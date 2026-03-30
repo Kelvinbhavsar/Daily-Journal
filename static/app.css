@@ -108,6 +108,12 @@ body{
 }
 .btn--ghost:hover{ background: rgba(255,255,255,0.92); }
 .btn--danger{ color: #B91C1C; border-color: rgba(185, 28, 28, 0.24); }
+.btn:disabled{
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+  filter: none;
+}
 
 .content{
   flex: 1;

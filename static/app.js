@@ -6,6 +6,9 @@ const INITIAL = window.__INITIAL__ || {};
 
 const els = {
   appTitle: document.getElementById("appTitle"),
+  undoBtn: document.getElementById("undoBtn"),
+  redoBtn: document.getElementById("redoBtn"),
+  saveNowBtn: document.getElementById("saveNowBtn"),
   accent: document.getElementById("accent"),
   font: document.getElementById("font"),
   newCategory: document.getElementById("newCategory"),
@@ -22,6 +25,17 @@ let state = null;
 let saveTimer = null;
 let dirty = false;
 let lastSavedAt = null;
+let historyDebounce = null;
+let history = {
+  topicId: null,
+  undo: [],
+  redo: [],
+  last: null,
+};
+
+const AUTOSAVE_MS = 5 * 60 * 1000;
+const HISTORY_DEBOUNCE_MS = 400;
+const HISTORY_LIMIT = 120;
 
 function setStatus(text) {
   els.saveStatus.textContent = text;
@@ -130,6 +144,7 @@ function renderEditor() {
   els.topicTitle.value = topic?.title || "";
   els.topicContent.value = topic?.content || "";
   els.deleteTopic.disabled = !topic;
+  resetHistoryForTopic(topic?.id || null);
 }
 
 function applyAppearanceFromState() {
@@ -141,17 +156,102 @@ function applyAppearanceFromState() {
   document.title = els.appTitle.value;
 }
 
-function markDirty() {
+function currentSnapshot() {
+  return {
+    topicId: selectedTopicId(),
+    title: els.topicTitle.value,
+    content: els.topicContent.value,
+  };
+}
+
+function sameSnapshot(a, b) {
+  if (!a || !b) return false;
+  return a.topicId === b.topicId && a.title === b.title && a.content === b.content;
+}
+
+function resetHistoryForTopic(topicId) {
+  if (history.topicId === topicId) return;
+  history.topicId = topicId;
+  history.undo = [];
+  history.redo = [];
+  history.last = null;
+  if (topicId) {
+    const snap = currentSnapshot();
+    history.undo.push(snap);
+    history.last = snap;
+  }
+  updateUndoRedoButtons();
+}
+
+function pushHistorySnapshot() {
+  const snap = currentSnapshot();
+  if (!snap.topicId) return;
+  if (history.last && sameSnapshot(history.last, snap)) return;
+  if (history.undo.length > 0 && sameSnapshot(history.undo[history.undo.length - 1], snap)) return;
+  history.undo.push(snap);
+  history.last = snap;
+  history.redo = [];
+  if (history.undo.length > HISTORY_LIMIT) history.undo.shift();
+  updateUndoRedoButtons();
+}
+
+function scheduleHistorySnapshot() {
+  if (historyDebounce) clearTimeout(historyDebounce);
+  historyDebounce = setTimeout(() => {
+    pushHistorySnapshot();
+  }, HISTORY_DEBOUNCE_MS);
+}
+
+function applySnapshot(snap) {
+  if (!snap || snap.topicId !== selectedTopicId()) return;
+  els.topicTitle.value = snap.title;
+  els.topicContent.value = snap.content;
+  history.last = snap;
+  markDirty({ scheduleOnly: true });
+  updateUndoRedoButtons();
+}
+
+function canUndo() {
+  return history.undo.length >= 2;
+}
+
+function canRedo() {
+  return history.redo.length >= 1;
+}
+
+function updateUndoRedoButtons() {
+  if (els.undoBtn) els.undoBtn.disabled = !canUndo();
+  if (els.redoBtn) els.redoBtn.disabled = !canRedo();
+}
+
+function doUndo() {
+  if (!canUndo()) return;
+  const current = history.undo.pop();
+  if (current) history.redo.push(current);
+  const prev = history.undo[history.undo.length - 1];
+  applySnapshot(prev);
+}
+
+function doRedo() {
+  if (!canRedo()) return;
+  const next = history.redo.pop();
+  if (!next) return;
+  history.undo.push(next);
+  applySnapshot(next);
+}
+
+function markDirty({ scheduleOnly = false } = {}) {
   dirty = true;
   setStatus("Unsaved…");
+  if (!scheduleOnly) scheduleHistorySnapshot();
   if (saveTimer) clearTimeout(saveTimer);
   saveTimer = setTimeout(() => {
     void autosave();
-  }, 700);
+  }, AUTOSAVE_MS);
 }
 
-async function autosave() {
-  if (!dirty) return;
+async function autosave({ force = false } = {}) {
+  if (!dirty && !force) return;
   const topicId = selectedTopicId();
   const topic = getTopicById(topicId);
   if (!topic) return;
@@ -202,6 +302,7 @@ async function saveSettings() {
 }
 
 async function createCategory() {
+  if (dirty) await autosave();
   const name = prompt("Category name?");
   if (!name) return;
   state = await api("/api/categories", { method: "POST", body: { name } });
@@ -212,6 +313,7 @@ async function createCategory() {
 }
 
 async function createTopic() {
+  if (dirty) await autosave();
   const catId = selectedCategoryId();
   if (!catId) return;
   const title = prompt("Subtopic title?") || "Untitled";
@@ -222,6 +324,7 @@ async function createTopic() {
 }
 
 async function deleteSelectedTopic() {
+  if (dirty) await autosave();
   const topicId = selectedTopicId();
   if (!topicId) return;
   if (!confirm("Delete this subtopic?")) return;
@@ -233,6 +336,7 @@ async function deleteSelectedTopic() {
 }
 
 async function selectCategory(categoryId) {
+  if (dirty) await autosave();
   state = await api("/api/select", { method: "POST", body: { category_id: categoryId } });
   dirty = false;
   renderCategories();
@@ -241,6 +345,7 @@ async function selectCategory(categoryId) {
 }
 
 async function selectTopic(topicId) {
+  if (dirty) await autosave();
   state = await api("/api/select", { method: "POST", body: { topic_id: topicId } });
   dirty = false;
   renderTopics();
@@ -261,6 +366,10 @@ function bind() {
   fillSelectOptions();
   els.categoryList.addEventListener("click", handleListClick);
   els.topicList.addEventListener("click", handleListClick);
+
+  els.undoBtn?.addEventListener("click", () => doUndo());
+  els.redoBtn?.addEventListener("click", () => doRedo());
+  els.saveNowBtn?.addEventListener("click", () => void autosave({ force: true }));
 
   els.accent.addEventListener("change", () => {
     setAccent(els.accent.value);
@@ -284,6 +393,33 @@ function bind() {
 
   els.topicTitle.addEventListener("input", () => markDirty());
   els.topicContent.addEventListener("input", () => markDirty());
+
+  document.addEventListener("keydown", (e) => {
+    const isMac = navigator.platform.toLowerCase().includes("mac");
+    const mod = isMac ? e.metaKey : e.ctrlKey;
+    if (!mod) return;
+
+    const key = (e.key || "").toLowerCase();
+    if (key === "s") {
+      e.preventDefault();
+      void autosave({ force: true });
+      return;
+    }
+
+    if (key === "z") {
+      // Redo on Shift+Cmd+Z
+      e.preventDefault();
+      if (e.shiftKey) doRedo();
+      else doUndo();
+      return;
+    }
+
+    // Windows/Linux Ctrl+Y redo
+    if (key === "y") {
+      e.preventDefault();
+      doRedo();
+    }
+  });
 }
 
 bind();

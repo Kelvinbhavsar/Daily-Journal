@@ -1,2 +1,4 @@
 README.md
 __pycache__/app.cpython-314.pyc
+data/journal_state.json
+ui/__pycache__/page.cpython-314.pyc

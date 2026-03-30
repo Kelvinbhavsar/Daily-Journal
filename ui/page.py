@@ -43,6 +43,9 @@ def render_index(state: dict[str, Any]) -> bytes:
         </div>
       </div>
       <div class="topbar__right">
+        <button id="undoBtn" class="btn btn--ghost" type="button" title="Undo (⌘Z / Ctrl+Z)">Undo</button>
+        <button id="redoBtn" class="btn btn--ghost" type="button" title="Redo (⇧⌘Z / Ctrl+Y)">Redo</button>
+        <button id="saveNowBtn" class="btn btn--ghost" type="button" title="Save now (⌘S / Ctrl+S)">Save</button>
         <div class="control">
           <label class="control__label" for="accent">Color</label>
           <select id="accent" class="control__select" aria-label="Accent color"></select>
