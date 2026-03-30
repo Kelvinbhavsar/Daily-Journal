@@ -211,17 +211,20 @@ body{
 }
 .editor__header{
   display:flex;
-  align-items:flex-start;
+  align-items:center;
   justify-content: space-between;
-  gap: 14px;
+  gap: 12px;
   padding: 14px 14px 12px;
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   background: rgba(255,255,255,0.85);
   box-shadow: var(--shadow);
+  min-width: 0;
 }
 .editor__title{
-  width: 100%;
+  flex: 1 1 0;
+  min-width: 0;
+  width: auto;
   border:none;
   outline:none;
   background: transparent;
@@ -231,9 +234,54 @@ body{
   letter-spacing: -0.02em;
   padding: 8px 10px;
   border-radius: 14px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .editor__title:focus{ box-shadow: 0 0 0 4px var(--accent-weak); background: rgba(255,255,255,0.92); }
-.editor__meta{ display:flex; align-items:center; gap: 10px; }
+.editor__meta{
+  display:flex;
+  align-items:center;
+  gap: 8px;
+  flex-wrap: nowrap;
+  justify-content: flex-end;
+  flex-shrink: 0;
+  min-width: 0;
+}
+.editor__actions{
+  display:flex;
+  align-items:center;
+  gap: 6px;
+  flex-wrap: nowrap;
+}
+.badge--status{
+  max-width: 140px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex-shrink: 1;
+  min-width: 0;
+}
+.btn--icon{
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.btn__icon{ display: block; }
+.btn--delete{
+  color: #B91C1C;
+  background: rgba(185, 28, 28, 0.06);
+  border: 2px solid #DC2626;
+  box-shadow: none;
+}
+.btn--delete:hover{
+  background: rgba(185, 28, 28, 0.12);
+  filter: none;
+}
 .badge{
   display:inline-flex;
   align-items:center;

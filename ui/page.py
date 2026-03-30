@@ -43,9 +43,6 @@ def render_index(state: dict[str, Any]) -> bytes:
         </div>
       </div>
       <div class="topbar__right">
-        <button id="undoBtn" class="btn btn--ghost" type="button" title="Undo (⌘Z / Ctrl+Z)">Undo</button>
-        <button id="redoBtn" class="btn btn--ghost" type="button" title="Redo (⇧⌘Z / Ctrl+Y)">Redo</button>
-        <button id="saveNowBtn" class="btn btn--ghost" type="button" title="Save now (⌘S / Ctrl+S)">Save</button>
         <div class="control">
           <label class="control__label" for="accent">Color</label>
           <select id="accent" class="control__select" aria-label="Accent color"></select>
@@ -80,8 +77,21 @@ def render_index(state: dict[str, Any]) -> bytes:
         <div class="editor__header">
           <input id="topicTitle" class="editor__title" type="text" placeholder="Subtopic title">
           <div class="editor__meta">
-            <span id="saveStatus" class="badge">Ready</span>
-            <button id="deleteTopic" class="btn btn--danger btn--ghost" type="button">Delete</button>
+            <span id="saveStatus" class="badge badge--status">Ready</span>
+            <div class="editor__actions" role="toolbar" aria-label="Editor actions">
+              <button id="undoBtn" class="btn btn--ghost btn--icon" type="button" title="Undo (⌘Z / Ctrl+Z)" aria-label="Undo">
+                <svg class="btn__icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"/></svg>
+              </button>
+              <button id="redoBtn" class="btn btn--ghost btn--icon" type="button" title="Redo (⇧⌘Z / Ctrl+Y)" aria-label="Redo">
+                <svg class="btn__icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 7v6h-6"/><path d="M3 17a9 9 0 0 1 9-9 9 9 0 0 1 6 2.3L21 13"/></svg>
+              </button>
+              <button id="saveNowBtn" class="btn btn--ghost btn--icon" type="button" title="Save (⌘S / Ctrl+S)" aria-label="Save">
+                <svg class="btn__icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+              </button>
+              <button id="deleteTopic" class="btn btn--icon btn--delete" type="button" title="Delete subtopic" aria-label="Delete">
+                <svg class="btn__icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+              </button>
+            </div>
           </div>
         </div>
         <textarea id="topicContent" class="editor__textarea" placeholder="Write your trading notes…"></textarea>
