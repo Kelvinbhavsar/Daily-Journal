@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
 from datetime import datetime
 from typing import Any
 from uuid import uuid4
@@ -34,20 +33,35 @@ FUNKY_ROUNDED_FONTS: list[dict[str, str]] = [
     {"key": "poppins", "label": "Poppins", "css": '"Poppins", "Segoe UI", system-ui, -apple-system, sans-serif'},
 ]
 
+STATIC_SEGMENTS: list[dict[str, str]] = [
+    {"key": "personal", "label": "Personal"},
+    {"key": "professional", "label": "Professional"},
+    {"key": "spiritual", "label": "Spiritual"},
+    {"key": "financial", "label": "Financial"},
+    {"key": "emotional", "label": "Emotional"},
+]
+
+DEFAULT_SEGMENT_KEY = "financial"
+
+
+def static_segment_keys() -> set[str]:
+    return {segment["key"] for segment in STATIC_SEGMENTS}
+
 
 def default_state() -> dict[str, Any]:
     cat_id = new_id("cat")
     topic_id = new_id("topic")
     return {
-        "version": 1,
+        "version": 2,
         "app_title": "Trading journal",
         "accent": "indigo",
         "font": "fredoka",
-        "selected": {"category_id": cat_id, "topic_id": topic_id},
+        "selected": {"segment_key": DEFAULT_SEGMENT_KEY, "category_id": cat_id, "topic_id": topic_id},
         "categories": [
             {
                 "id": cat_id,
                 "name": "General",
+                "segment_key": DEFAULT_SEGMENT_KEY,
                 "created_at": iso_now(),
             }
         ],
@@ -84,6 +98,22 @@ def coerce_state(raw: dict[str, Any] | None) -> dict[str, Any]:
 
     if not isinstance(state.get("selected"), dict):
         state["selected"] = default_state()["selected"]
+
+    valid_segments = static_segment_keys()
+    normalized_categories = []
+    for category in state.get("categories", []):
+        if not isinstance(category, dict):
+            continue
+        normalized = dict(category)
+        if normalized.get("segment_key") not in valid_segments:
+            normalized["segment_key"] = DEFAULT_SEGMENT_KEY
+        normalized_categories.append(normalized)
+    state["categories"] = normalized_categories or default_state()["categories"]
+
+    selected = dict(state.get("selected") or {})
+    if selected.get("segment_key") not in valid_segments:
+        selected["segment_key"] = DEFAULT_SEGMENT_KEY
+    state["selected"] = selected
 
     return state
 

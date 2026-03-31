@@ -7,7 +7,7 @@ from typing import Any
 from wsgiref.simple_server import make_server
 
 from core.journal import load_state, save_state, state_path
-from core.state import FUNKY_ROUNDED_FONTS, MATERIAL_ACCENTS, iso_now, new_id
+from core.state import DEFAULT_SEGMENT_KEY, FUNKY_ROUNDED_FONTS, MATERIAL_ACCENTS, STATIC_SEGMENTS, iso_now, new_id
 from core.storage import read_json
 from ui.page import render_index
 
@@ -82,14 +82,30 @@ def serve_static(path: str) -> list[bytes] | None:
 def select_defaults(state: dict[str, Any]) -> dict[str, Any]:
     cats = state.get("categories") or []
     topics = state.get("topics") or []
+    valid_segments = {segment["key"] for segment in STATIC_SEGMENTS}
     if not cats:
         cat_id = new_id("cat")
-        cats = [{"id": cat_id, "name": "General", "created_at": iso_now()}]
+        cats = [{"id": cat_id, "name": "General", "segment_key": DEFAULT_SEGMENT_KEY, "created_at": iso_now()}]
         state["categories"] = cats
     selected = state.get("selected") or {}
-    if selected.get("category_id") not in {c.get("id") for c in cats}:
-        selected["category_id"] = cats[0]["id"]
+    segment_key = str(selected.get("segment_key") or DEFAULT_SEGMENT_KEY)
+    if segment_key not in valid_segments:
+        segment_key = DEFAULT_SEGMENT_KEY
+
+    segment_cats = [c for c in cats if c.get("segment_key") == segment_key]
+    if not segment_cats:
+        selected["segment_key"] = segment_key
+        selected["category_id"] = None
+        selected["topic_id"] = None
+        state["selected"] = selected
+        return state
+
+    if selected.get("category_id") not in {c.get("id") for c in segment_cats}:
+        selected["category_id"] = segment_cats[0]["id"]
+
     cat_id = selected["category_id"]
+    cat = next((entry for entry in cats if entry.get("id") == cat_id), segment_cats[0])
+    segment_key = str(cat.get("segment_key") or segment_key)
     cat_topics = [t for t in topics if t.get("category_id") == cat_id]
     if not cat_topics:
         topic_id = new_id("topic")
@@ -107,6 +123,7 @@ def select_defaults(state: dict[str, Any]) -> dict[str, Any]:
         selected["topic_id"] = topic_id
     elif selected.get("topic_id") not in {t.get("id") for t in cat_topics}:
         selected["topic_id"] = cat_topics[0]["id"]
+    selected["segment_key"] = segment_key
     state["selected"] = selected
     return state
 
@@ -159,14 +176,21 @@ def app(environ: dict[str, Any], start_response: Any) -> list[bytes]:
     if method == "POST" and path == "/api/categories":
         payload = parse_json(environ)
         name = str(payload.get("name") or "").strip()
+        segment_key = str(payload.get("segment_key") or "").strip() or DEFAULT_SEGMENT_KEY
+        valid_segments = {segment["key"] for segment in STATIC_SEGMENTS}
         if not name:
             status, headers, body = json_response("400 Bad Request", {"error": "Category name required"})
+            start_response(status, headers)
+            return body
+        if segment_key not in valid_segments:
+            status, headers, body = json_response("400 Bad Request", {"error": "Invalid segment_key"})
             start_response(status, headers)
             return body
 
         state = select_defaults(load_state(BASE_DIR))
         cat_id = new_id("cat")
-        state["categories"].append({"id": cat_id, "name": name, "created_at": iso_now()})
+        state["categories"].append({"id": cat_id, "name": name, "segment_key": segment_key, "created_at": iso_now()})
+        state["selected"]["segment_key"] = segment_key
         state["selected"]["category_id"] = cat_id
         state["selected"]["topic_id"] = None
         state = select_defaults(state)
@@ -245,10 +269,22 @@ def app(environ: dict[str, Any], start_response: Any) -> list[bytes]:
         payload = parse_json(environ)
         state = select_defaults(load_state(BASE_DIR))
         sel = state.get("selected") or {}
+        valid_segments = {segment["key"] for segment in STATIC_SEGMENTS}
+
+        if "segment_key" in payload:
+            segment_key = str(payload.get("segment_key") or "").strip()
+            if segment_key in valid_segments:
+                sel["segment_key"] = segment_key
+                sel["category_id"] = None
+                sel["topic_id"] = None
+                state["selected"] = sel
+                state = select_defaults(state)
 
         if "category_id" in payload:
             category_id = str(payload.get("category_id") or "").strip()
             if category_id and category_id in {c.get("id") for c in state.get("categories", [])}:
+                category = next(c for c in state["categories"] if c["id"] == category_id)
+                sel["segment_key"] = category.get("segment_key") or DEFAULT_SEGMENT_KEY
                 sel["category_id"] = category_id
                 sel["topic_id"] = None
                 state["selected"] = sel
@@ -261,6 +297,8 @@ def app(environ: dict[str, Any], start_response: Any) -> list[bytes]:
                 # align category selection with the topic
                 topic = next(t for t in state["topics"] if t["id"] == topic_id)
                 sel["category_id"] = topic["category_id"]
+                category = next((c for c in state["categories"] if c["id"] == topic["category_id"]), None)
+                sel["segment_key"] = (category or {}).get("segment_key") or DEFAULT_SEGMENT_KEY
                 state["selected"] = sel
 
         state = save_state(BASE_DIR, state)

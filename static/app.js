@@ -1,11 +1,32 @@
-/* global window, document, fetch, setTimeout, clearTimeout */
+/* global window, document, fetch, setTimeout, clearTimeout, prompt, confirm, navigator */
 
 const ACCENTS = window.__ACCENTS__ || {};
 const FONTS = window.__FONTS__ || [];
-const INITIAL = window.__INITIAL__ || {};
+
+const STATIC_SEGMENTS = [
+  { key: "personal", label: "Personal", tone: "#8B5CF6", soft: "rgba(139, 92, 246, 0.18)", icon: "handshake" },
+  { key: "professional", label: "Professional", tone: "#3B82F6", soft: "rgba(59, 130, 246, 0.18)", icon: "chart" },
+  { key: "spiritual", label: "Spiritual", tone: "#FBBF24", soft: "rgba(251, 191, 36, 0.18)", icon: "lotus" },
+  { key: "financial", label: "Financial", tone: "#22C55E", soft: "rgba(34, 197, 94, 0.18)", icon: "coins" },
+  { key: "emotional", label: "Emotional", tone: "#EF4444", soft: "rgba(239, 68, 68, 0.18)", icon: "heart" },
+];
 
 const els = {
   appTitle: document.getElementById("appTitle"),
+  homeToggle: document.getElementById("homeToggle"),
+  breadcrumb: document.getElementById("breadcrumb"),
+  homeView: document.getElementById("homeView"),
+  detailView: document.getElementById("detailView"),
+  segmentGrid: document.getElementById("segmentGrid"),
+  statsSummary: document.getElementById("statsSummary"),
+  statsDetail: document.getElementById("statsDetail"),
+  detailSummary: document.getElementById("detailSummary"),
+  backToHome: document.getElementById("backToHome"),
+  categoryList: document.getElementById("categoryList"),
+  topicList: document.getElementById("topicList"),
+  topicTitle: document.getElementById("topicTitle"),
+  topicContent: document.getElementById("topicContent"),
+  saveStatus: document.getElementById("saveStatus"),
   undoBtn: document.getElementById("undoBtn"),
   redoBtn: document.getElementById("redoBtn"),
   saveNowBtn: document.getElementById("saveNowBtn"),
@@ -13,25 +34,16 @@ const els = {
   font: document.getElementById("font"),
   newCategory: document.getElementById("newCategory"),
   newTopic: document.getElementById("newTopic"),
-  categoryList: document.getElementById("categoryList"),
-  topicList: document.getElementById("topicList"),
-  topicTitle: document.getElementById("topicTitle"),
-  topicContent: document.getElementById("topicContent"),
-  saveStatus: document.getElementById("saveStatus"),
   deleteTopic: document.getElementById("deleteTopic"),
 };
 
 let state = null;
+let viewMode = "home";
 let saveTimer = null;
 let dirty = false;
 let lastSavedAt = null;
 let historyDebounce = null;
-let history = {
-  topicId: null,
-  undo: [],
-  redo: [],
-  last: null,
-};
+let history = { topicId: null, undo: [], redo: [], last: null };
 
 const AUTOSAVE_MS = 5 * 60 * 1000;
 const HISTORY_DEBOUNCE_MS = 400;
@@ -42,15 +54,14 @@ function setStatus(text) {
 }
 
 function setAccent(accentKey) {
-  const hex = ACCENTS[accentKey] || ACCENTS.indigo || "#3F51B5";
+  const hex = ACCENTS[accentKey] || ACCENTS.orange || "#FF9800";
   document.documentElement.style.setProperty("--accent", hex);
-  document.documentElement.style.setProperty("--accent-weak", hexToRgba(hex, 0.14));
+  document.documentElement.style.setProperty("--accent-weak", hexToRgba(hex, 0.15));
 }
 
 function setFont(fontKey) {
   const font = FONTS.find((f) => f.key === fontKey) || FONTS[0];
-  if (!font) return;
-  document.documentElement.style.setProperty("--font", font.css);
+  if (font) document.documentElement.style.setProperty("--font", font.css);
 }
 
 function hexToRgba(hex, alpha) {
@@ -83,6 +94,10 @@ async function api(path, { method = "GET", body } = {}) {
   return await res.json();
 }
 
+function selectedSegmentKey() {
+  return state?.selected?.segment_key || "financial";
+}
+
 function selectedCategoryId() {
   return state?.selected?.category_id || null;
 }
@@ -91,64 +106,170 @@ function selectedTopicId() {
   return state?.selected?.topic_id || null;
 }
 
+function categoriesForSegment(segmentKey) {
+  return (state?.categories || []).filter((category) => category.segment_key === segmentKey);
+}
+
 function topicsForCategory(categoryId) {
-  return (state?.topics || []).filter((t) => t.category_id === categoryId);
+  return (state?.topics || []).filter((topic) => topic.category_id === categoryId);
+}
+
+function getSegment(segmentKey) {
+  return STATIC_SEGMENTS.find((segment) => segment.key === segmentKey) || STATIC_SEGMENTS[3];
+}
+
+function getCategoryById(categoryId) {
+  return (state?.categories || []).find((category) => category.id === categoryId) || null;
 }
 
 function getTopicById(topicId) {
-  return (state?.topics || []).find((t) => t.id === topicId) || null;
+  return (state?.topics || []).find((topic) => topic.id === topicId) || null;
 }
 
-function renderCategories() {
-  const cats = state?.categories || [];
-  const activeId = selectedCategoryId();
-  els.categoryList.innerHTML = cats
-    .map((c) => {
-      const count = topicsForCategory(c.id).length;
-      const active = c.id === activeId ? " item--active" : "";
-      return `
-        <div class="item${active}" data-action="select-category" data-id="${escapeHtml(c.id)}">
-          <div class="item__main">
-            <div class="item__title">${escapeHtml(c.name)}</div>
-            <div class="item__sub">Major category</div>
-          </div>
-          <div class="chip">${count}</div>
-        </div>
-      `;
-    })
-    .join("");
+function initialsForLabel(label) {
+  return String(label || "")
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((word) => word[0]?.toUpperCase() || "")
+    .join("") || "SG";
 }
 
-function renderTopics() {
-  const catId = selectedCategoryId();
-  const list = catId ? topicsForCategory(catId) : [];
-  const activeId = selectedTopicId();
-  els.topicList.innerHTML = list
-    .map((t) => {
-      const active = t.id === activeId ? " item--active" : "";
-      const preview = (t.content || "").trim().split("\n")[0] || "No content yet";
-      return `
-        <div class="item${active}" data-action="select-topic" data-id="${escapeHtml(t.id)}">
-          <div class="item__main">
-            <div class="item__title">${escapeHtml(t.title || "Untitled")}</div>
-            <div class="item__sub">${escapeHtml(preview)}</div>
-          </div>
+function iconMarkup(name, color) {
+  const common = `stroke="${color}" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"`;
+  if (name === "chart") return `<svg viewBox="0 0 64 64" aria-hidden="true"><path ${common} d="M12 50H52"/><path ${common} d="M18 44V34"/><path ${common} d="M30 44V26"/><path ${common} d="M42 44V18"/><path ${common} d="M18 24L29 15L38 21L49 10"/></svg>`;
+  if (name === "lotus") return `<svg viewBox="0 0 64 64" aria-hidden="true"><path ${common} d="M32 50C22 45 18 36 21 28C27 30 31 35 32 43"/><path ${common} d="M32 50C42 45 46 36 43 28C37 30 33 35 32 43"/><path ${common} d="M32 49C36 43 37 36 32 18C27 36 28 43 32 49"/><path ${common} d="M16 48C22 47 27 44 30 38"/><path ${common} d="M48 48C42 47 37 44 34 38"/></svg>`;
+  if (name === "coins") return `<svg viewBox="0 0 64 64" aria-hidden="true"><ellipse ${common} cx="23" cy="39" rx="11" ry="5"/><path ${common} d="M12 39V47C12 49.8 17 52 23 52S34 49.8 34 47V39"/><ellipse ${common} cx="41" cy="27" rx="11" ry="5"/><path ${common} d="M30 27V35C30 37.8 35 40 41 40S52 37.8 52 35V27"/><path ${common} d="M30 35C30 37.8 35 40 41 40S52 37.8 52 35"/></svg>`;
+  if (name === "heart") return `<svg viewBox="0 0 64 64" aria-hidden="true"><path ${common} d="M32 51C18 42 12 34 12 25C12 18 17 13 24 13C28 13 31 15 32 19C33 15 36 13 40 13C47 13 52 18 52 25C52 34 46 42 32 51Z"/><path ${common} d="M24 36C27 32 30 31 33 33C36 35 39 34 42 30"/></svg>`;
+  return `<svg viewBox="0 0 64 64" aria-hidden="true"><path ${common} d="M15 32H22L28 24L36 40L42 32H49"/><path ${common} d="M18 20V44"/><path ${common} d="M46 20V44"/></svg>`;
+}
+
+function renderStats() {
+  const userCategories = state?.categories || [];
+  const subcategories = state?.topics || [];
+  els.statsSummary.textContent = `${subcategories.length} total ${subcategories.length === 1 ? "entry" : "entries"}`;
+  els.statsDetail.textContent = `${userCategories.length} user ${userCategories.length === 1 ? "category" : "categories"}`;
+}
+
+function renderSegments() {
+  const activeSegment = selectedSegmentKey();
+  els.segmentGrid.innerHTML = STATIC_SEGMENTS.map((segment) => {
+    const segmentCategories = categoriesForSegment(segment.key);
+    const segmentTopics = segmentCategories.flatMap((category) => topicsForCategory(category.id));
+    const active = segment.key === activeSegment ? " segmentCard--active" : "";
+    return `
+      <button
+        class="segmentCard${active}"
+        type="button"
+        data-action="open-segment"
+        data-id="${escapeHtml(segment.key)}"
+        style="--segment-tone:${segment.tone};--segment-soft:${segment.soft};--segment-ring:${segment.tone};"
+      >
+        <div class="segmentCard__title">${escapeHtml(segment.label)}</div>
+        <div class="segmentCard__ring">
+          <div class="segmentCard__icon">${iconMarkup(segment.icon, segment.tone)}</div>
         </div>
-      `;
-    })
-    .join("");
+        <div class="segmentCard__footer">
+          <span>${escapeHtml(segment.label)}</span>
+          <span class="segmentCard__count">${segmentCategories.length} categories • ${segmentTopics.length} subcategories</span>
+        </div>
+      </button>
+    `;
+  }).join("");
+}
+
+function renderDetailSummary() {
+  const segment = getSegment(selectedSegmentKey());
+  const segmentCategories = categoriesForSegment(segment.key);
+  const subcategoryCount = segmentCategories.reduce((sum, category) => sum + topicsForCategory(category.id).length, 0);
+  els.detailSummary.innerHTML = `
+    <div class="segmentSummary__badge" style="--summary-tone:${segment.tone};--summary-soft:${segment.soft};">
+      ${escapeHtml(initialsForLabel(segment.label))}
+    </div>
+    <div class="segmentSummary__content">
+      <div class="segmentSummary__eyebrow">Static Category</div>
+      <div class="segmentSummary__title">${escapeHtml(segment.label)}</div>
+      <div class="segmentSummary__meta">${segmentCategories.length} user categories • ${subcategoryCount} subcategories</div>
+    </div>
+  `;
+}
+
+function renderCategoryList() {
+  const activeCategoryId = selectedCategoryId();
+  const categories = categoriesForSegment(selectedSegmentKey());
+  els.categoryList.innerHTML = categories.map((category) => {
+    const subcategoryCount = topicsForCategory(category.id).length;
+    const active = category.id === activeCategoryId ? " browserCard--active" : "";
+    return `
+      <button class="browserCard${active}" type="button" data-action="select-category" data-id="${escapeHtml(category.id)}">
+        <div class="browserCard__title">${escapeHtml(category.name)}</div>
+        <div class="browserCard__meta">${subcategoryCount} ${subcategoryCount === 1 ? "subcategory" : "subcategories"}</div>
+      </button>
+    `;
+  }).join("");
+}
+
+function renderTopicList() {
+  const activeTopicId = selectedTopicId();
+  const topics = selectedCategoryId() ? topicsForCategory(selectedCategoryId()) : [];
+  els.topicList.innerHTML = topics.map((topic) => {
+    const active = topic.id === activeTopicId ? " browserCard--active" : "";
+    const preview = (topic.content || "").trim().split("\n")[0] || "No content yet";
+    return `
+      <button class="browserCard browserCard--topic${active}" type="button" data-action="select-topic" data-id="${escapeHtml(topic.id)}">
+        <div class="browserCard__title">${escapeHtml(topic.title || "Untitled")}</div>
+        <div class="browserCard__meta">${escapeHtml(preview)}</div>
+      </button>
+    `;
+  }).join("");
 }
 
 function renderEditor() {
   const topic = getTopicById(selectedTopicId());
   els.topicTitle.value = topic?.title || "";
   els.topicContent.value = topic?.content || "";
+  els.topicTitle.disabled = !topic;
+  els.topicContent.disabled = !topic;
   els.deleteTopic.disabled = !topic;
   resetHistoryForTopic(topic?.id || null);
 }
 
+function renderBreadcrumb() {
+  const segment = getSegment(selectedSegmentKey());
+  const category = getCategoryById(selectedCategoryId());
+  const topic = getTopicById(selectedTopicId());
+  if (viewMode !== "detail") {
+    els.breadcrumb.textContent = "Static Category • User Category • Subcategory";
+    return;
+  }
+  const parts = [segment.label];
+  if (category?.name) parts.push(category.name);
+  if (topic?.title) parts.push(topic.title);
+  els.breadcrumb.textContent = parts.join(" • ");
+}
+
+function setViewMode(nextMode) {
+  viewMode = nextMode;
+  const home = nextMode === "home";
+  els.homeView.classList.toggle("homeView--hidden", !home);
+  els.detailView.classList.toggle("detailView--hidden", home);
+  renderBreadcrumb();
+}
+
+function renderAll() {
+  applyAppearanceFromState();
+  renderStats();
+  renderSegments();
+  renderDetailSummary();
+  renderCategoryList();
+  renderTopicList();
+  renderEditor();
+  renderBreadcrumb();
+}
+
 function applyAppearanceFromState() {
-  els.accent.value = state?.accent || "indigo";
+  els.accent.value = state?.accent || "orange";
   els.font.value = state?.font || (FONTS[0]?.key ?? "fredoka");
   setAccent(els.accent.value);
   setFont(els.font.value);
@@ -157,24 +278,16 @@ function applyAppearanceFromState() {
 }
 
 function currentSnapshot() {
-  return {
-    topicId: selectedTopicId(),
-    title: els.topicTitle.value,
-    content: els.topicContent.value,
-  };
+  return { topicId: selectedTopicId(), title: els.topicTitle.value, content: els.topicContent.value };
 }
 
 function sameSnapshot(a, b) {
-  if (!a || !b) return false;
-  return a.topicId === b.topicId && a.title === b.title && a.content === b.content;
+  return !!(a && b && a.topicId === b.topicId && a.title === b.title && a.content === b.content);
 }
 
 function resetHistoryForTopic(topicId) {
   if (history.topicId === topicId) return;
-  history.topicId = topicId;
-  history.undo = [];
-  history.redo = [];
-  history.last = null;
+  history = { topicId, undo: [], redo: [], last: null };
   if (topicId) {
     const snap = currentSnapshot();
     history.undo.push(snap);
@@ -187,7 +300,7 @@ function pushHistorySnapshot() {
   const snap = currentSnapshot();
   if (!snap.topicId) return;
   if (history.last && sameSnapshot(history.last, snap)) return;
-  if (history.undo.length > 0 && sameSnapshot(history.undo[history.undo.length - 1], snap)) return;
+  if (history.undo.length && sameSnapshot(history.undo[history.undo.length - 1], snap)) return;
   history.undo.push(snap);
   history.last = snap;
   history.redo = [];
@@ -197,9 +310,7 @@ function pushHistorySnapshot() {
 
 function scheduleHistorySnapshot() {
   if (historyDebounce) clearTimeout(historyDebounce);
-  historyDebounce = setTimeout(() => {
-    pushHistorySnapshot();
-  }, HISTORY_DEBOUNCE_MS);
+  historyDebounce = setTimeout(pushHistorySnapshot, HISTORY_DEBOUNCE_MS);
 }
 
 function applySnapshot(snap) {
@@ -211,165 +322,162 @@ function applySnapshot(snap) {
   updateUndoRedoButtons();
 }
 
-function canUndo() {
-  return history.undo.length >= 2;
-}
-
-function canRedo() {
-  return history.redo.length >= 1;
-}
-
 function updateUndoRedoButtons() {
-  if (els.undoBtn) els.undoBtn.disabled = !canUndo();
-  if (els.redoBtn) els.redoBtn.disabled = !canRedo();
+  els.undoBtn.disabled = history.undo.length < 2;
+  els.redoBtn.disabled = history.redo.length < 1;
 }
 
 function doUndo() {
-  if (!canUndo()) return;
+  if (history.undo.length < 2) return;
   const current = history.undo.pop();
   if (current) history.redo.push(current);
-  const prev = history.undo[history.undo.length - 1];
-  applySnapshot(prev);
+  applySnapshot(history.undo[history.undo.length - 1]);
 }
 
 function doRedo() {
-  if (!canRedo()) return;
+  if (!history.redo.length) return;
   const next = history.redo.pop();
-  if (!next) return;
   history.undo.push(next);
   applySnapshot(next);
 }
 
 function markDirty({ scheduleOnly = false } = {}) {
   dirty = true;
-  setStatus("Unsaved…");
+  setStatus("Unsaved...");
   if (!scheduleOnly) scheduleHistorySnapshot();
   if (saveTimer) clearTimeout(saveTimer);
-  saveTimer = setTimeout(() => {
-    void autosave();
-  }, AUTOSAVE_MS);
+  saveTimer = setTimeout(() => void autosave(), AUTOSAVE_MS);
 }
 
 async function autosave({ force = false } = {}) {
   if (!dirty && !force) return;
   const topicId = selectedTopicId();
-  const topic = getTopicById(topicId);
-  if (!topic) return;
-
-  setStatus("Saving…");
-  const updated = await api(`/api/topics/${encodeURIComponent(topicId)}`, {
+  if (!topicId) return;
+  setStatus("Saving...");
+  state = await api(`/api/topics/${encodeURIComponent(topicId)}`, {
     method: "PUT",
-    body: {
-      title: els.topicTitle.value,
-      content: els.topicContent.value,
-    },
+    body: { title: els.topicTitle.value, content: els.topicContent.value },
   });
-  state = updated;
   dirty = false;
   lastSavedAt = new Date();
+  renderAll();
   setStatus(`Saved ${lastSavedAt.toLocaleTimeString()}`);
-  renderTopics();
 }
 
 async function refresh() {
   state = await api("/api/state");
-  applyAppearanceFromState();
-  renderCategories();
-  renderTopics();
-  renderEditor();
-  setStatus(state?.updated_at ? `Loaded` : "Ready");
+  renderAll();
+  setViewMode("home");
+  setStatus("Loaded");
 }
 
 function fillSelectOptions() {
-  els.accent.innerHTML = Object.keys(ACCENTS)
-    .map((k) => `<option value="${escapeHtml(k)}">${escapeHtml(k)}</option>`)
-    .join("");
-  els.font.innerHTML = FONTS.map((f) => `<option value="${escapeHtml(f.key)}">${escapeHtml(f.label)}</option>`).join("");
-
-  els.accent.value = INITIAL.accent || "indigo";
-  els.font.value = INITIAL.font || (FONTS[0]?.key ?? "fredoka");
+  els.accent.innerHTML = Object.keys(ACCENTS).map((key) => `<option value="${escapeHtml(key)}">${escapeHtml(key)}</option>`).join("");
+  els.font.innerHTML = FONTS.map((font) => `<option value="${escapeHtml(font.key)}">${escapeHtml(font.label)}</option>`).join("");
 }
 
 async function saveSettings() {
-  const payload = {
-    app_title: els.appTitle.value,
-    accent: els.accent.value,
-    font: els.font.value,
-  };
-  state = await api("/api/settings", { method: "POST", body: payload });
-  applyAppearanceFromState();
+  state = await api("/api/settings", {
+    method: "POST",
+    body: { app_title: els.appTitle.value, accent: els.accent.value, font: els.font.value },
+  });
+  renderAll();
   setStatus("Saved settings");
 }
 
 async function createCategory() {
   if (dirty) await autosave();
-  const name = prompt("Category name?");
+  const name = prompt("User category name?");
   if (!name) return;
-  state = await api("/api/categories", { method: "POST", body: { name } });
-  renderCategories();
-  renderTopics();
-  renderEditor();
+  state = await api("/api/categories", {
+    method: "POST",
+    body: { name, segment_key: selectedSegmentKey() },
+  });
+  renderAll();
+  setViewMode("detail");
   setStatus("Created category");
 }
 
 async function createTopic() {
   if (dirty) await autosave();
-  const catId = selectedCategoryId();
-  if (!catId) return;
-  const title = prompt("Subtopic title?") || "Untitled";
-  state = await api("/api/topics", { method: "POST", body: { category_id: catId, title } });
-  renderTopics();
-  renderEditor();
-  setStatus("Created subtopic");
+  const categoryId = selectedCategoryId();
+  if (!categoryId) {
+    setStatus("Open a user category first");
+    return;
+  }
+  const title = prompt("Subcategory title?") || "Untitled";
+  state = await api("/api/topics", { method: "POST", body: { category_id: categoryId, title } });
+  renderAll();
+  setViewMode("detail");
+  setStatus("Created subcategory");
 }
 
 async function deleteSelectedTopic() {
   if (dirty) await autosave();
   const topicId = selectedTopicId();
-  if (!topicId) return;
-  if (!confirm("Delete this subtopic?")) return;
+  if (!topicId || !confirm("Delete this subcategory?")) return;
   state = await api(`/api/topics/${encodeURIComponent(topicId)}`, { method: "DELETE" });
   dirty = false;
-  renderTopics();
-  renderEditor();
+  renderAll();
   setStatus("Deleted");
+}
+
+async function openSegment(segmentKey) {
+  if (dirty) await autosave();
+  state = await api("/api/select", { method: "POST", body: { segment_key: segmentKey } });
+  dirty = false;
+  renderAll();
+  setViewMode("detail");
 }
 
 async function selectCategory(categoryId) {
   if (dirty) await autosave();
   state = await api("/api/select", { method: "POST", body: { category_id: categoryId } });
   dirty = false;
-  renderCategories();
-  renderTopics();
-  renderEditor();
+  renderAll();
+  setViewMode("detail");
 }
 
 async function selectTopic(topicId) {
   if (dirty) await autosave();
   state = await api("/api/select", { method: "POST", body: { topic_id: topicId } });
   dirty = false;
-  renderTopics();
-  renderEditor();
+  renderAll();
+  setViewMode("detail");
 }
 
-function handleListClick(ev) {
+function handleClick(ev) {
   const target = ev.target.closest("[data-action]");
   if (!target) return;
   const action = target.getAttribute("data-action");
   const id = target.getAttribute("data-id");
   if (!id) return;
+  if (action === "open-segment") void openSegment(id);
   if (action === "select-category") void selectCategory(id);
   if (action === "select-topic") void selectTopic(id);
 }
 
 function bind() {
   fillSelectOptions();
-  els.categoryList.addEventListener("click", handleListClick);
-  els.topicList.addEventListener("click", handleListClick);
+  els.segmentGrid.addEventListener("click", handleClick);
+  els.categoryList.addEventListener("click", handleClick);
+  els.topicList.addEventListener("click", handleClick);
 
-  els.undoBtn?.addEventListener("click", () => doUndo());
-  els.redoBtn?.addEventListener("click", () => doRedo());
-  els.saveNowBtn?.addEventListener("click", () => void autosave({ force: true }));
+  els.homeToggle.addEventListener("click", async () => {
+    if (dirty) await autosave();
+    setViewMode("home");
+  });
+  els.backToHome.addEventListener("click", async () => {
+    if (dirty) await autosave();
+    setViewMode("home");
+  });
+
+  els.undoBtn.addEventListener("click", doUndo);
+  els.redoBtn.addEventListener("click", doRedo);
+  els.saveNowBtn.addEventListener("click", () => void autosave({ force: true }));
+  els.newCategory.addEventListener("click", () => void createCategory());
+  els.newTopic.addEventListener("click", () => void createTopic());
+  els.deleteTopic.addEventListener("click", () => void deleteSelectedTopic());
 
   els.accent.addEventListener("change", () => {
     setAccent(els.accent.value);
@@ -379,17 +487,10 @@ function bind() {
     setFont(els.font.value);
     void saveSettings();
   });
-
   els.appTitle.addEventListener("input", () => {
     document.title = els.appTitle.value || "Trading journal";
   });
-  els.appTitle.addEventListener("change", () => {
-    void saveSettings();
-  });
-
-  els.newCategory.addEventListener("click", () => void createCategory());
-  els.newTopic.addEventListener("click", () => void createTopic());
-  els.deleteTopic.addEventListener("click", () => void deleteSelectedTopic());
+  els.appTitle.addEventListener("change", () => void saveSettings());
 
   els.topicTitle.addEventListener("input", () => markDirty());
   els.topicContent.addEventListener("input", () => markDirty());
@@ -398,23 +499,18 @@ function bind() {
     const isMac = navigator.platform.toLowerCase().includes("mac");
     const mod = isMac ? e.metaKey : e.ctrlKey;
     if (!mod) return;
-
     const key = (e.key || "").toLowerCase();
     if (key === "s") {
       e.preventDefault();
       void autosave({ force: true });
       return;
     }
-
     if (key === "z") {
-      // Redo on Shift+Cmd+Z
       e.preventDefault();
       if (e.shiftKey) doRedo();
       else doUndo();
       return;
     }
-
-    // Windows/Linux Ctrl+Y redo
     if (key === "y") {
       e.preventDefault();
       doRedo();
@@ -427,4 +523,3 @@ refresh().catch((err) => {
   setStatus("Failed to load");
   console.error(err);
 });
-
