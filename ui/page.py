@@ -49,16 +49,15 @@ def render_index(state: dict[str, Any]) -> bytes:
           <label class="control__label" for="font">Font</label>
           <select id="font" class="control__select" aria-label="Font"></select>
         </div>
-        <div class="avatar" aria-hidden="true">TJ</div>
       </div>
     </header>
 
-    <div class="subbar">
+    <div id="subbar" class="subbar subbar--hidden">
       <button id="homeToggle" class="subbar__tab subbar__tab--active" type="button">Categories</button>
-      <div id="breadcrumb" class="subbar__crumb">Local first • Categories + Subtopics</div>
+      <div id="breadcrumb" class="subbar__crumb">Local first • Main Threads + Topics</div>
       <div class="subbar__actions">
-        <button id="newCategory" class="btn" type="button">New Category</button>
-        <button id="newTopic" class="btn" type="button">New Subtopic</button>
+        <button id="newCategory" class="btn" type="button">New Main Thread</button>
+        <button id="newTopic" class="btn" type="button">New Topic</button>
       </div>
     </div>
 
@@ -68,7 +67,7 @@ def render_index(state: dict[str, Any]) -> bytes:
           <div class="hero__content">
             <div class="eyebrow">Dashboard</div>
             <h1 class="hero__title">Your Life Segments</h1>
-            <p class="hero__copy">Click any segment to open its category, see its subtopics, and continue writing without leaving the page.</p>
+            <p class="hero__copy">Click any segment to open its main threads, see their topics, and continue writing without leaving the page.</p>
           </div>
           <aside class="statsCard" aria-label="Global stats">
             <div class="statsCard__label">Global Stats</div>
@@ -85,9 +84,9 @@ def render_index(state: dict[str, Any]) -> bytes:
           <div class="trashPanel__head">
             <div>
               <div class="trashPanel__title">Trash Bin</div>
-              <div class="trashPanel__hint">Restore deleted user categories and subcategories from here.</div>
+              <div class="trashPanel__hint">Restore deleted main threads and topics from here.</div>
             </div>
-            <button id="closeTrash" class="btn btn--ghost btn--iconLabel" type="button">Close</button>
+            <button id="closeTrash" class="btn btn--ghost" type="button">Close</button>
           </div>
           <div id="trashList" class="trashList"></div>
         </section>
@@ -97,11 +96,11 @@ def render_index(state: dict[str, Any]) -> bytes:
         <div class="detailShell">
           <aside class="detailPanel detailPanel--categories">
             <button id="backToHome" class="backButton" type="button">Back to Segments</button>
-            <div id="detailSummary" class="segmentSummary"></div>
+            
             <div class="browserPanel">
               <div class="browserPanel__head">
-                <div class="browserPanel__title">User Categories</div>
-                <div class="browserPanel__hint">Open a category inside this static segment</div>
+                <div class="browserPanel__title">Main Threads</div>
+                <div class="browserPanel__hint">Open a main thread inside this static segment</div>
               </div>
               <div id="categoryList" class="browserStack"></div>
             </div>
@@ -110,7 +109,7 @@ def render_index(state: dict[str, Any]) -> bytes:
           <aside class="detailPanel detailPanel--topics">
             <div class="browserPanel">
               <div class="browserPanel__head">
-                <div class="browserPanel__title">Subcategories</div>
+                <div class="browserPanel__title">Topics</div>
                 <div class="browserPanel__hint">Vertical scrolling column for your notes</div>
               </div>
               <div id="topicList" class="browserStack browserStack--topics"></div>
@@ -122,7 +121,7 @@ def render_index(state: dict[str, Any]) -> bytes:
               <div class="editorCard__header">
                 <div class="editorCard__titleWrap">
                   <div class="editorCard__eyebrow">Journal Entry</div>
-                  <input id="topicTitle" class="editor__title" type="text" placeholder="Subtopic title">
+                  <input id="topicTitle" class="editor__title" type="text" placeholder="Topic title">
                 </div>
                 <div class="editor__meta">
                   <span id="saveStatus" class="badge badge--status">Ready</span>

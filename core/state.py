@@ -70,7 +70,7 @@ def default_state() -> dict[str, Any]:
                 "id": topic_id,
                 "category_id": cat_id,
                 "title": "Welcome",
-                "content": "Start writing your notes here.\n\nCreate categories on the left, then add sub-topics in the middle column.",
+                "content": "Start writing your notes here.\n\nOpen a main thread on the left, then add topics in the middle column.",
                 "created_at": iso_now(),
                 "updated_at": iso_now(),
             }

@@ -3,7 +3,7 @@
 <div align="center">
   <h1 style="margin-bottom:6px;">Local-first trading journaling, with a "pro" writing flow</h1>
   <p style="margin-top:0;">
-    Organize your trading thoughts by <b>Category</b> and <b>Subtopic</b>, write in a distraction-free editor,
+    Organize your trading thoughts by <b>Category</b>, <b>Main Thread</b>, and <b>Topic</b>, write in a distraction-free editor,
     and let <b>autosave</b> + <b>undo/redo</b> protect your work. Everything runs locally -- no accounts, no tracking.
   </p>
 
@@ -77,7 +77,7 @@ If you want, tell me your preferred filenames and I will wire them into this sec
 ## Why this project is different
 
 - **Local-first storage**: your journal is saved in `data/journal_state.json` on your machine.
-- **Fast, organized thinking**: major categories + subtopics act like a knowledge base.
+- **Fast, organized thinking**: major categories + main threads + topics act like a knowledge base.
 - **Autosave that actually helps**: edits are periodically persisted, plus force-save when you need it.
 - **Editing confidence**: undo/redo during editing so you can move quickly without fear.
 - **Personal style, built in**: choose accent colors + rounded fonts (and even edit the app title).
@@ -88,20 +88,20 @@ If you want, tell me your preferred filenames and I will wire them into this sec
   <summary><b>Click to see the "pro" flow</b></summary>
 
   1. Create a **Major Category** (left panel). Example: `Strategies`, `FIIs/Institutions`, `Trading Mistakes`, `Rules`.
-  2. Create a **Subtopic** inside that category (middle panel). Example: `Mean reversion - Week 1`, `Mistake #12`.
+  2. Create a **Topic** inside that main thread (middle panel). Example: `Mean reversion - Week 1`, `Mistake #12`.
   3. Write in the editor (right panel): thesis, setup, execution, emotions, outcome, and what you learned.
   4. Keep writing confidently (autosave + undo/redo). Use Save when you want a checkpoint.
-  5. Later, review by switching subtopics and building your library over time.
+  5. Later, review by switching topics and building your library over time.
 </details>
 
 ## UI Features
 
-- Create categories and subtopics
-- Select a subtopic and continue writing
+- Create categories, main threads, and topics
+- Select a topic and continue writing
 - Autosave status indicator (so you know what's happening)
 - Force save (`Ctrl/Cmd + S`)
 - Undo/redo during editing
-- Delete a subtopic (with confirmation)
+- Delete a topic (with confirmation)
 - Change accent color and font (persisted in the app state)
 - Edit the app title from the top bar
 
@@ -145,7 +145,7 @@ The entire app state is stored in:
 It includes:
 
 - `categories`: major groups (name, created_at)
-- `topics`: subtopics (title, content, timestamps, category_id)
+- `topics`: topics (title, content, timestamps, category_id)
 - `selected`: which category/topic is currently active
 - `version`: state schema version
 

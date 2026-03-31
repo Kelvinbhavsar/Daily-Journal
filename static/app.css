@@ -91,6 +91,7 @@ button,input,textarea,select{ font:inherit; }
   background:rgba(255,255,255,0.62);
   backdrop-filter:blur(16px);
 }
+.subbar--hidden{ display:none; }
 .subbar__tab{
   border:none;
   background:#161924;

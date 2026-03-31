@@ -365,7 +365,7 @@ def app(environ: dict[str, Any], start_response: Any) -> list[bytes]:
             trash_topics = state["trash"]["topics"]
             idx = next((i for i, t in enumerate(trash_topics) if t.get("id") == item_id), None)
             if idx is None:
-                status, headers, body = json_response("404 Not Found", {"error": "Subcategory not found in trash"})
+                status, headers, body = json_response("404 Not Found", {"error": "Topic not found in trash"})
                 start_response(status, headers)
                 return body
 

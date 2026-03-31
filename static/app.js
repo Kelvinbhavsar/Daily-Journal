@@ -13,6 +13,7 @@ const STATIC_SEGMENTS = [
 
 const els = {
   appTitle: document.getElementById("appTitle"),
+  subbar: document.getElementById("subbar"),
   homeToggle: document.getElementById("homeToggle"),
   breadcrumb: document.getElementById("breadcrumb"),
   homeView: document.getElementById("homeView"),
@@ -158,11 +159,11 @@ function iconMarkup(name, color) {
 }
 
 function renderStats() {
-  const userCategories = state?.categories || [];
-  const subcategories = state?.topics || [];
-  els.statsSummary.textContent = `${subcategories.length} total ${subcategories.length === 1 ? "entry" : "entries"}`;
+  const mainThreads = state?.categories || [];
+  const topics = state?.topics || [];
+  els.statsSummary.textContent = `${topics.length} total ${topics.length === 1 ? "entry" : "entries"}`;
   const trashCount = trashCategories().length + visibleTrashTopics().length;
-  els.statsDetail.textContent = `${userCategories.length} user ${userCategories.length === 1 ? "category" : "categories"} • ${trashCount} in trash`;
+  els.statsDetail.textContent = `${mainThreads.length} ${mainThreads.length === 1 ? "main thread" : "main threads"} • ${trashCount} in trash`;
 }
 
 function renderSegments() {
@@ -185,7 +186,7 @@ function renderSegments() {
         </div>
         <div class="segmentCard__footer">
           <span>${escapeHtml(segment.label)}</span>
-          <span class="segmentCard__count">${segmentCategories.length} categories • ${segmentTopics.length} subcategories</span>
+          <span class="segmentCard__count">${segmentCategories.length} main threads • ${segmentTopics.length} topics</span>
         </div>
       </button>
     `;
@@ -196,28 +197,28 @@ function renderDetailSummary() {
   const segment = getSegment(selectedSegmentKey());
   const segmentCategories = categoriesForSegment(segment.key);
   const subcategoryCount = segmentCategories.reduce((sum, category) => sum + topicsForCategory(category.id).length, 0);
-  els.detailSummary.innerHTML = `
-    <div class="segmentSummary__badge" style="--summary-tone:${segment.tone};--summary-soft:${segment.soft};">
-      ${escapeHtml(initialsForLabel(segment.label))}
-    </div>
-    <div class="segmentSummary__content">
-      <div class="segmentSummary__eyebrow">Static Category</div>
-      <div class="segmentSummary__title">${escapeHtml(segment.label)}</div>
-      <div class="segmentSummary__meta">${segmentCategories.length} user categories • ${subcategoryCount} subcategories</div>
-    </div>
-  `;
+  // els.detailSummary.innerHTML = `
+  //   <div class="segmentSummary__badge" style="--summary-tone:${segment.tone};--summary-soft:${segment.soft};">
+  //     ${escapeHtml(initialsForLabel(segment.label))}
+  //   </div>
+  //   <div class="segmentSummary__content">
+  //     <div class="segmentSummary__eyebrow">Static Category</div>
+  //     <div class="segmentSummary__title">${escapeHtml(segment.label)}</div>
+  //     <div class="segmentSummary__meta">${segmentCategories.length} user categories • ${subcategoryCount} subcategories</div>
+  //   </div>
+  // `;
 }
 
 function renderCategoryList() {
   const activeCategoryId = selectedCategoryId();
   const categories = categoriesForSegment(selectedSegmentKey());
   els.categoryList.innerHTML = categories.map((category) => {
-    const subcategoryCount = topicsForCategory(category.id).length;
+    const topicCount = topicsForCategory(category.id).length;
     const active = category.id === activeCategoryId ? " browserCard--active" : "";
     return `
       <div class="browserCard${active}" data-action="select-category" data-id="${escapeHtml(category.id)}" role="button" tabindex="0">
         <div class="browserCard__title">${escapeHtml(category.name)}</div>
-        <div class="browserCard__meta">${subcategoryCount} ${subcategoryCount === 1 ? "subcategory" : "subcategories"}</div>
+        <div class="browserCard__meta">${topicCount} ${topicCount === 1 ? "topic" : "topics"}</div>
         <span class="cardDeleteWrap">
           <button class="cardDelete" type="button" data-action="delete-category" data-id="${escapeHtml(category.id)}" aria-label="Delete ${escapeHtml(category.name)}">
             <svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
@@ -256,14 +257,14 @@ function renderTrash() {
         kind: "category",
         id: category.id,
         title: category.name,
-        meta: `${category.segment_key || "financial"} segment • restores ${childCount} subcategories`,
+        meta: `${category.segment_key || "financial"} segment • restores ${childCount} topics`,
       };
     }),
     ...visibleTrashTopics().map((topic) => ({
       kind: "topic",
       id: topic.id,
       title: topic.title || "Untitled",
-      meta: "Deleted subcategory",
+      meta: "Deleted topic",
     })),
   ];
 
@@ -297,7 +298,7 @@ function renderBreadcrumb() {
   const category = getCategoryById(selectedCategoryId());
   const topic = getTopicById(selectedTopicId());
   if (viewMode !== "detail") {
-    els.breadcrumb.textContent = "Static Category • User Category • Subcategory";
+    els.breadcrumb.textContent = "Static Category • Main Thread • Topic";
     return;
   }
   const parts = [segment.label];
@@ -309,6 +310,7 @@ function renderBreadcrumb() {
 function setViewMode(nextMode) {
   viewMode = nextMode;
   const home = nextMode === "home";
+  els.subbar.classList.toggle("subbar--hidden", home);
   els.homeView.classList.toggle("homeView--hidden", !home);
   els.detailView.classList.toggle("detailView--hidden", home);
   renderBreadcrumb();
@@ -318,7 +320,6 @@ function renderAll() {
   applyAppearanceFromState();
   renderStats();
   renderSegments();
-  renderDetailSummary();
   renderCategoryList();
   renderTopicList();
   renderTrash();
@@ -445,7 +446,7 @@ async function saveSettings() {
 
 async function createCategory() {
   if (dirty) await autosave();
-  const name = prompt("User category name?");
+  const name = prompt("Main thread name?");
   if (!name) return;
   state = await api("/api/categories", {
     method: "POST",
@@ -453,26 +454,26 @@ async function createCategory() {
   });
   renderAll();
   setViewMode("detail");
-  setStatus("Created category");
+  setStatus("Created main thread");
 }
 
 async function createTopic() {
   if (dirty) await autosave();
   const categoryId = selectedCategoryId();
   if (!categoryId) {
-    setStatus("Open a user category first");
+    setStatus("Open a main thread first");
     return;
   }
-  const title = prompt("Subcategory title?") || "Untitled";
+  const title = prompt("Topic title?") || "Untitled";
   state = await api("/api/topics", { method: "POST", body: { category_id: categoryId, title } });
   renderAll();
   setViewMode("detail");
-  setStatus("Created subcategory");
+  setStatus("Created topic");
 }
 
 async function deleteTopic(topicId) {
   if (dirty) await autosave();
-  if (!topicId || !confirm("Delete this subcategory?")) return;
+  if (!topicId || !confirm("Delete this topic?")) return;
   state = await api(`/api/topics/${encodeURIComponent(topicId)}`, { method: "DELETE" });
   dirty = false;
   renderAll();
@@ -481,11 +482,11 @@ async function deleteTopic(topicId) {
 
 async function deleteCategory(categoryId) {
   if (dirty) await autosave();
-  if (!categoryId || !confirm("Delete this category and all its subcategories?")) return;
+  if (!categoryId || !confirm("Delete this main thread and all its topics?")) return;
   state = await api(`/api/categories/${encodeURIComponent(categoryId)}`, { method: "DELETE" });
   dirty = false;
   renderAll();
-  setStatus("Category moved to trash");
+  setStatus("Main thread moved to trash");
 }
 
 async function restoreTrash(kind, itemId) {
