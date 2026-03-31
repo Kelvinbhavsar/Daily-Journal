@@ -20,6 +20,18 @@ PORT = 9000
 STATIC_DIR = BASE_DIR / "static"
 
 
+def ensure_trash(state: dict[str, Any]) -> dict[str, Any]:
+    trash = state.get("trash")
+    if not isinstance(trash, dict):
+        trash = {}
+    if not isinstance(trash.get("categories"), list):
+        trash["categories"] = []
+    if not isinstance(trash.get("topics"), list):
+        trash["topics"] = []
+    state["trash"] = trash
+    return state
+
+
 def json_response(status: str, payload: dict[str, Any]) -> list[bytes]:
     body = json.dumps(payload).encode("utf-8")
     headers = [
@@ -80,17 +92,21 @@ def serve_static(path: str) -> list[bytes] | None:
 
 
 def select_defaults(state: dict[str, Any]) -> dict[str, Any]:
+    state = ensure_trash(state)
     cats = state.get("categories") or []
     topics = state.get("topics") or []
     valid_segments = {segment["key"] for segment in STATIC_SEGMENTS}
-    if not cats:
-        cat_id = new_id("cat")
-        cats = [{"id": cat_id, "name": "General", "segment_key": DEFAULT_SEGMENT_KEY, "created_at": iso_now()}]
-        state["categories"] = cats
     selected = state.get("selected") or {}
     segment_key = str(selected.get("segment_key") or DEFAULT_SEGMENT_KEY)
     if segment_key not in valid_segments:
         segment_key = DEFAULT_SEGMENT_KEY
+
+    if not cats:
+        selected["segment_key"] = segment_key
+        selected["category_id"] = None
+        selected["topic_id"] = None
+        state["selected"] = selected
+        return state
 
     segment_cats = [c for c in cats if c.get("segment_key") == segment_key]
     if not segment_cats:
@@ -228,9 +244,47 @@ def app(environ: dict[str, Any], start_response: Any) -> list[bytes]:
         start_response(status, headers)
         return body
 
+    if path.startswith("/api/categories/"):
+        category_id = path.removeprefix("/api/categories/").strip("/")
+        state = ensure_trash(select_defaults(load_state(BASE_DIR)))
+        categories = state.get("categories", [])
+        idx = next((i for i, c in enumerate(categories) if c.get("id") == category_id), None)
+        if idx is None:
+            status, headers, body = json_response("404 Not Found", {"error": "Category not found"})
+            start_response(status, headers)
+            return body
+
+        if method == "DELETE":
+            deleted_category = dict(categories.pop(idx))
+            deleted_category["deleted_at"] = iso_now()
+            state["trash"]["categories"].append(deleted_category)
+
+            kept_topics = []
+            for topic in state.get("topics", []):
+                if topic.get("category_id") == category_id:
+                    trashed_topic = dict(topic)
+                    trashed_topic["deleted_at"] = iso_now()
+                    trashed_topic["deleted_with_category_id"] = category_id
+                    state["trash"]["topics"].append(trashed_topic)
+                else:
+                    kept_topics.append(topic)
+            state["categories"] = categories
+            state["topics"] = kept_topics
+
+            sel = state.get("selected") or {}
+            if sel.get("category_id") == category_id:
+                sel["category_id"] = None
+                sel["topic_id"] = None
+                state["selected"] = sel
+            state = select_defaults(state)
+            state = save_state(BASE_DIR, state)
+            status, headers, body = json_response("200 OK", state)
+            start_response(status, headers)
+            return body
+
     if path.startswith("/api/topics/"):
         topic_id = path.removeprefix("/api/topics/").strip("/")
-        state = select_defaults(load_state(BASE_DIR))
+        state = ensure_trash(select_defaults(load_state(BASE_DIR)))
         topics = state.get("topics", [])
         idx = next((i for i, t in enumerate(topics) if t.get("id") == topic_id), None)
         if idx is None:
@@ -252,7 +306,10 @@ def app(environ: dict[str, Any], start_response: Any) -> list[bytes]:
             return body
 
         if method == "DELETE":
-            deleted = topics.pop(idx)
+            deleted = dict(topics.pop(idx))
+            deleted["deleted_at"] = iso_now()
+            deleted["deleted_with_category_id"] = None
+            state["trash"]["topics"].append(deleted)
             state["topics"] = topics
             # keep selection sane
             sel = state.get("selected") or {}
@@ -264,6 +321,77 @@ def app(environ: dict[str, Any], start_response: Any) -> list[bytes]:
             status, headers, body = json_response("200 OK", state)
             start_response(status, headers)
             return body
+
+    if method == "POST" and path == "/api/trash/restore":
+        payload = parse_json(environ)
+        kind = str(payload.get("kind") or "").strip()
+        item_id = str(payload.get("id") or "").strip()
+        state = ensure_trash(select_defaults(load_state(BASE_DIR)))
+
+        if kind == "category":
+            trash_categories = state["trash"]["categories"]
+            idx = next((i for i, c in enumerate(trash_categories) if c.get("id") == item_id), None)
+            if idx is None:
+                status, headers, body = json_response("404 Not Found", {"error": "Category not found in trash"})
+                start_response(status, headers)
+                return body
+
+            restored = dict(trash_categories.pop(idx))
+            restored.pop("deleted_at", None)
+            state["categories"].append(restored)
+
+            kept_trashed_topics = []
+            restored_topics = []
+            for topic in state["trash"]["topics"]:
+                if topic.get("deleted_with_category_id") == item_id:
+                    restored_topic = dict(topic)
+                    restored_topic.pop("deleted_at", None)
+                    restored_topic.pop("deleted_with_category_id", None)
+                    restored_topics.append(restored_topic)
+                else:
+                    kept_trashed_topics.append(topic)
+            state["trash"]["topics"] = kept_trashed_topics
+            state["topics"].extend(restored_topics)
+            state["selected"]["segment_key"] = restored.get("segment_key") or DEFAULT_SEGMENT_KEY
+            state["selected"]["category_id"] = restored["id"]
+            state["selected"]["topic_id"] = restored_topics[0]["id"] if restored_topics else None
+            state = select_defaults(state)
+            state = save_state(BASE_DIR, state)
+            status, headers, body = json_response("200 OK", state)
+            start_response(status, headers)
+            return body
+
+        if kind == "topic":
+            trash_topics = state["trash"]["topics"]
+            idx = next((i for i, t in enumerate(trash_topics) if t.get("id") == item_id), None)
+            if idx is None:
+                status, headers, body = json_response("404 Not Found", {"error": "Subcategory not found in trash"})
+                start_response(status, headers)
+                return body
+
+            restored = dict(trash_topics[idx])
+            category_id = restored.get("category_id")
+            if category_id not in {c.get("id") for c in state.get("categories", [])}:
+                status, headers, body = json_response("400 Bad Request", {"error": "Restore the parent category first"})
+                start_response(status, headers)
+                return body
+
+            trash_topics.pop(idx)
+            restored.pop("deleted_at", None)
+            restored.pop("deleted_with_category_id", None)
+            state["topics"].append(restored)
+            state["selected"]["category_id"] = category_id
+            state["selected"]["topic_id"] = restored["id"]
+            category = next((c for c in state["categories"] if c["id"] == category_id), None)
+            state["selected"]["segment_key"] = (category or {}).get("segment_key") or DEFAULT_SEGMENT_KEY
+            state = save_state(BASE_DIR, state)
+            status, headers, body = json_response("200 OK", state)
+            start_response(status, headers)
+            return body
+
+        status, headers, body = json_response("400 Bad Request", {"error": "Invalid restore kind"})
+        start_response(status, headers)
+        return body
 
     if method == "POST" and path == "/api/select":
         payload = parse_json(environ)

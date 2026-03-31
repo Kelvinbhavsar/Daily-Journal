@@ -20,6 +20,10 @@ const els = {
   segmentGrid: document.getElementById("segmentGrid"),
   statsSummary: document.getElementById("statsSummary"),
   statsDetail: document.getElementById("statsDetail"),
+  openTrash: document.getElementById("openTrash"),
+  closeTrash: document.getElementById("closeTrash"),
+  trashPanel: document.getElementById("trashPanel"),
+  trashList: document.getElementById("trashList"),
   detailSummary: document.getElementById("detailSummary"),
   backToHome: document.getElementById("backToHome"),
   categoryList: document.getElementById("categoryList"),
@@ -34,11 +38,11 @@ const els = {
   font: document.getElementById("font"),
   newCategory: document.getElementById("newCategory"),
   newTopic: document.getElementById("newTopic"),
-  deleteTopic: document.getElementById("deleteTopic"),
 };
 
 let state = null;
 let viewMode = "home";
+let trashOpen = false;
 let saveTimer = null;
 let dirty = false;
 let lastSavedAt = null;
@@ -126,6 +130,14 @@ function getTopicById(topicId) {
   return (state?.topics || []).find((topic) => topic.id === topicId) || null;
 }
 
+function visibleTrashTopics() {
+  return (state?.trash?.topics || []).filter((topic) => !topic.deleted_with_category_id);
+}
+
+function trashCategories() {
+  return state?.trash?.categories || [];
+}
+
 function initialsForLabel(label) {
   return String(label || "")
     .trim()
@@ -149,7 +161,8 @@ function renderStats() {
   const userCategories = state?.categories || [];
   const subcategories = state?.topics || [];
   els.statsSummary.textContent = `${subcategories.length} total ${subcategories.length === 1 ? "entry" : "entries"}`;
-  els.statsDetail.textContent = `${userCategories.length} user ${userCategories.length === 1 ? "category" : "categories"}`;
+  const trashCount = trashCategories().length + visibleTrashTopics().length;
+  els.statsDetail.textContent = `${userCategories.length} user ${userCategories.length === 1 ? "category" : "categories"} • ${trashCount} in trash`;
 }
 
 function renderSegments() {
@@ -202,10 +215,15 @@ function renderCategoryList() {
     const subcategoryCount = topicsForCategory(category.id).length;
     const active = category.id === activeCategoryId ? " browserCard--active" : "";
     return `
-      <button class="browserCard${active}" type="button" data-action="select-category" data-id="${escapeHtml(category.id)}">
+      <div class="browserCard${active}" data-action="select-category" data-id="${escapeHtml(category.id)}" role="button" tabindex="0">
         <div class="browserCard__title">${escapeHtml(category.name)}</div>
         <div class="browserCard__meta">${subcategoryCount} ${subcategoryCount === 1 ? "subcategory" : "subcategories"}</div>
-      </button>
+        <span class="cardDeleteWrap">
+          <button class="cardDelete" type="button" data-action="delete-category" data-id="${escapeHtml(category.id)}" aria-label="Delete ${escapeHtml(category.name)}">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+          </button>
+        </span>
+      </div>
     `;
   }).join("");
 }
@@ -217,12 +235,52 @@ function renderTopicList() {
     const active = topic.id === activeTopicId ? " browserCard--active" : "";
     const preview = (topic.content || "").trim().split("\n")[0] || "No content yet";
     return `
-      <button class="browserCard browserCard--topic${active}" type="button" data-action="select-topic" data-id="${escapeHtml(topic.id)}">
+      <div class="browserCard browserCard--topic${active}" data-action="select-topic" data-id="${escapeHtml(topic.id)}" role="button" tabindex="0">
         <div class="browserCard__title">${escapeHtml(topic.title || "Untitled")}</div>
         <div class="browserCard__meta">${escapeHtml(preview)}</div>
-      </button>
+        <span class="cardDeleteWrap">
+          <button class="cardDelete" type="button" data-action="delete-topic" data-id="${escapeHtml(topic.id)}" aria-label="Delete ${escapeHtml(topic.title || "Untitled")}">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+          </button>
+        </span>
+      </div>
     `;
   }).join("");
+}
+
+function renderTrash() {
+  const items = [
+    ...trashCategories().map((category) => {
+      const childCount = (state?.trash?.topics || []).filter((topic) => topic.deleted_with_category_id === category.id).length;
+      return {
+        kind: "category",
+        id: category.id,
+        title: category.name,
+        meta: `${category.segment_key || "financial"} segment • restores ${childCount} subcategories`,
+      };
+    }),
+    ...visibleTrashTopics().map((topic) => ({
+      kind: "topic",
+      id: topic.id,
+      title: topic.title || "Untitled",
+      meta: "Deleted subcategory",
+    })),
+  ];
+
+  els.trashPanel.classList.toggle("trashPanel--hidden", !trashOpen);
+  els.trashList.innerHTML = items.length
+    ? items.map((item) => `
+      <div class="trashCard">
+        <div>
+          <div class="trashCard__title">${escapeHtml(item.title)}</div>
+          <div class="trashCard__meta">${escapeHtml(item.meta)}</div>
+        </div>
+        <button class="cardRestore" type="button" data-action="restore-trash" data-kind="${escapeHtml(item.kind)}" data-id="${escapeHtml(item.id)}" aria-label="Restore ${escapeHtml(item.title)}">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7v6h6"></path><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"></path></svg>
+        </button>
+      </div>
+    `).join("")
+    : `<div class="trashEmpty">Trash is empty right now.</div>`;
 }
 
 function renderEditor() {
@@ -231,7 +289,6 @@ function renderEditor() {
   els.topicContent.value = topic?.content || "";
   els.topicTitle.disabled = !topic;
   els.topicContent.disabled = !topic;
-  els.deleteTopic.disabled = !topic;
   resetHistoryForTopic(topic?.id || null);
 }
 
@@ -264,6 +321,7 @@ function renderAll() {
   renderDetailSummary();
   renderCategoryList();
   renderTopicList();
+  renderTrash();
   renderEditor();
   renderBreadcrumb();
 }
@@ -412,14 +470,29 @@ async function createTopic() {
   setStatus("Created subcategory");
 }
 
-async function deleteSelectedTopic() {
+async function deleteTopic(topicId) {
   if (dirty) await autosave();
-  const topicId = selectedTopicId();
   if (!topicId || !confirm("Delete this subcategory?")) return;
   state = await api(`/api/topics/${encodeURIComponent(topicId)}`, { method: "DELETE" });
   dirty = false;
   renderAll();
-  setStatus("Deleted");
+  setStatus("Moved to trash");
+}
+
+async function deleteCategory(categoryId) {
+  if (dirty) await autosave();
+  if (!categoryId || !confirm("Delete this category and all its subcategories?")) return;
+  state = await api(`/api/categories/${encodeURIComponent(categoryId)}`, { method: "DELETE" });
+  dirty = false;
+  renderAll();
+  setStatus("Category moved to trash");
+}
+
+async function restoreTrash(kind, itemId) {
+  if (!kind || !itemId) return;
+  state = await api("/api/trash/restore", { method: "POST", body: { kind, id: itemId } });
+  renderAll();
+  setStatus("Restored from trash");
 }
 
 async function openSegment(segmentKey) {
@@ -451,10 +524,22 @@ function handleClick(ev) {
   if (!target) return;
   const action = target.getAttribute("data-action");
   const id = target.getAttribute("data-id");
-  if (!id) return;
   if (action === "open-segment") void openSegment(id);
   if (action === "select-category") void selectCategory(id);
   if (action === "select-topic") void selectTopic(id);
+  if (action === "delete-category") {
+    ev.preventDefault();
+    ev.stopPropagation();
+    void deleteCategory(id);
+  }
+  if (action === "delete-topic") {
+    ev.preventDefault();
+    ev.stopPropagation();
+    void deleteTopic(id);
+  }
+  if (action === "restore-trash") {
+    void restoreTrash(target.getAttribute("data-kind"), id);
+  }
 }
 
 function bind() {
@@ -462,6 +547,7 @@ function bind() {
   els.segmentGrid.addEventListener("click", handleClick);
   els.categoryList.addEventListener("click", handleClick);
   els.topicList.addEventListener("click", handleClick);
+  els.trashList.addEventListener("click", handleClick);
 
   els.homeToggle.addEventListener("click", async () => {
     if (dirty) await autosave();
@@ -471,13 +557,21 @@ function bind() {
     if (dirty) await autosave();
     setViewMode("home");
   });
+  els.openTrash.addEventListener("click", async () => {
+    if (dirty) await autosave();
+    trashOpen = !trashOpen;
+    renderTrash();
+  });
+  els.closeTrash.addEventListener("click", () => {
+    trashOpen = false;
+    renderTrash();
+  });
 
   els.undoBtn.addEventListener("click", doUndo);
   els.redoBtn.addEventListener("click", doRedo);
   els.saveNowBtn.addEventListener("click", () => void autosave({ force: true }));
   els.newCategory.addEventListener("click", () => void createCategory());
   els.newTopic.addEventListener("click", () => void createTopic());
-  els.deleteTopic.addEventListener("click", () => void deleteSelectedTopic());
 
   els.accent.addEventListener("change", () => {
     setAccent(els.accent.value);

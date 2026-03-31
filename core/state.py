@@ -52,7 +52,7 @@ def default_state() -> dict[str, Any]:
     cat_id = new_id("cat")
     topic_id = new_id("topic")
     return {
-        "version": 2,
+        "version": 3,
         "app_title": "Trading journal",
         "accent": "indigo",
         "font": "fredoka",
@@ -75,6 +75,7 @@ def default_state() -> dict[str, Any]:
                 "updated_at": iso_now(),
             }
         ],
+        "trash": {"categories": [], "topics": []},
         "updated_at": iso_now(),
     }
 
@@ -84,7 +85,7 @@ def coerce_state(raw: dict[str, Any] | None) -> dict[str, Any]:
         return default_state()
 
     state = default_state()
-    state.update({k: raw.get(k) for k in ("version", "app_title", "accent", "font", "categories", "topics", "selected", "updated_at") if k in raw})
+    state.update({k: raw.get(k) for k in ("version", "app_title", "accent", "font", "categories", "topics", "trash", "selected", "updated_at") if k in raw})
 
     if state.get("accent") not in MATERIAL_ACCENTS:
         state["accent"] = "indigo"
@@ -98,6 +99,12 @@ def coerce_state(raw: dict[str, Any] | None) -> dict[str, Any]:
 
     if not isinstance(state.get("selected"), dict):
         state["selected"] = default_state()["selected"]
+    if not isinstance(state.get("trash"), dict):
+        state["trash"] = default_state()["trash"]
+    if not isinstance(state["trash"].get("categories"), list):
+        state["trash"]["categories"] = []
+    if not isinstance(state["trash"].get("topics"), list):
+        state["trash"]["topics"] = []
 
     valid_segments = static_segment_keys()
     normalized_categories = []

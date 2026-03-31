@@ -78,6 +78,19 @@ def render_index(state: dict[str, Any]) -> bytes:
         </div>
 
         <div id="segmentGrid" class="segmentGrid" aria-label="Category segments"></div>
+        <button id="openTrash" class="floatingTrash" type="button" aria-label="Open trash">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+        </button>
+        <section id="trashPanel" class="trashPanel trashPanel--hidden" aria-label="Deleted items">
+          <div class="trashPanel__head">
+            <div>
+              <div class="trashPanel__title">Trash Bin</div>
+              <div class="trashPanel__hint">Restore deleted user categories and subcategories from here.</div>
+            </div>
+            <button id="closeTrash" class="btn btn--ghost btn--iconLabel" type="button">Close</button>
+          </div>
+          <div id="trashList" class="trashList"></div>
+        </section>
       </section>
 
       <section id="detailView" class="detailView detailView--hidden" aria-label="Category detail view">
@@ -122,9 +135,6 @@ def render_index(state: dict[str, Any]) -> bytes:
                     </button>
                     <button id="saveNowBtn" class="btn btn--ghost btn--icon" type="button" title="Save (⌘S / Ctrl+S)" aria-label="Save">
                       <svg class="btn__icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
-                    </button>
-                    <button id="deleteTopic" class="btn btn--icon btn--delete" type="button" title="Delete subtopic" aria-label="Delete">
-                      <svg class="btn__icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
                     </button>
                   </div>
                 </div>
