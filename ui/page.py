@@ -15,12 +15,13 @@ def render_index(state: dict[str, Any]) -> bytes:
             "app_title": title,
             "accent": state.get("accent"),
             "font": state.get("font"),
+            "theme": state.get("theme"),
             "selected": state.get("selected"),
         }
     )
 
     html = f"""<!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="{_html_escape(str(state.get("theme") or "light"))}">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -46,9 +47,12 @@ def render_index(state: dict[str, Any]) -> bytes:
           <select id="accent" class="control__select" aria-label="Accent color"></select>
         </div>
         <div class="control">
-          <label class="control__label" for="font">Font</label>
-          <select id="font" class="control__select" aria-label="Font"></select>
+            <label class="control__label" for="font">Font</label>
+            <select id="font" class="control__select" aria-label="Font"></select>
         </div>
+        <button id="themeToggle" class="themeToggle" type="button" aria-label="Toggle theme">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"></path></svg>
+        </button>
       </div>
     </header>
 

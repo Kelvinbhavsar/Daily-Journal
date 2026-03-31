@@ -177,12 +177,15 @@ def app(environ: dict[str, Any], start_response: Any) -> list[bytes]:
         title = str(payload.get("app_title") or "").strip() or "Trading journal"
         accent = payload.get("accent")
         font = payload.get("font")
+        theme = payload.get("theme")
 
         state["app_title"] = title
         if accent in MATERIAL_ACCENTS:
             state["accent"] = accent
         if font in {f["key"] for f in FUNKY_ROUNDED_FONTS}:
             state["font"] = font
+        if theme in {"light", "dark"}:
+            state["theme"] = theme
 
         state = save_state(BASE_DIR, state)
         status, headers, body = json_response("200 OK", state)

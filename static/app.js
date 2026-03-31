@@ -14,6 +14,7 @@ const STATIC_SEGMENTS = [
 const els = {
   appTitle: document.getElementById("appTitle"),
   subbar: document.getElementById("subbar"),
+  themeToggle: document.getElementById("themeToggle"),
   homeToggle: document.getElementById("homeToggle"),
   breadcrumb: document.getElementById("breadcrumb"),
   homeView: document.getElementById("homeView"),
@@ -67,6 +68,20 @@ function setAccent(accentKey) {
 function setFont(fontKey) {
   const font = FONTS.find((f) => f.key === fontKey) || FONTS[0];
   if (font) document.documentElement.style.setProperty("--font", font.css);
+}
+
+function themeIcon(mode) {
+  if (mode === "dark") {
+    return `<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2"></path><path d="M12 20v2"></path><path d="m4.93 4.93 1.41 1.41"></path><path d="m17.66 17.66 1.41 1.41"></path><path d="M2 12h2"></path><path d="M20 12h2"></path><path d="m6.34 17.66-1.41 1.41"></path><path d="m19.07 4.93-1.41 1.41"></path></svg>`;
+  }
+  return `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"></path></svg>`;
+}
+
+function setTheme(mode) {
+  const theme = mode === "dark" ? "dark" : "light";
+  document.documentElement.setAttribute("data-theme", theme);
+  els.themeToggle.innerHTML = themeIcon(theme);
+  els.themeToggle.setAttribute("aria-label", theme === "dark" ? "Switch to light mode" : "Switch to dark mode");
 }
 
 function hexToRgba(hex, alpha) {
@@ -185,7 +200,6 @@ function renderSegments() {
           <div class="segmentCard__icon">${iconMarkup(segment.icon, segment.tone)}</div>
         </div>
         <div class="segmentCard__footer">
-          <span>${escapeHtml(segment.label)}</span>
           <span class="segmentCard__count">${segmentCategories.length} main threads • ${segmentTopics.length} topics</span>
         </div>
       </button>
@@ -332,6 +346,7 @@ function applyAppearanceFromState() {
   els.font.value = state?.font || (FONTS[0]?.key ?? "fredoka");
   setAccent(els.accent.value);
   setFont(els.font.value);
+  setTheme(state?.theme || "light");
   els.appTitle.value = state?.app_title || "Trading journal";
   document.title = els.appTitle.value;
 }
@@ -438,10 +453,29 @@ function fillSelectOptions() {
 async function saveSettings() {
   state = await api("/api/settings", {
     method: "POST",
-    body: { app_title: els.appTitle.value, accent: els.accent.value, font: els.font.value },
+    body: { app_title: els.appTitle.value, accent: els.accent.value, font: els.font.value, theme: state?.theme || "light" },
   });
   renderAll();
   setStatus("Saved settings");
+}
+
+async function toggleTheme() {
+  state = {
+    ...state,
+    theme: state?.theme === "dark" ? "light" : "dark",
+  };
+  setTheme(state.theme);
+  state = await api("/api/settings", {
+    method: "POST",
+    body: {
+      app_title: els.appTitle.value,
+      accent: els.accent.value,
+      font: els.font.value,
+      theme: state.theme,
+    },
+  });
+  renderAll();
+  setStatus(`Switched to ${state.theme} mode`);
 }
 
 async function createCategory() {
@@ -573,6 +607,7 @@ function bind() {
   els.saveNowBtn.addEventListener("click", () => void autosave({ force: true }));
   els.newCategory.addEventListener("click", () => void createCategory());
   els.newTopic.addEventListener("click", () => void createTopic());
+  els.themeToggle.addEventListener("click", () => void toggleTheme());
 
   els.accent.addEventListener("change", () => {
     setAccent(els.accent.value);

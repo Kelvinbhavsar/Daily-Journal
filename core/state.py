@@ -42,6 +42,7 @@ STATIC_SEGMENTS: list[dict[str, str]] = [
 ]
 
 DEFAULT_SEGMENT_KEY = "financial"
+THEMES = {"light", "dark"}
 
 
 def static_segment_keys() -> set[str]:
@@ -56,6 +57,7 @@ def default_state() -> dict[str, Any]:
         "app_title": "Trading journal",
         "accent": "indigo",
         "font": "fredoka",
+        "theme": "light",
         "selected": {"segment_key": DEFAULT_SEGMENT_KEY, "category_id": cat_id, "topic_id": topic_id},
         "categories": [
             {
@@ -85,12 +87,14 @@ def coerce_state(raw: dict[str, Any] | None) -> dict[str, Any]:
         return default_state()
 
     state = default_state()
-    state.update({k: raw.get(k) for k in ("version", "app_title", "accent", "font", "categories", "topics", "trash", "selected", "updated_at") if k in raw})
+    state.update({k: raw.get(k) for k in ("version", "app_title", "accent", "font", "theme", "categories", "topics", "trash", "selected", "updated_at") if k in raw})
 
     if state.get("accent") not in MATERIAL_ACCENTS:
         state["accent"] = "indigo"
     if state.get("font") not in {f["key"] for f in FUNKY_ROUNDED_FONTS}:
         state["font"] = "fredoka"
+    if state.get("theme") not in THEMES:
+        state["theme"] = "light"
 
     if not isinstance(state.get("categories"), list):
         state["categories"] = default_state()["categories"]
