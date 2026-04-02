@@ -26,6 +26,7 @@ def render_index(state: dict[str, Any]) -> bytes:
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{_html_escape(title)}</title>
+  <link rel="icon" type="image/png" href="/static/diary.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Nunito:wght@400;600;700&family=Poppins:wght@400;600;700&family=Quicksand:wght@400;600;700&family=Rubik:wght@400;600;700&display=swap" rel="stylesheet">
@@ -35,7 +36,7 @@ def render_index(state: dict[str, Any]) -> bytes:
   <div id="app" class="app" aria-label="Trading journal app">
     <header class="topbar">
       <div class="brand">
-        <div class="brand__mark" aria-hidden="true"></div>
+        <img class="brand__mark" src="/static/diary.png" alt="" aria-hidden="true">
         <div class="brand__titleWrap">
           <input id="appTitle" class="brand__title" type="text" value="{_html_escape(title)}" aria-label="App title">
         </div>
@@ -90,7 +91,10 @@ def render_index(state: dict[str, Any]) -> bytes:
               <div class="trashPanel__title">Trash Bin</div>
               <div class="trashPanel__hint">Restore deleted main threads and topics from here.</div>
             </div>
-            <button id="closeTrash" class="btn btn--ghost" type="button">Close</button>
+            <div class="trashPanel__actions">
+              <button id="emptyTrash" class="btn btn--ghost" type="button">Empty Bin</button>
+              <button id="closeTrash" class="btn btn--ghost" type="button">Close</button>
+            </div>
           </div>
           <div id="trashList" class="trashList"></div>
         </section>

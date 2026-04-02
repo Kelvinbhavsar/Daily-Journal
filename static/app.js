@@ -24,6 +24,7 @@ const els = {
   statsDetail: document.getElementById("statsDetail"),
   openTrash: document.getElementById("openTrash"),
   closeTrash: document.getElementById("closeTrash"),
+  emptyTrash: document.getElementById("emptyTrash"),
   trashPanel: document.getElementById("trashPanel"),
   trashList: document.getElementById("trashList"),
   detailSummary: document.getElementById("detailSummary"),
@@ -530,6 +531,13 @@ async function restoreTrash(kind, itemId) {
   setStatus("Restored from trash");
 }
 
+async function emptyTrash() {
+  if (!confirm("Permanently empty the trash bin?")) return;
+  state = await api("/api/trash/empty", { method: "POST" });
+  renderAll();
+  setStatus("Trash bin emptied");
+}
+
 async function openSegment(segmentKey) {
   if (dirty) await autosave();
   state = await api("/api/select", { method: "POST", body: { segment_key: segmentKey } });
@@ -601,6 +609,7 @@ function bind() {
     trashOpen = false;
     renderTrash();
   });
+  els.emptyTrash.addEventListener("click", () => void emptyTrash());
 
   els.undoBtn.addEventListener("click", doUndo);
   els.redoBtn.addEventListener("click", doRedo);

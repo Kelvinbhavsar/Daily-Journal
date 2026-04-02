@@ -88,6 +88,12 @@ def serve_static(path: str) -> list[bytes] | None:
         ctype = "text/css; charset=utf-8"
     elif rel.endswith(".js"):
         ctype = "text/javascript; charset=utf-8"
+    elif rel.endswith(".png"):
+        ctype = "image/png"
+    elif rel.endswith(".jpg") or rel.endswith(".jpeg"):
+        ctype = "image/jpeg"
+    elif rel.endswith(".svg"):
+        ctype = "image/svg+xml"
     return bytes_response("200 OK", body, ctype)
 
 
@@ -393,6 +399,15 @@ def app(environ: dict[str, Any], start_response: Any) -> list[bytes]:
             return body
 
         status, headers, body = json_response("400 Bad Request", {"error": "Invalid restore kind"})
+        start_response(status, headers)
+        return body
+
+    if method == "POST" and path == "/api/trash/empty":
+        state = ensure_trash(select_defaults(load_state(BASE_DIR)))
+        state["trash"]["categories"] = []
+        state["trash"]["topics"] = []
+        state = save_state(BASE_DIR, state)
+        status, headers, body = json_response("200 OK", state)
         start_response(status, headers)
         return body
 
