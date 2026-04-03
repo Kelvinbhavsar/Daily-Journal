@@ -60,19 +60,10 @@
 
 ---
 
-## Screenshots (add yours for best effect)
-
-Once you provide 1-2 screenshots, drop them into `assets/` and name them like:
-
-- `assets/screenshot-1.png`
-- `assets/screenshot-2.png`
-
-Then GitHub will render them here:
+## Screenshots 
 
 ![Daily-Journal - dashboard/editor preview](assets/screenshot-1.png)
 ![Daily-Journal - writing & autosave](assets/screenshot-2.png)
-
-If you want, tell me your preferred filenames and I will wire them into this section.
 
 ## Why this project is different
 
