@@ -1,4 +1,4 @@
-/* global window, document, fetch, setTimeout, clearTimeout, prompt, confirm, navigator */
+/* global window, document, fetch, setTimeout, clearTimeout, navigator */
 
 const ACCENTS = window.__ACCENTS__ || {};
 const FONTS = window.__FONTS__ || [];
@@ -15,6 +15,15 @@ const els = {
   appTitle: document.getElementById("appTitle"),
   subbar: document.getElementById("subbar"),
   themeToggle: document.getElementById("themeToggle"),
+  modalLayer: document.getElementById("modalLayer"),
+  modalBackdrop: document.getElementById("modalBackdrop"),
+  modalTitle: document.getElementById("modalTitle"),
+  modalMessage: document.getElementById("modalMessage"),
+  modalInputWrap: document.getElementById("modalInputWrap"),
+  modalInputLabel: document.getElementById("modalInputLabel"),
+  modalInput: document.getElementById("modalInput"),
+  modalCancel: document.getElementById("modalCancel"),
+  modalConfirm: document.getElementById("modalConfirm"),
   homeToggle: document.getElementById("homeToggle"),
   breadcrumb: document.getElementById("breadcrumb"),
   homeView: document.getElementById("homeView"),
@@ -51,6 +60,7 @@ let dirty = false;
 let lastSavedAt = null;
 let historyDebounce = null;
 let history = { topicId: null, undo: [], redo: [], last: null };
+let modalState = null;
 
 const AUTOSAVE_MS = 5 * 60 * 1000;
 const HISTORY_DEBOUNCE_MS = 400;
@@ -58,6 +68,62 @@ const HISTORY_LIMIT = 120;
 
 function setStatus(text) {
   els.saveStatus.textContent = text;
+}
+
+function closeModal(result = null) {
+  if (!modalState) return;
+  const current = modalState;
+  modalState = null;
+  els.modalLayer.classList.add("modalLayer--hidden");
+  els.modalLayer.setAttribute("aria-hidden", "true");
+  els.modalInputWrap.classList.add("modalShell__field--hidden");
+  current.resolve(result);
+}
+
+function openModal({
+  title,
+  message = "",
+  confirmLabel = "Confirm",
+  cancelLabel = "Cancel",
+  inputLabel = "",
+  inputValue = "",
+  inputPlaceholder = "",
+  requireInput = false,
+}) {
+  return new Promise((resolve) => {
+    modalState = { resolve, requireInput };
+    els.modalTitle.textContent = title;
+    els.modalMessage.textContent = message;
+    els.modalConfirm.textContent = confirmLabel;
+    els.modalCancel.textContent = cancelLabel;
+    els.modalInputLabel.textContent = inputLabel;
+    els.modalInput.value = inputValue;
+    els.modalInput.placeholder = inputPlaceholder;
+    els.modalInputWrap.classList.toggle("modalShell__field--hidden", !requireInput);
+    els.modalLayer.classList.remove("modalLayer--hidden");
+    els.modalLayer.setAttribute("aria-hidden", "false");
+    if (requireInput) {
+      setTimeout(() => {
+        els.modalInput.focus();
+        els.modalInput.select();
+      }, 0);
+    } else {
+      setTimeout(() => {
+        els.modalConfirm.focus();
+      }, 0);
+    }
+  });
+}
+
+async function promptModal(options) {
+  const result = await openModal({ ...options, requireInput: true });
+  if (!result || !result.confirmed) return null;
+  return result.value;
+}
+
+async function confirmModal(options) {
+  const result = await openModal(options);
+  return !!(result && result.confirmed);
 }
 
 function setAccent(accentKey) {
@@ -481,7 +547,13 @@ async function toggleTheme() {
 
 async function createCategory() {
   if (dirty) await autosave();
-  const name = prompt("Main thread name?");
+  const name = await promptModal({
+    title: "Create Main Thread",
+    message: "Give this main thread a clear name so you can find it quickly later.",
+    confirmLabel: "Create",
+    inputLabel: "Main thread name",
+    inputPlaceholder: "Example: Weekly Review",
+  });
   if (!name) return;
   state = await api("/api/categories", {
     method: "POST",
@@ -499,7 +571,14 @@ async function createTopic() {
     setStatus("Open a main thread first");
     return;
   }
-  const title = prompt("Topic title?") || "Untitled";
+  const title = (await promptModal({
+    title: "Create Topic",
+    message: "Add a topic inside the selected main thread.",
+    confirmLabel: "Create",
+    inputLabel: "Topic title",
+    inputPlaceholder: "Example: April setup notes",
+    inputValue: "Untitled",
+  })) || "Untitled";
   state = await api("/api/topics", { method: "POST", body: { category_id: categoryId, title } });
   renderAll();
   setViewMode("detail");
@@ -508,7 +587,13 @@ async function createTopic() {
 
 async function deleteTopic(topicId) {
   if (dirty) await autosave();
-  if (!topicId || !confirm("Delete this topic?")) return;
+  if (!topicId) return;
+  const approved = await confirmModal({
+    title: "Delete Topic",
+    message: "This topic will move to the trash bin and can be restored until you empty it.",
+    confirmLabel: "Delete",
+  });
+  if (!approved) return;
   state = await api(`/api/topics/${encodeURIComponent(topicId)}`, { method: "DELETE" });
   dirty = false;
   renderAll();
@@ -517,7 +602,13 @@ async function deleteTopic(topicId) {
 
 async function deleteCategory(categoryId) {
   if (dirty) await autosave();
-  if (!categoryId || !confirm("Delete this main thread and all its topics?")) return;
+  if (!categoryId) return;
+  const approved = await confirmModal({
+    title: "Delete Main Thread",
+    message: "This main thread and all of its topics will move to the trash bin.",
+    confirmLabel: "Delete",
+  });
+  if (!approved) return;
   state = await api(`/api/categories/${encodeURIComponent(categoryId)}`, { method: "DELETE" });
   dirty = false;
   renderAll();
@@ -532,7 +623,12 @@ async function restoreTrash(kind, itemId) {
 }
 
 async function emptyTrash() {
-  if (!confirm("Permanently empty the trash bin?")) return;
+  const approved = await confirmModal({
+    title: "Empty Trash Bin",
+    message: "This permanently removes every deleted main thread and topic from the trash bin.",
+    confirmLabel: "Empty Bin",
+  });
+  if (!approved) return;
   state = await api("/api/trash/empty", { method: "POST" });
   renderAll();
   setStatus("Trash bin emptied");
@@ -610,6 +706,27 @@ function bind() {
     renderTrash();
   });
   els.emptyTrash.addEventListener("click", () => void emptyTrash());
+  els.modalBackdrop.addEventListener("click", () => closeModal({ confirmed: false }));
+  els.modalCancel.addEventListener("click", () => closeModal({ confirmed: false }));
+  els.modalConfirm.addEventListener("click", () => {
+    if (!modalState) return;
+    if (modalState.requireInput) {
+      const value = els.modalInput.value.trim();
+      if (!value) {
+        els.modalInput.focus();
+        return;
+      }
+      closeModal({ confirmed: true, value });
+      return;
+    }
+    closeModal({ confirmed: true });
+  });
+  els.modalInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      els.modalConfirm.click();
+    }
+  });
 
   els.undoBtn.addEventListener("click", doUndo);
   els.redoBtn.addEventListener("click", doRedo);
@@ -635,6 +752,11 @@ function bind() {
   els.topicContent.addEventListener("input", () => markDirty());
 
   document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && modalState) {
+      e.preventDefault();
+      closeModal({ confirmed: false });
+      return;
+    }
     const isMac = navigator.platform.toLowerCase().includes("mac");
     const mod = isMac ? e.metaKey : e.ctrlKey;
     if (!mod) return;

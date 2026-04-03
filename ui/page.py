@@ -154,6 +154,23 @@ def render_index(state: dict[str, Any]) -> bytes:
     </main>
   </div>
 
+  <div id="modalLayer" class="modalLayer modalLayer--hidden" aria-hidden="true">
+    <div id="modalBackdrop" class="modalBackdrop"></div>
+    <div class="modalShell" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <div class="modalShell__eyebrow">Journal Action</div>
+      <h2 id="modalTitle" class="modalShell__title">Modal title</h2>
+      <p id="modalMessage" class="modalShell__message"></p>
+      <label id="modalInputWrap" class="modalShell__field modalShell__field--hidden">
+        <span id="modalInputLabel" class="modalShell__label">Label</span>
+        <input id="modalInput" class="modalShell__input" type="text" autocomplete="off">
+      </label>
+      <div class="modalShell__actions">
+        <button id="modalCancel" class="btn btn--ghost" type="button">Cancel</button>
+        <button id="modalConfirm" class="btn" type="button">Confirm</button>
+      </div>
+    </div>
+  </div>
+
   <script>
     window.__ACCENTS__ = {accents};
     window.__FONTS__ = {fonts};

@@ -196,6 +196,81 @@ button,input,textarea,select{ font:inherit; }
 .trashPanel__title{ font-size:22px; font-weight:900; letter-spacing:-0.04em; }
 .trashPanel__hint{ margin-top:6px; font-size:14px; color:var(--muted); }
 .trashList{ display:flex; flex-direction:column; gap:12px; margin-top:18px; }
+.modalLayer{
+  position:fixed;
+  inset:0;
+  z-index:40;
+  display:grid;
+  place-items:center;
+  padding:24px;
+}
+.modalLayer--hidden{ display:none; }
+.modalBackdrop{
+  position:absolute;
+  inset:0;
+  background:rgba(9, 14, 23, 0.28);
+  backdrop-filter:blur(14px);
+}
+.modalShell{
+  position:relative;
+  width:min(100%, 460px);
+  padding:24px;
+  border-radius:28px;
+  background:var(--surface-strong);
+  border:1px solid var(--border);
+  box-shadow:var(--shadow);
+}
+.modalShell__eyebrow{
+  font-size:12px;
+  font-weight:900;
+  letter-spacing:0.14em;
+  text-transform:uppercase;
+  color:var(--muted);
+}
+.modalShell__title{
+  margin:10px 0 0;
+  font-size:30px;
+  line-height:1.05;
+  letter-spacing:-0.05em;
+}
+.modalShell__message{
+  margin:12px 0 0;
+  color:var(--muted);
+  font-size:15px;
+  line-height:1.65;
+}
+.modalShell__field{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  margin-top:18px;
+}
+.modalShell__field--hidden{ display:none; }
+.modalShell__label{
+  font-size:13px;
+  font-weight:800;
+  color:var(--muted);
+}
+.modalShell__input{
+  width:100%;
+  border:1px solid var(--border);
+  border-radius:18px;
+  padding:14px 16px;
+  outline:none;
+  background:var(--surface);
+  color:var(--text);
+  box-shadow:var(--shadow-soft);
+}
+.modalShell__input:focus{
+  box-shadow:0 0 0 4px var(--accent-weak), var(--shadow-soft);
+}
+.modalShell__actions{
+  display:flex;
+  justify-content:flex-end;
+  gap:10px;
+  margin-top:22px;
+  flex-wrap:wrap;
+}
 .trashCard{
   display:flex;
   align-items:center;
