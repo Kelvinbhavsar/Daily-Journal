@@ -291,6 +291,22 @@ def app(environ: dict[str, Any], start_response: Any) -> list[bytes]:
             start_response(status, headers)
             return body
 
+        if method == "PUT":
+            payload = parse_json(environ)
+            name = str(payload.get("name") or "").strip()
+            if not name:
+                status, headers, body = json_response("400 Bad Request", {"error": "Category name required"})
+                start_response(status, headers)
+                return body
+
+            categories[idx]["name"] = name
+            categories[idx]["updated_at"] = iso_now()
+            state["categories"] = categories
+            state = save_state(BASE_DIR, state)
+            status, headers, body = json_response("200 OK", state)
+            start_response(status, headers)
+            return body
+
     if path.startswith("/api/topics/"):
         topic_id = path.removeprefix("/api/topics/").strip("/")
         state = ensure_trash(select_defaults(load_state(BASE_DIR)))

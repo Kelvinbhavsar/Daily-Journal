@@ -615,6 +615,36 @@ async function deleteCategory(categoryId) {
   setStatus("Main thread moved to trash");
 }
 
+async function renameCategory(categoryId, nextName) {
+  const name = String(nextName || "").trim();
+  const category = getCategoryById(categoryId);
+  if (!categoryId || !category) return;
+  if (!name || name === category.name) return;
+  if (dirty) await autosave();
+  state = await api(`/api/categories/${encodeURIComponent(categoryId)}`, {
+    method: "PUT",
+    body: { name },
+  });
+  renderAll();
+  setStatus("Main thread renamed");
+}
+
+async function openRenameCategoryModal(categoryId) {
+  const category = getCategoryById(categoryId);
+  if (!category) return;
+  const name = await promptModal({
+    title: "Rename Main Thread",
+    message: "Update the name for this main thread.",
+    confirmLabel: "Save",
+    cancelLabel: "Cancel",
+    inputLabel: "Main thread title",
+    inputPlaceholder: "Example: Weekly Review",
+    inputValue: category.name,
+  });
+  if (!name) return;
+  await renameCategory(categoryId, name);
+}
+
 async function restoreTrash(kind, itemId) {
   if (!kind || !itemId) return;
   state = await api("/api/trash/restore", { method: "POST", body: { kind, id: itemId } });
@@ -685,6 +715,13 @@ function bind() {
   fillSelectOptions();
   els.segmentGrid.addEventListener("click", handleClick);
   els.categoryList.addEventListener("click", handleClick);
+  els.categoryList.addEventListener("dblclick", (ev) => {
+    const card = ev.target.closest("[data-action='select-category']");
+    if (!card || ev.target.closest(".cardDelete")) return;
+    ev.preventDefault();
+    ev.stopPropagation();
+    void openRenameCategoryModal(card.getAttribute("data-id"));
+  });
   els.topicList.addEventListener("click", handleClick);
   els.trashList.addEventListener("click", handleClick);
 
