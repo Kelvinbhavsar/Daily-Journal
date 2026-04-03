@@ -1,7 +1,7 @@
-# Trading Journal
+# Daily-Journal
 
 <div align="center">
-  <h1 style="margin-bottom:6px;">Local-first trading journaling, with a "pro" writing flow</h1>
+  <h1 style="margin-bottom:6px;">Local-first daily journaling, with a "pro" writing flow</h1>
   <p style="margin-top:0;">
     Organize your trading thoughts by <b>Category</b>, <b>Main Thread</b>, and <b>Topic</b>, write in a distraction-free editor,
     and let <b>autosave</b> + <b>undo/redo</b> protect your work. Everything runs locally -- no accounts, no tracking.
@@ -69,8 +69,8 @@ Once you provide 1-2 screenshots, drop them into `assets/` and name them like:
 
 Then GitHub will render them here:
 
-![Trading Journal - dashboard/editor preview](assets/screenshot-1.png)
-![Trading Journal - writing & autosave](assets/screenshot-2.png)
+![Daily-Journal - dashboard/editor preview](assets/screenshot-1.png)
+![Daily-Journal - writing & autosave](assets/screenshot-2.png)
 
 If you want, tell me your preferred filenames and I will wire them into this section.
 
@@ -158,6 +158,14 @@ If a legacy file exists at:
 the app migrates it into the new `data/journal_state.json` format on first load.
 
 ## Getting Started
+
+### Install
+
+```bash
+git clone <your-repo-url>
+cd Trading-Journal
+python3 -m pip install -r requirements.txt
+```
 
 ### Run the server
 

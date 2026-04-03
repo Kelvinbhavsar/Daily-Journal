@@ -180,7 +180,7 @@ def app(environ: dict[str, Any], start_response: Any) -> list[bytes]:
         payload = parse_json(environ)
         state = select_defaults(load_state(BASE_DIR))
 
-        title = str(payload.get("app_title") or "").strip() or "Trading journal"
+        title = str(payload.get("app_title") or "").strip() or "Daily-Journal"
         accent = payload.get("accent")
         font = payload.get("font")
         theme = payload.get("theme")
@@ -472,7 +472,7 @@ if __name__ == "__main__":
     for attempt in range(10):
         try:
             with make_server(HOST, port, app) as server:
-                print(f"Trading Journal running at http://{HOST}:{port}")
+                print(f"Daily-Journal running at http://{HOST}:{port}")
                 server.serve_forever()
             last_error = None
             break

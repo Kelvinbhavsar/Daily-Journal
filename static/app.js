@@ -414,7 +414,7 @@ function applyAppearanceFromState() {
   setAccent(els.accent.value);
   setFont(els.font.value);
   setTheme(state?.theme || "light");
-  els.appTitle.value = state?.app_title || "Trading journal";
+  els.appTitle.value = state?.app_title || "Daily-Journal";
   document.title = els.appTitle.value;
 }
 
@@ -744,7 +744,7 @@ function bind() {
     void saveSettings();
   });
   els.appTitle.addEventListener("input", () => {
-    document.title = els.appTitle.value || "Trading journal";
+    document.title = els.appTitle.value || "Daily-Journal";
   });
   els.appTitle.addEventListener("change", () => void saveSettings());
 

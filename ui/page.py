@@ -7,7 +7,7 @@ from core.state import FUNKY_ROUNDED_FONTS, MATERIAL_ACCENTS
 
 
 def render_index(state: dict[str, Any]) -> bytes:
-    title = str(state.get("app_title") or "Trading journal")
+    title = str(state.get("app_title") or "Daily-Journal")
     accents = json.dumps(MATERIAL_ACCENTS)
     fonts = json.dumps(FUNKY_ROUNDED_FONTS)
     initial = json.dumps(
@@ -33,7 +33,7 @@ def render_index(state: dict[str, Any]) -> bytes:
   <link rel="stylesheet" href="/static/app.css">
 </head>
 <body>
-  <div id="app" class="app" aria-label="Trading journal app">
+  <div id="app" class="app" aria-label="Daily-Journal app">
     <header class="topbar">
       <div class="brand">
         <img class="brand__mark" src="/static/diary.png" alt="" aria-hidden="true">

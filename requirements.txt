@@ -1,0 +1,3 @@
+# Daily-Journal currently uses only Python's standard library.
+# This file exists so the project has a single install entrypoint:
+#   pip install -r requirements.txt

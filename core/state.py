@@ -54,7 +54,7 @@ def default_state() -> dict[str, Any]:
     topic_id = new_id("topic")
     return {
         "version": 3,
-        "app_title": "Trading journal",
+        "app_title": "Daily-Journal",
         "accent": "indigo",
         "font": "fredoka",
         "theme": "light",
