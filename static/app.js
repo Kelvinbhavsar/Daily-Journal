@@ -42,6 +42,7 @@ const els = {
   topicList: document.getElementById("topicList"),
   topicTitle: document.getElementById("topicTitle"),
   topicContent: document.getElementById("topicContent"),
+  topicEditor: document.getElementById("topicEditor"),
   saveStatus: document.getElementById("saveStatus"),
   undoBtn: document.getElementById("undoBtn"),
   redoBtn: document.getElementById("redoBtn"),
@@ -61,6 +62,7 @@ let lastSavedAt = null;
 let historyDebounce = null;
 let history = { topicId: null, undo: [], redo: [], last: null };
 let modalState = null;
+let suppressEditorInput = false;
 
 const AUTOSAVE_MS = 5 * 60 * 1000;
 const HISTORY_DEBOUNCE_MS = 400;
@@ -211,6 +213,35 @@ function getCategoryById(categoryId) {
 
 function getTopicById(topicId) {
   return (state?.topics || []).find((topic) => topic.id === topicId) || null;
+}
+
+function splitParagraphs(content) {
+  return String(content || "")
+    .replaceAll("\r\n", "\n")
+    .split(/\n\s*\n+/)
+    .map((paragraph) => paragraph.trim())
+    .filter(Boolean);
+}
+
+function normalizeParagraphText(text) {
+  return String(text || "")
+    .replaceAll("\r\n", "\n")
+    .replace(/\u00A0/g, " ")
+    .replace(/\n{3,}/g, "\n\n");
+}
+
+function editorParagraphNodes() {
+  return Array.from(els.topicEditor.querySelectorAll(".editorParagraph__text"));
+}
+
+function editorParagraphTexts() {
+  return editorParagraphNodes()
+    .map((node) => normalizeParagraphText(node.innerText).trim())
+    .filter((text) => text.length);
+}
+
+function syncEditorToHiddenField() {
+  els.topicContent.value = editorParagraphTexts().join("\n\n");
 }
 
 function visibleTrashTopics() {
@@ -371,7 +402,190 @@ function renderEditor() {
   els.topicContent.value = topic?.content || "";
   els.topicTitle.disabled = !topic;
   els.topicContent.disabled = !topic;
+  renderEditorSurface(topic);
   resetHistoryForTopic(topic?.id || null);
+}
+
+function formatParagraphTime(value) {
+  if (!value) return "No timestamp yet";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return date.toLocaleString([], {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  });
+}
+
+function paragraphViewModels() {
+  const topic = getTopicById(selectedTopicId());
+  if (!topic) return [];
+
+  const currentParagraphs = splitParagraphs(els.topicContent.value);
+  const savedParagraphs = Array.isArray(topic.paragraphs) ? topic.paragraphs : [];
+  const used = new Set();
+
+  return currentParagraphs.map((text, index) => {
+    let matchIndex = -1;
+    for (let candidate = 0; candidate < savedParagraphs.length; candidate += 1) {
+      if (used.has(candidate)) continue;
+      if ((savedParagraphs[candidate]?.text || "") === text) {
+        matchIndex = candidate;
+        break;
+      }
+    }
+    if (matchIndex === -1 && (savedParagraphs[index]?.text || "") === text && !used.has(index)) {
+      matchIndex = index;
+    }
+    if (matchIndex !== -1) used.add(matchIndex);
+
+    const saved = matchIndex !== -1 ? savedParagraphs[matchIndex] : null;
+    const pending = !!(dirty && !saved);
+    return {
+      text,
+      updatedAt: saved?.updated_at || topic.updated_at || null,
+      pending,
+    };
+  });
+}
+
+function renderEditorSurface(topic, { focusIndex = null, focusOffset = null, draftParagraphs = null } = {}) {
+  const items = topic
+    ? (() => {
+        if (Array.isArray(draftParagraphs)) {
+          const currentModels = paragraphViewModels();
+          let modelIndex = 0;
+          return draftParagraphs.map((text) => {
+            if (!text.trim()) {
+              return { text, updatedAt: null, pending: false };
+            }
+            const model = currentModels[modelIndex];
+            modelIndex += 1;
+            return model || { text, updatedAt: topic.updated_at || null, pending: true };
+          });
+        }
+        return splitParagraphs(els.topicContent.value).length
+          ? paragraphViewModels()
+          : [{ text: "", updatedAt: topic.updated_at || null, pending: dirty }];
+      })()
+    : [];
+
+  if (!topic) {
+    els.topicEditor.innerHTML = "";
+    els.topicEditor.setAttribute("aria-disabled", "true");
+    return;
+  }
+
+  els.topicEditor.setAttribute("aria-disabled", "false");
+  els.topicEditor.innerHTML = `
+    <div class="editorParagraphs">
+      ${items.map((item, index) => `
+        <div class="editorParagraph" data-paragraph-index="${index}">
+          <div
+            class="editorParagraph__text"
+            contenteditable="true"
+            role="textbox"
+            aria-multiline="true"
+            data-placeholder="Write your journal notes here..."
+          >${escapeHtml(item.text).replaceAll("\n", "<br>")}</div>
+          <span class="editorParagraph__time" contenteditable="false">${item.pending ? "Updates on save" : escapeHtml(formatParagraphTime(item.updatedAt))}</span>
+        </div>
+      `).join("")}
+    </div>
+  `;
+
+  if (focusIndex !== null) {
+    const target = editorParagraphNodes()[focusIndex];
+    if (target) setCaretOffset(target, focusOffset ?? target.innerText.length);
+  }
+}
+
+function refreshParagraphTimeLabels() {
+  const items = paragraphViewModels();
+  const rows = Array.from(els.topicEditor.querySelectorAll(".editorParagraph"));
+  rows.forEach((row, index) => {
+    const label = row.querySelector(".editorParagraph__time");
+    if (!label) return;
+    const item = items[index];
+    label.textContent = item ? (item.pending ? "Updates on save" : formatParagraphTime(item.updatedAt)) : "";
+  });
+}
+
+function getSelectionOffset(container) {
+  const selection = window.getSelection();
+  if (!selection || !selection.rangeCount) return normalizeParagraphText(container.innerText).length;
+  const range = selection.getRangeAt(0);
+  const preRange = range.cloneRange();
+  preRange.selectNodeContents(container);
+  preRange.setEnd(range.endContainer, range.endOffset);
+  return preRange.toString().length;
+}
+
+function setCaretOffset(container, offset) {
+  const selection = window.getSelection();
+  if (!selection) return;
+  const walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT);
+  let remaining = Math.max(0, offset);
+  let node = walker.nextNode();
+  while (node) {
+    const length = node.textContent.length;
+    if (remaining <= length) {
+      const range = document.createRange();
+      range.setStart(node, remaining);
+      range.collapse(true);
+      selection.removeAllRanges();
+      selection.addRange(range);
+      container.focus();
+      return;
+    }
+    remaining -= length;
+    node = walker.nextNode();
+  }
+  const range = document.createRange();
+  range.selectNodeContents(container);
+  range.collapse(false);
+  selection.removeAllRanges();
+  selection.addRange(range);
+  container.focus();
+}
+
+function replaceParagraphs(paragraphs, { focusIndex = null, focusOffset = null } = {}) {
+  els.topicContent.value = paragraphs.filter((text) => text.trim().length).join("\n\n");
+  renderEditorSurface(getTopicById(selectedTopicId()), { focusIndex, focusOffset, draftParagraphs: paragraphs });
+}
+
+function handleEditorInput() {
+  if (suppressEditorInput) return;
+  syncEditorToHiddenField();
+  refreshParagraphTimeLabels();
+  markDirty();
+}
+
+function splitEditorParagraph(node) {
+  const rows = editorParagraphNodes();
+  const index = rows.indexOf(node);
+  if (index === -1) return;
+  const text = normalizeParagraphText(node.innerText);
+  const offset = getSelectionOffset(node);
+  const before = text.slice(0, offset).trim();
+  const after = text.slice(offset).trim();
+  const paragraphs = editorParagraphNodes().map((item) => normalizeParagraphText(item.innerText).trim());
+  paragraphs.splice(index, 1, before, after);
+  replaceParagraphs(paragraphs, { focusIndex: index + 1, focusOffset: 0 });
+  markDirty();
+}
+
+function mergeWithPreviousParagraph(node) {
+  const rows = editorParagraphNodes();
+  const index = rows.indexOf(node);
+  if (index <= 0) return;
+  const paragraphs = rows.map((item) => normalizeParagraphText(item.innerText).trim());
+  const previousText = paragraphs[index - 1];
+  paragraphs.splice(index, 1);
+  replaceParagraphs(paragraphs, { focusIndex: index - 1, focusOffset: previousText.length });
+  markDirty();
 }
 
 function renderBreadcrumb() {
@@ -458,6 +672,7 @@ function applySnapshot(snap) {
   if (!snap || snap.topicId !== selectedTopicId()) return;
   els.topicTitle.value = snap.title;
   els.topicContent.value = snap.content;
+  renderEditorSurface(getTopicById(selectedTopicId()));
   history.last = snap;
   markDirty({ scheduleOnly: true });
   updateUndoRedoButtons();
@@ -485,6 +700,7 @@ function doRedo() {
 function markDirty({ scheduleOnly = false } = {}) {
   dirty = true;
   setStatus("Unsaved...");
+  refreshParagraphTimeLabels();
   if (!scheduleOnly) scheduleHistorySnapshot();
   if (saveTimer) clearTimeout(saveTimer);
   saveTimer = setTimeout(() => void autosave(), AUTOSAVE_MS);
@@ -749,7 +965,30 @@ function bind() {
   els.appTitle.addEventListener("change", () => void saveSettings());
 
   els.topicTitle.addEventListener("input", () => markDirty());
-  els.topicContent.addEventListener("input", () => markDirty());
+  els.topicEditor.addEventListener("input", (e) => {
+    if (!e.target.closest(".editorParagraph__text")) return;
+    handleEditorInput();
+  });
+  els.topicEditor.addEventListener("keydown", (e) => {
+    const target = e.target.closest(".editorParagraph__text");
+    if (!target) return;
+    if (e.key === "Enter") {
+      e.preventDefault();
+      splitEditorParagraph(target);
+      return;
+    }
+    if (e.key === "Backspace" && !normalizeParagraphText(target.innerText).trim()) {
+      e.preventDefault();
+      mergeWithPreviousParagraph(target);
+    }
+  });
+  els.topicEditor.addEventListener("paste", (e) => {
+    const target = e.target.closest(".editorParagraph__text");
+    if (!target) return;
+    e.preventDefault();
+    const pasted = e.clipboardData?.getData("text/plain") || "";
+    document.execCommand("insertText", false, pasted);
+  });
 
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape" && modalState) {

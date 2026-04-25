@@ -146,7 +146,8 @@ def render_index(state: dict[str, Any]) -> bytes:
                   </div>
                 </div>
               </div>
-              <textarea id="topicContent" class="editor__textarea" placeholder="Write your journal notes here..."></textarea>
+              <textarea id="topicContent" class="editor__textarea editor__textarea--hidden" placeholder="Write your journal notes here..." aria-hidden="true" tabindex="-1"></textarea>
+              <div id="topicEditor" class="editor__surface" aria-label="Write your journal notes here"></div>
             </div>
           </section>
         </div>
