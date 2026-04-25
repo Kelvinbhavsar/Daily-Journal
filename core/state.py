@@ -27,6 +27,18 @@ MATERIAL_ACCENTS: dict[str, str] = {
     "purple": "#9C27B0",
 }
 
+EMOTION_OPTIONS: list[dict[str, str]] = [
+    {"key": "normal", "emoji": "🙂", "label": "Normal"},
+    {"key": "happy", "emoji": "😄", "label": "Happy"},
+    {"key": "calm", "emoji": "😌", "label": "Calm"},
+    {"key": "focused", "emoji": "🤓", "label": "Focused"},
+    {"key": "confident", "emoji": "😎", "label": "Confident"},
+    {"key": "anxious", "emoji": "😟", "label": "Anxious"},
+    {"key": "frustrated", "emoji": "😤", "label": "Frustrated"},
+    {"key": "tired", "emoji": "😴", "label": "Tired"},
+]
+DEFAULT_EMOTION_KEY = "normal"
+
 FUNKY_ROUNDED_FONTS: list[dict[str, str]] = [
     {"key": "fredoka", "label": "Fredoka", "css": '"Fredoka", "Segoe UI", system-ui, -apple-system, sans-serif'},
     {"key": "nunito", "label": "Nunito", "css": '"Nunito", "Segoe UI", system-ui, -apple-system, sans-serif'},
@@ -51,6 +63,10 @@ def static_segment_keys() -> set[str]:
     return {segment["key"] for segment in STATIC_SEGMENTS}
 
 
+def emotion_keys() -> set[str]:
+    return {emotion["key"] for emotion in EMOTION_OPTIONS}
+
+
 def split_paragraphs(content: str) -> list[str]:
     normalized = str(content or "").replace("\r\n", "\n")
     parts = [part.strip() for part in re.split(r"\n\s*\n+", normalized) if part.strip()]
@@ -58,7 +74,10 @@ def split_paragraphs(content: str) -> list[str]:
 
 
 def paragraph_records_from_content(content: str, fallback_updated_at: str) -> list[dict[str, str]]:
-    return [{"text": paragraph, "updated_at": fallback_updated_at} for paragraph in split_paragraphs(content)]
+    return [
+        {"text": paragraph, "updated_at": fallback_updated_at, "mood": DEFAULT_EMOTION_KEY}
+        for paragraph in split_paragraphs(content)
+    ]
 
 
 def normalize_topic(topic: dict[str, Any]) -> dict[str, Any]:
@@ -71,16 +90,21 @@ def normalize_topic(topic: dict[str, Any]) -> dict[str, Any]:
         return normalized
 
     normalized_paragraphs = []
+    valid_moods = emotion_keys()
     for paragraph in paragraphs:
         if not isinstance(paragraph, dict):
             continue
         text = str(paragraph.get("text") or "").strip()
         if not text:
             continue
+        mood = str(paragraph.get("mood") or DEFAULT_EMOTION_KEY)
+        if mood not in valid_moods:
+            mood = DEFAULT_EMOTION_KEY
         normalized_paragraphs.append(
             {
                 "text": text,
                 "updated_at": str(paragraph.get("updated_at") or fallback_updated_at),
+                "mood": mood,
             }
         )
     normalized["paragraphs"] = normalized_paragraphs or paragraph_records_from_content(content, fallback_updated_at)
@@ -88,29 +112,68 @@ def normalize_topic(topic: dict[str, Any]) -> dict[str, Any]:
 
 
 def merge_paragraph_updates(
-    existing_paragraphs: list[dict[str, Any]] | None, content: str, updated_at: str
+    existing_paragraphs: list[dict[str, Any]] | None, incoming_paragraphs: list[dict[str, Any]] | None, updated_at: str
 ) -> list[dict[str, str]]:
     previous = []
+    valid_moods = emotion_keys()
     for paragraph in existing_paragraphs or []:
         if not isinstance(paragraph, dict):
             continue
         text = str(paragraph.get("text") or "").strip()
         if not text:
             continue
-        previous.append({"text": text, "updated_at": str(paragraph.get("updated_at") or updated_at)})
+        previous.append(
+            {
+                "text": text,
+                "updated_at": str(paragraph.get("updated_at") or updated_at),
+                "mood": str(paragraph.get("mood") or DEFAULT_EMOTION_KEY),
+            }
+        )
 
-    current = split_paragraphs(content)
+    current = []
+    for paragraph in incoming_paragraphs or []:
+        if not isinstance(paragraph, dict):
+            continue
+        text = str(paragraph.get("text") or "").strip()
+        if not text:
+            continue
+        mood = str(paragraph.get("mood") or DEFAULT_EMOTION_KEY)
+        if mood not in valid_moods:
+            mood = DEFAULT_EMOTION_KEY
+        current.append(
+            {
+                "text": text,
+                "mood": mood,
+            }
+        )
     if not previous:
-        return paragraph_records_from_content(content, updated_at)
+        return [
+            {"text": paragraph["text"], "updated_at": updated_at, "mood": paragraph["mood"]}
+            for paragraph in current
+        ]
 
-    matcher = SequenceMatcher(a=[item["text"] for item in previous], b=current)
+    matcher = SequenceMatcher(a=[item["text"] for item in previous], b=[item["text"] for item in current])
     merged: list[dict[str, str]] = []
     for tag, i1, i2, j1, j2 in matcher.get_opcodes():
         if tag == "equal":
-            merged.extend({"text": previous[index]["text"], "updated_at": previous[index]["updated_at"]} for index in range(i1, i2))
+            merged.extend(
+                {
+                    "text": previous[index]["text"],
+                    "updated_at": previous[index]["updated_at"],
+                    "mood": current[j1 + (index - i1)]["mood"],
+                }
+                for index in range(i1, i2)
+            )
             continue
         if tag in {"replace", "insert"}:
-            merged.extend({"text": paragraph, "updated_at": updated_at} for paragraph in current[j1:j2])
+            merged.extend(
+                {
+                    "text": paragraph["text"],
+                    "updated_at": updated_at,
+                    "mood": paragraph["mood"],
+                }
+                for paragraph in current[j1:j2]
+            )
     return merged
 
 
@@ -143,10 +206,12 @@ def default_state() -> dict[str, Any]:
                     {
                         "text": "Start writing your notes here.",
                         "updated_at": topic_updated_at,
+                        "mood": DEFAULT_EMOTION_KEY,
                     },
                     {
                         "text": "Open a main thread on the left, then add topics in the middle column.",
                         "updated_at": topic_updated_at,
+                        "mood": DEFAULT_EMOTION_KEY,
                     },
                 ],
                 "created_at": topic_updated_at,

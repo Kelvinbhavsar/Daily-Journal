@@ -316,10 +316,11 @@ def app(environ: dict[str, Any], start_response: Any) -> list[bytes]:
             payload = parse_json(environ)
             title = str(payload.get("title") or "").strip() or "Untitled"
             content = str(payload.get("content") or "")
+            paragraphs = payload.get("paragraphs")
             updated_at = iso_now()
             topics[idx]["title"] = title
             topics[idx]["content"] = content
-            topics[idx]["paragraphs"] = merge_paragraph_updates(topics[idx].get("paragraphs"), content, updated_at)
+            topics[idx]["paragraphs"] = merge_paragraph_updates(topics[idx].get("paragraphs"), paragraphs, updated_at)
             topics[idx]["updated_at"] = updated_at
             state["topics"] = topics
             state = save_state(BASE_DIR, state)
