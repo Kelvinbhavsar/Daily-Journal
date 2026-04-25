@@ -3,12 +3,13 @@ from __future__ import annotations
 import json
 from typing import Any
 
-from core.state import FUNKY_ROUNDED_FONTS, MATERIAL_ACCENTS
+from core.state import EMOTION_OPTIONS, FUNKY_ROUNDED_FONTS, MATERIAL_ACCENTS
 
 
 def render_index(state: dict[str, Any]) -> bytes:
     title = str(state.get("app_title") or "Daily-Journal")
     accents = json.dumps(MATERIAL_ACCENTS)
+    emotions = json.dumps(EMOTION_OPTIONS)
     fonts = json.dumps(FUNKY_ROUNDED_FONTS)
     initial = json.dumps(
         {
@@ -61,6 +62,7 @@ def render_index(state: dict[str, Any]) -> bytes:
       <button id="homeToggle" class="subbar__tab subbar__tab--active" type="button">Categories</button>
       <div id="breadcrumb" class="subbar__crumb">Local first • Main Threads + Topics</div>
       <div class="subbar__actions">
+        <div id="moodPicker" class="moodPicker" aria-label="Current mood"></div>
         <button id="newCategory" class="btn" type="button">New Main Thread</button>
         <button id="newTopic" class="btn" type="button">New Topic</button>
       </div>
@@ -146,7 +148,8 @@ def render_index(state: dict[str, Any]) -> bytes:
                   </div>
                 </div>
               </div>
-              <textarea id="topicContent" class="editor__textarea" placeholder="Write your journal notes here..."></textarea>
+              <textarea id="topicContent" class="editor__textarea editor__textarea--hidden" placeholder="Write your journal notes here..." aria-hidden="true" tabindex="-1"></textarea>
+              <div id="topicEditor" class="editor__surface" aria-label="Write your journal notes here"></div>
             </div>
           </section>
         </div>
@@ -160,6 +163,10 @@ def render_index(state: dict[str, Any]) -> bytes:
       <div class="modalShell__eyebrow">Journal Action</div>
       <h2 id="modalTitle" class="modalShell__title">Modal title</h2>
       <p id="modalMessage" class="modalShell__message"></p>
+      <div id="modalMoodWrap" class="modalMoodWrap modalMoodWrap--hidden">
+        <div class="modalMoodWrap__label">How are you feeling right now?</div>
+        <div id="modalMoodOptions" class="modalMoodOptions" aria-label="Mood options"></div>
+      </div>
       <label id="modalInputWrap" class="modalShell__field modalShell__field--hidden">
         <span id="modalInputLabel" class="modalShell__label">Label</span>
         <input id="modalInput" class="modalShell__input" type="text" autocomplete="off">
@@ -173,6 +180,7 @@ def render_index(state: dict[str, Any]) -> bytes:
 
   <script>
     window.__ACCENTS__ = {accents};
+    window.__EMOTIONS__ = {emotions};
     window.__FONTS__ = {fonts};
     window.__INITIAL__ = {initial};
   </script>

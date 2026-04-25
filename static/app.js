@@ -1,7 +1,9 @@
 /* global window, document, fetch, setTimeout, clearTimeout, navigator */
 
 const ACCENTS = window.__ACCENTS__ || {};
+const EMOTIONS = window.__EMOTIONS__ || [];
 const FONTS = window.__FONTS__ || [];
+const DEFAULT_MOOD_KEY = "normal";
 
 const STATIC_SEGMENTS = [
   { key: "personal", label: "Personal", tone: "#8B5CF6", soft: "rgba(139, 92, 246, 0.18)", icon: "handshake" },
@@ -19,6 +21,8 @@ const els = {
   modalBackdrop: document.getElementById("modalBackdrop"),
   modalTitle: document.getElementById("modalTitle"),
   modalMessage: document.getElementById("modalMessage"),
+  modalMoodWrap: document.getElementById("modalMoodWrap"),
+  modalMoodOptions: document.getElementById("modalMoodOptions"),
   modalInputWrap: document.getElementById("modalInputWrap"),
   modalInputLabel: document.getElementById("modalInputLabel"),
   modalInput: document.getElementById("modalInput"),
@@ -26,6 +30,7 @@ const els = {
   modalConfirm: document.getElementById("modalConfirm"),
   homeToggle: document.getElementById("homeToggle"),
   breadcrumb: document.getElementById("breadcrumb"),
+  moodPicker: document.getElementById("moodPicker"),
   homeView: document.getElementById("homeView"),
   detailView: document.getElementById("detailView"),
   segmentGrid: document.getElementById("segmentGrid"),
@@ -42,6 +47,7 @@ const els = {
   topicList: document.getElementById("topicList"),
   topicTitle: document.getElementById("topicTitle"),
   topicContent: document.getElementById("topicContent"),
+  topicEditor: document.getElementById("topicEditor"),
   saveStatus: document.getElementById("saveStatus"),
   undoBtn: document.getElementById("undoBtn"),
   redoBtn: document.getElementById("redoBtn"),
@@ -61,13 +67,24 @@ let lastSavedAt = null;
 let historyDebounce = null;
 let history = { topicId: null, undo: [], redo: [], last: null };
 let modalState = null;
+let currentMoodKey = DEFAULT_MOOD_KEY;
+let moodPromptTimer = null;
 
 const AUTOSAVE_MS = 5 * 60 * 1000;
 const HISTORY_DEBOUNCE_MS = 400;
 const HISTORY_LIMIT = 120;
+const MOOD_PROMPT_MS = 15 * 60 * 1000;
 
 function setStatus(text) {
   els.saveStatus.textContent = text;
+}
+
+function moodByKey(key) {
+  return EMOTIONS.find((emotion) => emotion.key === key) || EMOTIONS[0] || { key: DEFAULT_MOOD_KEY, emoji: "🙂", label: "Normal" };
+}
+
+function currentMood() {
+  return moodByKey(currentMoodKey);
 }
 
 function closeModal(result = null) {
@@ -77,6 +94,9 @@ function closeModal(result = null) {
   els.modalLayer.classList.add("modalLayer--hidden");
   els.modalLayer.setAttribute("aria-hidden", "true");
   els.modalInputWrap.classList.add("modalShell__field--hidden");
+  els.modalMoodWrap.classList.add("modalMoodWrap--hidden");
+  els.modalMoodOptions.innerHTML = "";
+  els.modalConfirm.disabled = false;
   current.resolve(result);
 }
 
@@ -89,9 +109,11 @@ function openModal({
   inputValue = "",
   inputPlaceholder = "",
   requireInput = false,
+  moodKey = "",
+  moodPrompt = false,
 }) {
   return new Promise((resolve) => {
-    modalState = { resolve, requireInput };
+    modalState = { resolve, requireInput, moodPrompt, selectedMoodKey: moodKey || currentMoodKey };
     els.modalTitle.textContent = title;
     els.modalMessage.textContent = message;
     els.modalConfirm.textContent = confirmLabel;
@@ -100,12 +122,22 @@ function openModal({
     els.modalInput.value = inputValue;
     els.modalInput.placeholder = inputPlaceholder;
     els.modalInputWrap.classList.toggle("modalShell__field--hidden", !requireInput);
+    els.modalMoodWrap.classList.toggle("modalMoodWrap--hidden", !moodPrompt);
+    if (moodPrompt) {
+      renderMoodOptions(modalState.selectedMoodKey);
+    } else {
+      els.modalMoodOptions.innerHTML = "";
+    }
     els.modalLayer.classList.remove("modalLayer--hidden");
     els.modalLayer.setAttribute("aria-hidden", "false");
     if (requireInput) {
       setTimeout(() => {
         els.modalInput.focus();
         els.modalInput.select();
+      }, 0);
+    } else if (moodPrompt) {
+      setTimeout(() => {
+        els.modalMoodOptions.querySelector(".modalMoodOption--active")?.focus();
       }, 0);
     } else {
       setTimeout(() => {
@@ -124,6 +156,19 @@ async function promptModal(options) {
 async function confirmModal(options) {
   const result = await openModal(options);
   return !!(result && result.confirmed);
+}
+
+async function promptMood({ title, message, confirmLabel = "Continue" }) {
+  const result = await openModal({
+    title,
+    message,
+    confirmLabel,
+    cancelLabel: "Keep current",
+    moodPrompt: true,
+    moodKey: currentMoodKey,
+  });
+  if (!result || !result.confirmed) return currentMoodKey;
+  return result.moodKey || currentMoodKey;
 }
 
 function setAccent(accentKey) {
@@ -149,6 +194,40 @@ function setTheme(mode) {
   document.documentElement.setAttribute("data-theme", theme);
   els.themeToggle.innerHTML = themeIcon(theme);
   els.themeToggle.setAttribute("aria-label", theme === "dark" ? "Switch to light mode" : "Switch to dark mode");
+}
+
+function renderMoodPicker() {
+  els.moodPicker.innerHTML = EMOTIONS.map((emotion) => `
+    <button
+      class="moodChip${emotion.key === currentMoodKey ? " moodChip--active" : ""}"
+      type="button"
+      data-action="pick-mood"
+      data-id="${escapeHtml(emotion.key)}"
+      aria-label="${escapeHtml(emotion.label)} mood"
+      title="${escapeHtml(emotion.label)}"
+    >${emotion.emoji}</button>
+  `).join("");
+}
+
+function renderMoodOptions(selectedMoodKey) {
+  els.modalMoodOptions.innerHTML = EMOTIONS.map((emotion) => `
+    <button
+      class="modalMoodOption${emotion.key === selectedMoodKey ? " modalMoodOption--active" : ""}"
+      type="button"
+      data-action="modal-pick-mood"
+      data-id="${escapeHtml(emotion.key)}"
+      aria-label="${escapeHtml(emotion.label)} mood"
+    >
+      <span class="modalMoodOption__emoji">${emotion.emoji}</span>
+      <span class="modalMoodOption__label">${escapeHtml(emotion.label)}</span>
+    </button>
+  `).join("");
+}
+
+function applyCurrentMood(nextMoodKey) {
+  currentMoodKey = moodByKey(nextMoodKey).key;
+  renderMoodPicker();
+  applyMoodToBlankParagraphs();
 }
 
 function hexToRgba(hex, alpha) {
@@ -211,6 +290,71 @@ function getCategoryById(categoryId) {
 
 function getTopicById(topicId) {
   return (state?.topics || []).find((topic) => topic.id === topicId) || null;
+}
+
+function splitParagraphs(content) {
+  return String(content || "")
+    .replaceAll("\r\n", "\n")
+    .split(/\n\s*\n+/)
+    .map((paragraph) => paragraph.trim())
+    .filter(Boolean);
+}
+
+function normalizeParagraphText(text) {
+  return String(text || "")
+    .replaceAll("\r\n", "\n")
+    .replace(/\u00A0/g, " ")
+    .replace(/\n{3,}/g, "\n\n");
+}
+
+function normalizeParagraphDraft(paragraph) {
+  const text = normalizeParagraphText(paragraph?.text || "");
+  return {
+    text,
+    mood: moodByKey(paragraph?.mood || DEFAULT_MOOD_KEY).key,
+    updatedAt: paragraph?.updatedAt || paragraph?.updated_at || null,
+    pending: !!paragraph?.pending,
+  };
+}
+
+function editorParagraphNodes() {
+  return Array.from(els.topicEditor.querySelectorAll(".editorParagraph__text"));
+}
+
+function currentEditorParagraphDrafts() {
+  return Array.from(els.topicEditor.querySelectorAll(".editorParagraph")).map((row) => ({
+    text: normalizeParagraphText(row.querySelector(".editorParagraph__text")?.innerText || ""),
+    mood: moodByKey(row.getAttribute("data-mood") || DEFAULT_MOOD_KEY).key,
+    updatedAt: row.getAttribute("data-updated-at") || null,
+    pending: row.getAttribute("data-pending") === "true",
+  }));
+}
+
+function syncEditorToHiddenField() {
+  els.topicContent.value = currentEditorParagraphDrafts()
+    .map((paragraph) => paragraph.text.trim())
+    .filter((text) => text.length)
+    .join("\n\n");
+}
+
+function savePayloadParagraphs() {
+  return currentEditorParagraphDrafts()
+    .map((paragraph) => ({
+      text: paragraph.text.trim(),
+      mood: paragraph.mood,
+    }))
+    .filter((paragraph) => paragraph.text.length);
+}
+
+function applyMoodToBlankParagraphs() {
+  const drafts = currentEditorParagraphDrafts();
+  if (!drafts.length) return;
+  const nextDrafts = drafts.map((paragraph) => (
+    paragraph.text.trim()
+      ? paragraph
+      : { ...paragraph, mood: currentMoodKey, pending: false }
+  ));
+  replaceParagraphs(nextDrafts);
 }
 
 function visibleTrashTopics() {
@@ -371,7 +515,219 @@ function renderEditor() {
   els.topicContent.value = topic?.content || "";
   els.topicTitle.disabled = !topic;
   els.topicContent.disabled = !topic;
+  renderEditorSurface(topic);
   resetHistoryForTopic(topic?.id || null);
+}
+
+function formatParagraphTime(value) {
+  if (!value) return "No timestamp yet";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return date.toLocaleString([], {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  });
+}
+
+function paragraphViewModels(draftParagraphs = null) {
+  const topic = getTopicById(selectedTopicId());
+  if (!topic) return [];
+
+  const currentParagraphs = Array.isArray(draftParagraphs)
+    ? draftParagraphs
+      .map((paragraph) => normalizeParagraphDraft(paragraph))
+      .filter((paragraph) => paragraph.text.trim().length)
+    : splitParagraphs(els.topicContent.value).map((text) => ({ text, mood: null }));
+  const savedParagraphs = Array.isArray(topic.paragraphs) ? topic.paragraphs : [];
+  const used = new Set();
+
+  return currentParagraphs.map((paragraph, index) => {
+    const text = paragraph.text.trim();
+    let matchIndex = -1;
+    for (let candidate = 0; candidate < savedParagraphs.length; candidate += 1) {
+      if (used.has(candidate)) continue;
+      if ((savedParagraphs[candidate]?.text || "") === text) {
+        matchIndex = candidate;
+        break;
+      }
+    }
+    if (matchIndex === -1 && (savedParagraphs[index]?.text || "") === text && !used.has(index)) {
+      matchIndex = index;
+    }
+    if (matchIndex !== -1) used.add(matchIndex);
+
+    const saved = matchIndex !== -1 ? savedParagraphs[matchIndex] : null;
+    const pending = !saved;
+    return {
+      text,
+      mood: paragraph.mood || saved?.mood || DEFAULT_MOOD_KEY,
+      updatedAt: saved?.updated_at || topic.updated_at || null,
+      pending,
+    };
+  });
+}
+
+function renderEditorSurface(topic, { focusIndex = null, focusOffset = null, draftParagraphs = null } = {}) {
+  const items = topic
+    ? (() => {
+        if (Array.isArray(draftParagraphs)) {
+          return draftParagraphs.map((paragraph) => normalizeParagraphDraft(paragraph));
+        }
+        return splitParagraphs(els.topicContent.value).length
+          ? paragraphViewModels()
+          : [{ text: "", mood: currentMoodKey, updatedAt: topic.updated_at || null, pending: dirty }];
+      })()
+    : [];
+
+  if (!topic) {
+    els.topicEditor.innerHTML = "";
+    els.topicEditor.setAttribute("aria-disabled", "true");
+    return;
+  }
+
+  els.topicEditor.setAttribute("aria-disabled", "false");
+  els.topicEditor.innerHTML = `
+    <div class="editorParagraphs">
+      ${items.map((item, index) => `
+        <div
+          class="editorParagraph"
+          data-paragraph-index="${index}"
+          data-mood="${escapeHtml(item.mood || DEFAULT_MOOD_KEY)}"
+          data-updated-at="${escapeHtml(item.updatedAt || "")}"
+          data-pending="${item.pending ? "true" : "false"}"
+        >
+          <div
+            class="editorParagraph__text"
+            contenteditable="true"
+            role="textbox"
+            aria-multiline="true"
+            data-placeholder="Write your journal notes here..."
+          >${escapeHtml(item.text).replaceAll("\n", "<br>")}</div>
+          <div class="editorParagraph__meta" contenteditable="false">
+            <span class="editorParagraph__mood" aria-label="${escapeHtml(moodByKey(item.mood).label)} mood">${moodByKey(item.mood).emoji}</span>
+            <span class="editorParagraph__time">${item.pending ? "Updates on save" : escapeHtml(formatParagraphTime(item.updatedAt))}</span>
+          </div>
+        </div>
+      `).join("")}
+    </div>
+  `;
+
+  if (focusIndex !== null) {
+    const target = editorParagraphNodes()[focusIndex];
+    if (target) setCaretOffset(target, focusOffset ?? target.innerText.length);
+  }
+}
+
+function refreshParagraphTimeLabels() {
+  const drafts = currentEditorParagraphDrafts();
+  const models = paragraphViewModels(drafts);
+  let modelIndex = 0;
+  drafts.forEach((paragraph, index) => {
+    const row = els.topicEditor.querySelector(`.editorParagraph[data-paragraph-index="${index}"]`);
+    if (!row) return;
+    const label = row.querySelector(".editorParagraph__time");
+    const mood = row.querySelector(".editorParagraph__mood");
+    const normalized = normalizeParagraphDraft(paragraph);
+    const model = normalized.text.trim() ? models[modelIndex++] : { ...normalized, pending: false };
+    row.setAttribute("data-mood", model.mood || DEFAULT_MOOD_KEY);
+    row.setAttribute("data-updated-at", model.updatedAt || "");
+    row.setAttribute("data-pending", model.pending ? "true" : "false");
+    if (label) {
+      label.textContent = model.pending ? "Updates on save" : formatParagraphTime(model.updatedAt);
+    }
+    if (mood) {
+      const emotion = moodByKey(model.mood);
+      mood.textContent = emotion.emoji;
+      mood.setAttribute("aria-label", `${emotion.label} mood`);
+    }
+  });
+}
+
+function getSelectionOffset(container) {
+  const selection = window.getSelection();
+  if (!selection || !selection.rangeCount) return normalizeParagraphText(container.innerText).length;
+  const range = selection.getRangeAt(0);
+  const preRange = range.cloneRange();
+  preRange.selectNodeContents(container);
+  preRange.setEnd(range.endContainer, range.endOffset);
+  return preRange.toString().length;
+}
+
+function setCaretOffset(container, offset) {
+  const selection = window.getSelection();
+  if (!selection) return;
+  const walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT);
+  let remaining = Math.max(0, offset);
+  let node = walker.nextNode();
+  while (node) {
+    const length = node.textContent.length;
+    if (remaining <= length) {
+      const range = document.createRange();
+      range.setStart(node, remaining);
+      range.collapse(true);
+      selection.removeAllRanges();
+      selection.addRange(range);
+      container.focus();
+      return;
+    }
+    remaining -= length;
+    node = walker.nextNode();
+  }
+  const range = document.createRange();
+  range.selectNodeContents(container);
+  range.collapse(false);
+  selection.removeAllRanges();
+  selection.addRange(range);
+  container.focus();
+}
+
+function replaceParagraphs(paragraphs, { focusIndex = null, focusOffset = null } = {}) {
+  els.topicContent.value = paragraphs
+    .map((paragraph) => normalizeParagraphDraft(paragraph).text.trim())
+    .filter((text) => text.length)
+    .join("\n\n");
+  renderEditorSurface(getTopicById(selectedTopicId()), { focusIndex, focusOffset, draftParagraphs: paragraphs });
+}
+
+function handleEditorInput() {
+  syncEditorToHiddenField();
+  refreshParagraphTimeLabels();
+  markDirty();
+}
+
+function splitEditorParagraph(node) {
+  const rows = editorParagraphNodes();
+  const index = rows.indexOf(node);
+  if (index === -1) return;
+  const text = normalizeParagraphText(node.innerText);
+  const offset = getSelectionOffset(node);
+  const before = text.slice(0, offset).trim();
+  const after = text.slice(offset).trim();
+  const drafts = currentEditorParagraphDrafts();
+  const current = drafts[index];
+  drafts.splice(
+    index,
+    1,
+    { ...current, text: before },
+    { text: after, mood: currentMoodKey, updatedAt: null, pending: !!after }
+  );
+  syncEditorToHiddenField();
+  replaceParagraphs(drafts, { focusIndex: index + 1, focusOffset: 0 });
+  markDirty();
+}
+
+function mergeWithPreviousParagraph(node) {
+  const rows = editorParagraphNodes();
+  const index = rows.indexOf(node);
+  if (index <= 0) return;
+  const drafts = currentEditorParagraphDrafts();
+  const previousText = drafts[index - 1].text;
+  drafts.splice(index, 1);
+  replaceParagraphs(drafts, { focusIndex: index - 1, focusOffset: previousText.length });
+  markDirty();
 }
 
 function renderBreadcrumb() {
@@ -419,11 +775,23 @@ function applyAppearanceFromState() {
 }
 
 function currentSnapshot() {
-  return { topicId: selectedTopicId(), title: els.topicTitle.value, content: els.topicContent.value };
+  return {
+    topicId: selectedTopicId(),
+    title: els.topicTitle.value,
+    content: els.topicContent.value,
+    paragraphs: currentEditorParagraphDrafts(),
+  };
 }
 
 function sameSnapshot(a, b) {
-  return !!(a && b && a.topicId === b.topicId && a.title === b.title && a.content === b.content);
+  return !!(
+    a
+    && b
+    && a.topicId === b.topicId
+    && a.title === b.title
+    && a.content === b.content
+    && JSON.stringify(a.paragraphs || []) === JSON.stringify(b.paragraphs || [])
+  );
 }
 
 function resetHistoryForTopic(topicId) {
@@ -458,6 +826,7 @@ function applySnapshot(snap) {
   if (!snap || snap.topicId !== selectedTopicId()) return;
   els.topicTitle.value = snap.title;
   els.topicContent.value = snap.content;
+  renderEditorSurface(getTopicById(selectedTopicId()), { draftParagraphs: snap.paragraphs });
   history.last = snap;
   markDirty({ scheduleOnly: true });
   updateUndoRedoButtons();
@@ -485,6 +854,7 @@ function doRedo() {
 function markDirty({ scheduleOnly = false } = {}) {
   dirty = true;
   setStatus("Unsaved...");
+  refreshParagraphTimeLabels();
   if (!scheduleOnly) scheduleHistorySnapshot();
   if (saveTimer) clearTimeout(saveTimer);
   saveTimer = setTimeout(() => void autosave(), AUTOSAVE_MS);
@@ -497,7 +867,7 @@ async function autosave({ force = false } = {}) {
   setStatus("Saving...");
   state = await api(`/api/topics/${encodeURIComponent(topicId)}`, {
     method: "PUT",
-    body: { title: els.topicTitle.value, content: els.topicContent.value },
+    body: { title: els.topicTitle.value, content: els.topicContent.value, paragraphs: savePayloadParagraphs() },
   });
   dirty = false;
   lastSavedAt = new Date();
@@ -510,6 +880,11 @@ async function refresh() {
   renderAll();
   setViewMode("home");
   setStatus("Loaded");
+  applyCurrentMood(DEFAULT_MOOD_KEY);
+  startMoodPromptLoop();
+  setTimeout(() => {
+    if (!modalState) void openMoodPrompt("initial");
+  }, 0);
 }
 
 function fillSelectOptions() {
@@ -543,6 +918,27 @@ async function toggleTheme() {
   });
   renderAll();
   setStatus(`Switched to ${state.theme} mode`);
+}
+
+async function openMoodPrompt(reason = "check-in") {
+  if (modalState) return;
+  const moodKey = await promptMood({
+    title: reason === "initial" ? "Mood Check-In" : "Mood Update",
+    message: reason === "initial"
+      ? "Pick the mood that should be applied to the new paragraphs you write in this session."
+      : "How are you feeling now? New paragraphs will use this mood until you change it again.",
+    confirmLabel: "Use mood",
+  });
+  applyCurrentMood(moodKey);
+  setStatus(`Mood set to ${currentMood().label}`);
+}
+
+function startMoodPromptLoop() {
+  if (moodPromptTimer) clearInterval(moodPromptTimer);
+  moodPromptTimer = setInterval(() => {
+    if (modalState) return;
+    void openMoodPrompt("timer");
+  }, MOOD_PROMPT_MS);
 }
 
 async function createCategory() {
@@ -709,6 +1105,14 @@ function handleClick(ev) {
   if (action === "restore-trash") {
     void restoreTrash(target.getAttribute("data-kind"), id);
   }
+  if (action === "pick-mood") {
+    applyCurrentMood(id);
+    setStatus(`Mood set to ${currentMood().label}`);
+  }
+  if (action === "modal-pick-mood" && modalState?.moodPrompt) {
+    modalState.selectedMoodKey = moodByKey(id).key;
+    renderMoodOptions(modalState.selectedMoodKey);
+  }
 }
 
 function bind() {
@@ -724,6 +1128,8 @@ function bind() {
   });
   els.topicList.addEventListener("click", handleClick);
   els.trashList.addEventListener("click", handleClick);
+  els.moodPicker.addEventListener("click", handleClick);
+  els.modalMoodOptions.addEventListener("click", handleClick);
 
   els.homeToggle.addEventListener("click", async () => {
     if (dirty) await autosave();
@@ -756,6 +1162,10 @@ function bind() {
       closeModal({ confirmed: true, value });
       return;
     }
+    if (modalState.moodPrompt) {
+      closeModal({ confirmed: true, moodKey: modalState.selectedMoodKey || currentMoodKey });
+      return;
+    }
     closeModal({ confirmed: true });
   });
   els.modalInput.addEventListener("keydown", (e) => {
@@ -786,7 +1196,30 @@ function bind() {
   els.appTitle.addEventListener("change", () => void saveSettings());
 
   els.topicTitle.addEventListener("input", () => markDirty());
-  els.topicContent.addEventListener("input", () => markDirty());
+  els.topicEditor.addEventListener("input", (e) => {
+    if (!e.target.closest(".editorParagraph__text")) return;
+    handleEditorInput();
+  });
+  els.topicEditor.addEventListener("keydown", (e) => {
+    const target = e.target.closest(".editorParagraph__text");
+    if (!target) return;
+    if (e.key === "Enter") {
+      e.preventDefault();
+      splitEditorParagraph(target);
+      return;
+    }
+    if (e.key === "Backspace" && !normalizeParagraphText(target.innerText).trim()) {
+      e.preventDefault();
+      mergeWithPreviousParagraph(target);
+    }
+  });
+  els.topicEditor.addEventListener("paste", (e) => {
+    const target = e.target.closest(".editorParagraph__text");
+    if (!target) return;
+    e.preventDefault();
+    const pasted = e.clipboardData?.getData("text/plain") || "";
+    document.execCommand("insertText", false, pasted);
+  });
 
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape" && modalState) {

@@ -7,8 +7,15 @@ from typing import Any
 from wsgiref.simple_server import make_server
 
 from core.journal import load_state, save_state, state_path
-from core.state import DEFAULT_SEGMENT_KEY, FUNKY_ROUNDED_FONTS, MATERIAL_ACCENTS, STATIC_SEGMENTS, iso_now, new_id
-from core.storage import read_json
+from core.state import (
+    DEFAULT_SEGMENT_KEY,
+    FUNKY_ROUNDED_FONTS,
+    MATERIAL_ACCENTS,
+    STATIC_SEGMENTS,
+    iso_now,
+    merge_paragraph_updates,
+    new_id,
+)
 from ui.page import render_index
 
 
@@ -131,14 +138,16 @@ def select_defaults(state: dict[str, Any]) -> dict[str, Any]:
     cat_topics = [t for t in topics if t.get("category_id") == cat_id]
     if not cat_topics:
         topic_id = new_id("topic")
+        created_at = iso_now()
         topics.append(
             {
                 "id": topic_id,
                 "category_id": cat_id,
                 "title": "New note",
                 "content": "",
-                "created_at": iso_now(),
-                "updated_at": iso_now(),
+                "paragraphs": [],
+                "created_at": created_at,
+                "updated_at": created_at,
             }
         )
         state["topics"] = topics
@@ -236,14 +245,16 @@ def app(environ: dict[str, Any], start_response: Any) -> list[bytes]:
             return body
 
         topic_id = new_id("topic")
+        created_at = iso_now()
         state["topics"].append(
             {
                 "id": topic_id,
                 "category_id": category_id,
                 "title": title,
                 "content": "",
-                "created_at": iso_now(),
-                "updated_at": iso_now(),
+                "paragraphs": [],
+                "created_at": created_at,
+                "updated_at": created_at,
             }
         )
         state["selected"]["category_id"] = category_id
@@ -321,9 +332,12 @@ def app(environ: dict[str, Any], start_response: Any) -> list[bytes]:
             payload = parse_json(environ)
             title = str(payload.get("title") or "").strip() or "Untitled"
             content = str(payload.get("content") or "")
+            paragraphs = payload.get("paragraphs")
+            updated_at = iso_now()
             topics[idx]["title"] = title
             topics[idx]["content"] = content
-            topics[idx]["updated_at"] = iso_now()
+            topics[idx]["paragraphs"] = merge_paragraph_updates(topics[idx].get("paragraphs"), paragraphs, updated_at)
+            topics[idx]["updated_at"] = updated_at
             state["topics"] = topics
             state = save_state(BASE_DIR, state)
             status, headers, body = json_response("200 OK", state)
