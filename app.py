@@ -189,7 +189,7 @@ def app(environ: dict[str, Any], start_response: Any) -> list[bytes]:
         payload = parse_json(environ)
         state = select_defaults(load_state(BASE_DIR))
 
-        title = str(payload.get("app_title") or "").strip() or "Trading journal"
+        title = str(payload.get("app_title") or "").strip() or "Daily-Journal"
         accent = payload.get("accent")
         font = payload.get("font")
         theme = payload.get("theme")
@@ -297,6 +297,22 @@ def app(environ: dict[str, Any], start_response: Any) -> list[bytes]:
                 sel["topic_id"] = None
                 state["selected"] = sel
             state = select_defaults(state)
+            state = save_state(BASE_DIR, state)
+            status, headers, body = json_response("200 OK", state)
+            start_response(status, headers)
+            return body
+
+        if method == "PUT":
+            payload = parse_json(environ)
+            name = str(payload.get("name") or "").strip()
+            if not name:
+                status, headers, body = json_response("400 Bad Request", {"error": "Category name required"})
+                start_response(status, headers)
+                return body
+
+            categories[idx]["name"] = name
+            categories[idx]["updated_at"] = iso_now()
+            state["categories"] = categories
             state = save_state(BASE_DIR, state)
             status, headers, body = json_response("200 OK", state)
             start_response(status, headers)
@@ -486,7 +502,7 @@ if __name__ == "__main__":
     for attempt in range(10):
         try:
             with make_server(HOST, port, app) as server:
-                print(f"Trading Journal running at http://{HOST}:{port}")
+                print(f"Daily-Journal running at http://{HOST}:{port}")
                 server.serve_forever()
             last_error = None
             break

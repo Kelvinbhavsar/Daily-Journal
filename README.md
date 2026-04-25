@@ -1,9 +1,9 @@
-# Trading Journal
+# Daily-Journal
 
 <div align="center">
-  <h1 style="margin-bottom:6px;">Local-first trading journaling, with a "pro" writing flow</h1>
+  <h1 style="margin-bottom:6px;">Local-first daily journaling, with a "pro" writing flow</h1>
   <p style="margin-top:0;">
-    Organize your trading thoughts by <b>Category</b>, <b>Main Thread</b>, and <b>Topic</b>, write in a distraction-free editor,
+    Organize your daily thoughts by <b>Category</b>, <b>Main Thread</b>, and <b>Topic</b>, write in a distraction-free editor,
     and let <b>autosave</b> + <b>undo/redo</b> protect your work. Everything runs locally -- no accounts, no tracking.
   </p>
 
@@ -60,19 +60,10 @@
 
 ---
 
-## Screenshots (add yours for best effect)
+## Screenshots 
 
-Once you provide 1-2 screenshots, drop them into `assets/` and name them like:
-
-- `assets/screenshot-1.png`
-- `assets/screenshot-2.png`
-
-Then GitHub will render them here:
-
-![Trading Journal - dashboard/editor preview](assets/screenshot-1.png)
-![Trading Journal - writing & autosave](assets/screenshot-2.png)
-
-If you want, tell me your preferred filenames and I will wire them into this section.
+![Daily-Journal - dashboard/editor preview](assets/screenshot-1.png)
+![Daily-Journal - writing & autosave](assets/screenshot-2.png)
 
 ## Why this project is different
 
@@ -87,9 +78,9 @@ If you want, tell me your preferred filenames and I will wire them into this sec
 <details>
   <summary><b>Click to see the "pro" flow</b></summary>
 
-  1. Create a **Major Category** (left panel). Example: `Strategies`, `FIIs/Institutions`, `Trading Mistakes`, `Rules`.
-  2. Create a **Topic** inside that main thread (middle panel). Example: `Mean reversion - Week 1`, `Mistake #12`.
-  3. Write in the editor (right panel): thesis, setup, execution, emotions, outcome, and what you learned.
+  1. Create a **Major Category** (left panel). Example: `Health`, `Work`, `Learning`, `Relationships`.
+  2. Create a **Topic** inside that main thread (middle panel). Example: `Morning routine - Week 1`, `April reflections`.
+  3. Write in the editor (right panel): thoughts, goals, observations, emotions, outcomes, and what you learned.
   4. Keep writing confidently (autosave + undo/redo). Use Save when you want a checkpoint.
   5. Later, review by switching topics and building your library over time.
 </details>
@@ -108,32 +99,32 @@ If you want, tell me your preferred filenames and I will wire them into this sec
 ## Writing templates (copy/paste ideas)
 
 <details>
-  <summary><b>Trade recap</b></summary>
-  - Setup / thesis:
-  - Entry (price + reason):
-  - Risk (stop level):
-  - Execution notes:
-  - Outcome (profit/loss):
+  <summary><b>Daily reflection</b></summary>
+  - Focus of the day:
+  - What happened:
+  - Key moments:
+  - Wins:
+  - Challenges:
   - Emotion check (0-10):
   - Learning for next time:
 </details>
 
 <details>
-  <summary><b>Mistake log</b></summary>
+  <summary><b>Challenge log</b></summary>
   - What happened:
   - Why it happened (root cause):
-  - The rule I broke (or should add):
-  - New checklist before next trade:
+  - What boundary, habit, or system failed:
+  - New checklist for next time:
   - Review date:
 </details>
 
 <details>
-  <summary><b>Rules & playbook</b></summary>
-  - My edge:
-  - When I should not trade:
-  - My position sizing method:
-  - Must-have conditions:
-  - Execution habits to keep:
+  <summary><b>Personal playbook</b></summary>
+  - What keeps me grounded:
+  - When I should slow down or pause:
+  - How I want to spend my energy:
+  - Must-have conditions for a good day:
+  - Habits to keep:
 </details>
 
 ## Data model (where your journal lives)
@@ -158,6 +149,14 @@ If a legacy file exists at:
 the app migrates it into the new `data/journal_state.json` format on first load.
 
 ## Getting Started
+
+### Install
+
+```bash
+git clone <your-repo-url>
+cd Journal
+python3 -m pip install -r requirements.txt
+```
 
 ### Run the server
 

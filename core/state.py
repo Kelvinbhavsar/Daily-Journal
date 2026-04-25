@@ -182,8 +182,8 @@ def default_state() -> dict[str, Any]:
     topic_id = new_id("topic")
     topic_updated_at = iso_now()
     return {
-        "version": 4,
-        "app_title": "Trading journal",
+        "version": 3,
+        "app_title": "Daily-Journal",
         "accent": "indigo",
         "font": "fredoka",
         "theme": "light",
