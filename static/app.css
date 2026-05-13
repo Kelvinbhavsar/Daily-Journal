@@ -476,8 +476,12 @@ button,input,textarea,select{ font:inherit; }
   margin-top:18px;
   max-height:calc(100vh - 310px);
   overflow:auto;
+  -ms-overflow-style:none;
+  scrollbar-width:none;
   padding-right:4px;
 }
+
+.browserStack::-webkit-scrollbar{ display:none; }
 
 .browserCard{
   position:relative;
