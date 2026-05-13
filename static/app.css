@@ -436,18 +436,6 @@ button,input,textarea,select{ font:inherit; }
 .detailPanel{ min-width:0; }
 .detailPanel--categories{ display:flex; flex-direction:column; gap:18px; }
 
-.backButton{
-  width:max-content;
-  border:none;
-  background:var(--surface-soft);
-  color:var(--text);
-  padding:12px 18px;
-  border-radius:999px;
-  cursor:pointer;
-  font-weight:800;
-  box-shadow:var(--shadow-soft);
-}
-
 .segmentSummary{ padding:22px; display:flex; align-items:center; gap:16px; }
 .segmentSummary__badge{
   width:72px;
@@ -606,7 +594,7 @@ button,input,textarea,select{ font:inherit; }
   box-shadow:none;
 }
 
-.btn:disabled,.backButton:disabled,.browserCard:disabled,.editor__title:disabled,.editor__textarea:disabled,.editor__surface[aria-disabled="true"]{
+.btn:disabled,.browserCard:disabled,.editor__title:disabled,.editor__textarea:disabled,.editor__surface[aria-disabled="true"]{
   opacity:0.55;
   cursor:not-allowed;
 }

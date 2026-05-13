@@ -42,7 +42,6 @@ const els = {
   trashPanel: document.getElementById("trashPanel"),
   trashList: document.getElementById("trashList"),
   detailSummary: document.getElementById("detailSummary"),
-  backToHome: document.getElementById("backToHome"),
   categoryList: document.getElementById("categoryList"),
   topicList: document.getElementById("topicList"),
   topicTitle: document.getElementById("topicTitle"),
@@ -1132,10 +1131,6 @@ function bind() {
   els.modalMoodOptions.addEventListener("click", handleClick);
 
   els.homeToggle.addEventListener("click", async () => {
-    if (dirty) await autosave();
-    setViewMode("home");
-  });
-  els.backToHome.addEventListener("click", async () => {
     if (dirty) await autosave();
     setViewMode("home");
   });

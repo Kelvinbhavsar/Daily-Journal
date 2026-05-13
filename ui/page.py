@@ -105,12 +105,9 @@ def render_index(state: dict[str, Any]) -> bytes:
       <section id="detailView" class="detailView detailView--hidden" aria-label="Category detail view">
         <div class="detailShell">
           <aside class="detailPanel detailPanel--categories">
-            <button id="backToHome" class="backButton" type="button">Back to Segments</button>
-            
             <div class="browserPanel">
               <div class="browserPanel__head">
                 <div class="browserPanel__title">Main Threads</div>
-                <div class="browserPanel__hint">Open a main thread inside this static segment</div>
               </div>
               <div id="categoryList" class="browserStack"></div>
             </div>
@@ -120,7 +117,6 @@ def render_index(state: dict[str, Any]) -> bytes:
             <div class="browserPanel">
               <div class="browserPanel__head">
                 <div class="browserPanel__title">Topics</div>
-                <div class="browserPanel__hint">Vertical scrolling column for your notes</div>
               </div>
               <div id="topicList" class="browserStack browserStack--topics"></div>
             </div>
