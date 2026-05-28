@@ -17,6 +17,7 @@ const els = {
   appTitle: document.getElementById("appTitle"),
   subbar: document.getElementById("subbar"),
   themeToggle: document.getElementById("themeToggle"),
+  secretToggle: document.getElementById("secretToggle"),
   modalLayer: document.getElementById("modalLayer"),
   modalBackdrop: document.getElementById("modalBackdrop"),
   modalTitle: document.getElementById("modalTitle"),
@@ -26,6 +27,12 @@ const els = {
   modalInputWrap: document.getElementById("modalInputWrap"),
   modalInputLabel: document.getElementById("modalInputLabel"),
   modalInput: document.getElementById("modalInput"),
+  modalSecretWrap: document.getElementById("modalSecretWrap"),
+  modalSecretPasswordLabel: document.getElementById("modalSecretPasswordLabel"),
+  modalSecretPassword: document.getElementById("modalSecretPassword"),
+  modalSecretConfirmWrap: document.getElementById("modalSecretConfirmWrap"),
+  modalSecretConfirm: document.getElementById("modalSecretConfirm"),
+  modalSecretError: document.getElementById("modalSecretError"),
   modalCancel: document.getElementById("modalCancel"),
   modalConfirm: document.getElementById("modalConfirm"),
   homeToggle: document.getElementById("homeToggle"),
@@ -68,6 +75,9 @@ let history = { topicId: null, undo: [], redo: [], last: null };
 let modalState = null;
 let currentMoodKey = DEFAULT_MOOD_KEY;
 let moodPromptTimer = null;
+let secretMode = false;
+let secretPassword = "";
+let secretDashboard = null;
 
 const AUTOSAVE_MS = 5 * 60 * 1000;
 const HISTORY_DEBOUNCE_MS = 400;
@@ -94,7 +104,12 @@ function closeModal(result = null) {
   els.modalLayer.setAttribute("aria-hidden", "true");
   els.modalInputWrap.classList.add("modalShell__field--hidden");
   els.modalMoodWrap.classList.add("modalMoodWrap--hidden");
+  els.modalSecretWrap.classList.add("modalSecretWrap--hidden");
+  els.modalSecretConfirmWrap.classList.add("modalShell__field--hidden");
   els.modalMoodOptions.innerHTML = "";
+  els.modalSecretPassword.value = "";
+  els.modalSecretConfirm.value = "";
+  els.modalSecretError.textContent = "";
   els.modalConfirm.disabled = false;
   current.resolve(result);
 }
@@ -110,9 +125,11 @@ function openModal({
   requireInput = false,
   moodKey = "",
   moodPrompt = false,
+  secretPrompt = false,
+  secretSetup = false,
 }) {
   return new Promise((resolve) => {
-    modalState = { resolve, requireInput, moodPrompt, selectedMoodKey: moodKey || currentMoodKey };
+    modalState = { resolve, requireInput, moodPrompt, secretPrompt, secretSetup, selectedMoodKey: moodKey || currentMoodKey };
     els.modalTitle.textContent = title;
     els.modalMessage.textContent = message;
     els.modalConfirm.textContent = confirmLabel;
@@ -122,6 +139,11 @@ function openModal({
     els.modalInput.placeholder = inputPlaceholder;
     els.modalInputWrap.classList.toggle("modalShell__field--hidden", !requireInput);
     els.modalMoodWrap.classList.toggle("modalMoodWrap--hidden", !moodPrompt);
+    els.modalSecretWrap.classList.toggle("modalSecretWrap--hidden", !secretPrompt);
+    els.modalSecretConfirmWrap.classList.toggle("modalShell__field--hidden", !(secretPrompt && secretSetup));
+    els.modalSecretPasswordLabel.textContent = secretSetup ? "Password" : "Password";
+    els.modalSecretPassword.autocomplete = secretSetup ? "new-password" : "current-password";
+    els.modalSecretError.textContent = "";
     if (moodPrompt) {
       renderMoodOptions(modalState.selectedMoodKey);
     } else {
@@ -137,6 +159,10 @@ function openModal({
     } else if (moodPrompt) {
       setTimeout(() => {
         els.modalMoodOptions.querySelector(".modalMoodOption--active")?.focus();
+      }, 0);
+    } else if (secretPrompt) {
+      setTimeout(() => {
+        els.modalSecretPassword.focus();
       }, 0);
     } else {
       setTimeout(() => {
@@ -168,6 +194,21 @@ async function promptMood({ title, message, confirmLabel = "Continue" }) {
   });
   if (!result || !result.confirmed) return currentMoodKey;
   return result.moodKey || currentMoodKey;
+}
+
+async function promptSecretPassword({ setup = false } = {}) {
+  const result = await openModal({
+    title: setup ? "Set Secrets Password" : "Unlock Secrets",
+    message: setup
+      ? "Create a password for your secret dashboard."
+      : "Enter your password to open your secret dashboard.",
+    confirmLabel: setup ? "Create" : "Unlock",
+    cancelLabel: "Cancel",
+    secretPrompt: true,
+    secretSetup: setup,
+  });
+  if (!result || !result.confirmed) return null;
+  return result;
 }
 
 function setAccent(accentKey) {
@@ -264,10 +305,12 @@ function selectedSegmentKey() {
 }
 
 function selectedCategoryId() {
+  if (secretMode) return "secrets_main_thread";
   return state?.selected?.category_id || null;
 }
 
 function selectedTopicId() {
+  if (secretMode) return secretDashboard?.selected_topic_id || null;
   return state?.selected?.topic_id || null;
 }
 
@@ -284,11 +327,41 @@ function getSegment(segmentKey) {
 }
 
 function getCategoryById(categoryId) {
+  if (secretMode && categoryId === "secrets_main_thread") return { id: "secrets_main_thread", name: "Secrets" };
   return (state?.categories || []).find((category) => category.id === categoryId) || null;
 }
 
 function getTopicById(topicId) {
+  if (secretMode) return (secretDashboard?.topics || []).find((topic) => topic.id === topicId) || null;
   return (state?.topics || []).find((topic) => topic.id === topicId) || null;
+}
+
+function isSecretsConfigured() {
+  return !!state?.secrets?.configured;
+}
+
+function applySecretDashboard(nextDashboard) {
+  secretDashboard = nextDashboard;
+  state = {
+    ...state,
+    secrets: {
+      configured: true,
+      topic_count: (nextDashboard?.topics || []).length,
+    },
+  };
+  secretMode = true;
+  dirty = false;
+  renderAll();
+  setViewMode("detail");
+}
+
+function exitSecretMode() {
+  secretMode = false;
+  secretPassword = "";
+  secretDashboard = null;
+  dirty = false;
+  renderAll();
+  setViewMode("home");
 }
 
 function splitParagraphs(content) {
@@ -388,7 +461,8 @@ function renderStats() {
   const topics = state?.topics || [];
   els.statsSummary.textContent = `${topics.length} total ${topics.length === 1 ? "entry" : "entries"}`;
   const trashCount = trashCategories().length + visibleTrashTopics().length;
-  els.statsDetail.textContent = `${mainThreads.length} ${mainThreads.length === 1 ? "main thread" : "main threads"} • ${trashCount} in trash`;
+  const secretText = state?.secrets?.configured ? " • secrets locked" : "";
+  els.statsDetail.textContent = `${mainThreads.length} ${mainThreads.length === 1 ? "main thread" : "main threads"} • ${trashCount} in trash${secretText}`;
 }
 
 function renderSegments() {
@@ -434,6 +508,15 @@ function renderDetailSummary() {
 }
 
 function renderCategoryList() {
+  if (secretMode) {
+    els.categoryList.innerHTML = `
+      <div class="browserCard browserCard--active" role="button" tabindex="0">
+        <div class="browserCard__title">Secrets</div>
+        <div class="browserCard__meta">${(secretDashboard?.topics || []).length} ${(secretDashboard?.topics || []).length === 1 ? "topic" : "topics"}</div>
+      </div>
+    `;
+    return;
+  }
   const activeCategoryId = selectedCategoryId();
   const categories = categoriesForSegment(selectedSegmentKey());
   els.categoryList.innerHTML = categories.map((category) => {
@@ -454,6 +537,26 @@ function renderCategoryList() {
 }
 
 function renderTopicList() {
+  if (secretMode) {
+    const activeTopicId = selectedTopicId();
+    const topics = secretDashboard?.topics || [];
+    els.topicList.innerHTML = topics.map((topic) => {
+      const active = topic.id === activeTopicId ? " browserCard--active" : "";
+      const preview = (topic.content || "").trim().split("\n")[0] || "No content yet";
+      return `
+        <div class="browserCard browserCard--topic${active}" data-action="select-secret-topic" data-id="${escapeHtml(topic.id)}" role="button" tabindex="0">
+          <div class="browserCard__title">${escapeHtml(topic.title || "Untitled")}</div>
+          <div class="browserCard__meta">${escapeHtml(preview)}</div>
+          <span class="cardDeleteWrap">
+            <button class="cardDelete" type="button" data-action="delete-secret-topic" data-id="${escapeHtml(topic.id)}" aria-label="Delete ${escapeHtml(topic.title || "Untitled")}">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+            </button>
+          </span>
+        </div>
+      `;
+    }).join("");
+    return;
+  }
   const activeTopicId = selectedTopicId();
   const topics = selectedCategoryId() ? topicsForCategory(selectedCategoryId()) : [];
   els.topicList.innerHTML = topics.map((topic) => {
@@ -730,6 +833,11 @@ function mergeWithPreviousParagraph(node) {
 }
 
 function renderBreadcrumb() {
+  if (secretMode) {
+    const topic = getTopicById(selectedTopicId());
+    els.breadcrumb.textContent = ["Secrets", topic?.title].filter(Boolean).join(" • ");
+    return;
+  }
   const segment = getSegment(selectedSegmentKey());
   const category = getCategoryById(selectedCategoryId());
   const topic = getTopicById(selectedTopicId());
@@ -761,6 +869,8 @@ function renderAll() {
   renderTrash();
   renderEditor();
   renderBreadcrumb();
+  els.newCategory.disabled = secretMode;
+  els.homeToggle.textContent = secretMode ? "Lock" : "Categories";
 }
 
 function applyAppearanceFromState() {
@@ -771,6 +881,7 @@ function applyAppearanceFromState() {
   setTheme(state?.theme || "light");
   els.appTitle.value = state?.app_title || "Daily-Journal";
   document.title = els.appTitle.value;
+  els.secretToggle.classList.toggle("themeToggle--active", secretMode);
 }
 
 function currentSnapshot() {
@@ -864,10 +975,18 @@ async function autosave({ force = false } = {}) {
   const topicId = selectedTopicId();
   if (!topicId) return;
   setStatus("Saving...");
-  state = await api(`/api/topics/${encodeURIComponent(topicId)}`, {
-    method: "PUT",
-    body: { title: els.topicTitle.value, content: els.topicContent.value, paragraphs: savePayloadParagraphs() },
-  });
+  if (secretMode) {
+    const result = await api(`/api/secrets/topics/${encodeURIComponent(topicId)}`, {
+      method: "PUT",
+      body: { password: secretPassword, title: els.topicTitle.value, content: els.topicContent.value, paragraphs: savePayloadParagraphs() },
+    });
+    secretDashboard = result.secrets;
+  } else {
+    state = await api(`/api/topics/${encodeURIComponent(topicId)}`, {
+      method: "PUT",
+      body: { title: els.topicTitle.value, content: els.topicContent.value, paragraphs: savePayloadParagraphs() },
+    });
+  }
   dirty = false;
   lastSavedAt = new Date();
   renderAll();
@@ -961,6 +1080,22 @@ async function createCategory() {
 
 async function createTopic() {
   if (dirty) await autosave();
+  if (secretMode) {
+    const title = (await promptModal({
+      title: "Create Secret Topic",
+      message: "Add a topic inside Secrets.",
+      confirmLabel: "Create",
+      inputLabel: "Topic title",
+      inputPlaceholder: "Example: Private thought",
+      inputValue: "Untitled",
+    })) || "Untitled";
+    const result = await api("/api/secrets/topics", { method: "POST", body: { password: secretPassword, title } });
+    secretDashboard = result.secrets;
+    renderAll();
+    setViewMode("detail");
+    setStatus("Created secret topic");
+    return;
+  }
   const categoryId = selectedCategoryId();
   if (!categoryId) {
     setStatus("Open a main thread first");
@@ -993,6 +1128,25 @@ async function deleteTopic(topicId) {
   dirty = false;
   renderAll();
   setStatus("Moved to trash");
+}
+
+async function deleteSecretTopic(topicId) {
+  if (dirty) await autosave();
+  if (!topicId) return;
+  const approved = await confirmModal({
+    title: "Delete Secret Topic",
+    message: "This permanently removes the selected secret topic.",
+    confirmLabel: "Delete",
+  });
+  if (!approved) return;
+  const result = await api(`/api/secrets/topics/${encodeURIComponent(topicId)}`, {
+    method: "DELETE",
+    body: { password: secretPassword },
+  });
+  secretDashboard = result.secrets;
+  dirty = false;
+  renderAll();
+  setStatus("Secret topic deleted");
 }
 
 async function deleteCategory(categoryId) {
@@ -1083,6 +1237,47 @@ async function selectTopic(topicId) {
   setViewMode("detail");
 }
 
+async function selectSecretTopic(topicId) {
+  if (dirty) await autosave();
+  const result = await api("/api/secrets/select", { method: "POST", body: { password: secretPassword, topic_id: topicId } });
+  secretDashboard = result.secrets;
+  dirty = false;
+  renderAll();
+  setViewMode("detail");
+}
+
+async function openSecrets() {
+  if (secretMode) {
+    if (dirty) await autosave();
+    exitSecretMode();
+    setStatus("Secrets locked");
+    return;
+  }
+  if (dirty) await autosave();
+  const setup = !isSecretsConfigured();
+  const credentials = await promptSecretPassword({ setup });
+  if (!credentials) return;
+  try {
+    const result = await api(setup ? "/api/secrets/setup" : "/api/secrets/unlock", {
+      method: "POST",
+      body: setup
+        ? { password: credentials.password, confirm_password: credentials.confirmPassword }
+        : { password: credentials.password },
+    });
+    secretPassword = credentials.password;
+    applySecretDashboard(result.secrets);
+    setStatus(setup ? "Secrets password created" : "Secrets unlocked");
+  } catch (err) {
+    setStatus(setup ? "Could not create secrets password" : "Could not unlock secrets");
+    await confirmModal({
+      title: "Secrets",
+      message: err.message || "The password was not accepted.",
+      confirmLabel: "OK",
+      cancelLabel: "Close",
+    });
+  }
+}
+
 function handleClick(ev) {
   const target = ev.target.closest("[data-action]");
   if (!target) return;
@@ -1091,6 +1286,7 @@ function handleClick(ev) {
   if (action === "open-segment") void openSegment(id);
   if (action === "select-category") void selectCategory(id);
   if (action === "select-topic") void selectTopic(id);
+  if (action === "select-secret-topic") void selectSecretTopic(id);
   if (action === "delete-category") {
     ev.preventDefault();
     ev.stopPropagation();
@@ -1100,6 +1296,11 @@ function handleClick(ev) {
     ev.preventDefault();
     ev.stopPropagation();
     void deleteTopic(id);
+  }
+  if (action === "delete-secret-topic") {
+    ev.preventDefault();
+    ev.stopPropagation();
+    void deleteSecretTopic(id);
   }
   if (action === "restore-trash") {
     void restoreTrash(target.getAttribute("data-kind"), id);
@@ -1132,6 +1333,10 @@ function bind() {
 
   els.homeToggle.addEventListener("click", async () => {
     if (dirty) await autosave();
+    if (secretMode) {
+      exitSecretMode();
+      return;
+    }
     setViewMode("home");
   });
   els.openTrash.addEventListener("click", async () => {
@@ -1148,6 +1353,22 @@ function bind() {
   els.modalCancel.addEventListener("click", () => closeModal({ confirmed: false }));
   els.modalConfirm.addEventListener("click", () => {
     if (!modalState) return;
+    if (modalState.secretPrompt) {
+      const password = els.modalSecretPassword.value;
+      const confirmPassword = els.modalSecretConfirm.value;
+      if (!password) {
+        els.modalSecretError.textContent = "Password is required.";
+        els.modalSecretPassword.focus();
+        return;
+      }
+      if (modalState.secretSetup && password !== confirmPassword) {
+        els.modalSecretError.textContent = "Passwords do not match.";
+        els.modalSecretConfirm.focus();
+        return;
+      }
+      closeModal({ confirmed: true, password, confirmPassword });
+      return;
+    }
     if (modalState.requireInput) {
       const value = els.modalInput.value.trim();
       if (!value) {
@@ -1169,6 +1390,14 @@ function bind() {
       els.modalConfirm.click();
     }
   });
+  [els.modalSecretPassword, els.modalSecretConfirm].forEach((input) => {
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        els.modalConfirm.click();
+      }
+    });
+  });
 
   els.undoBtn.addEventListener("click", doUndo);
   els.redoBtn.addEventListener("click", doRedo);
@@ -1176,6 +1405,7 @@ function bind() {
   els.newCategory.addEventListener("click", () => void createCategory());
   els.newTopic.addEventListener("click", () => void createTopic());
   els.themeToggle.addEventListener("click", () => void toggleTheme());
+  els.secretToggle.addEventListener("click", () => void openSecrets());
 
   els.accent.addEventListener("change", () => {
     setAccent(els.accent.value);

@@ -55,6 +55,9 @@ def render_index(state: dict[str, Any]) -> bytes:
         <button id="themeToggle" class="themeToggle" type="button" aria-label="Toggle theme">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"></path></svg>
         </button>
+        <button id="secretToggle" class="themeToggle" type="button" aria-label="Open secrets" title="Open secrets">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"></rect><path d="M8 11V8a4 4 0 0 1 8 0v3"></path></svg>
+        </button>
       </div>
     </header>
 
@@ -167,6 +170,17 @@ def render_index(state: dict[str, Any]) -> bytes:
         <span id="modalInputLabel" class="modalShell__label">Label</span>
         <input id="modalInput" class="modalShell__input" type="text" autocomplete="off">
       </label>
+      <div id="modalSecretWrap" class="modalSecretWrap modalSecretWrap--hidden">
+        <label class="modalShell__field">
+          <span id="modalSecretPasswordLabel" class="modalShell__label">Password</span>
+          <input id="modalSecretPassword" class="modalShell__input" type="password" autocomplete="current-password">
+        </label>
+        <label id="modalSecretConfirmWrap" class="modalShell__field modalShell__field--hidden">
+          <span class="modalShell__label">Confirm password</span>
+          <input id="modalSecretConfirm" class="modalShell__input" type="password" autocomplete="new-password">
+        </label>
+        <div id="modalSecretError" class="modalShell__error"></div>
+      </div>
       <div class="modalShell__actions">
         <button id="modalCancel" class="btn btn--ghost" type="button">Cancel</button>
         <button id="modalConfirm" class="btn" type="button">Confirm</button>

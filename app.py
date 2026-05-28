@@ -1,7 +1,11 @@
 from __future__ import annotations
 
+import copy
+import hashlib
+import hmac
 import json
 import os
+import secrets as token_secrets
 from pathlib import Path
 from typing import Any
 from wsgiref.simple_server import make_server
@@ -11,6 +15,7 @@ from core.state import (
     DEFAULT_SEGMENT_KEY,
     FUNKY_ROUNDED_FONTS,
     MATERIAL_ACCENTS,
+    SECRETS_CATEGORY_ID,
     STATIC_SEGMENTS,
     iso_now,
     merge_paragraph_updates,
@@ -25,6 +30,50 @@ PORT = 9000
 
 
 STATIC_DIR = BASE_DIR / "static"
+PASSWORD_ITERATIONS = 200_000
+
+
+def hash_password(password: str, salt: str) -> str:
+    return hashlib.pbkdf2_hmac("sha256", password.encode("utf-8"), bytes.fromhex(salt), PASSWORD_ITERATIONS).hex()
+
+
+def verify_secret_password(secrets_state: dict[str, Any], password: str) -> bool:
+    expected = str(secrets_state.get("password_hash") or "")
+    salt = str(secrets_state.get("password_salt") or "")
+    if not expected or not salt or not password:
+        return False
+    try:
+        candidate = hash_password(password, salt)
+    except ValueError:
+        return False
+    return hmac.compare_digest(candidate, expected)
+
+
+def public_state(state: dict[str, Any]) -> dict[str, Any]:
+    safe = copy.deepcopy(state)
+    secrets_state = safe.get("secrets") if isinstance(safe.get("secrets"), dict) else {}
+    safe["secrets"] = {
+        "configured": bool(secrets_state.get("password_hash")),
+        "topic_count": len(secrets_state.get("topics") or []),
+    }
+    return safe
+
+
+def secret_dashboard_payload(secrets_state: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "category": {"id": SECRETS_CATEGORY_ID, "name": "Secrets"},
+        "topics": secrets_state.get("topics") or [],
+        "selected_topic_id": secrets_state.get("selected_topic_id"),
+        "configured": bool(secrets_state.get("password_hash")),
+    }
+
+
+def require_secret_password(state: dict[str, Any], payload: dict[str, Any]) -> tuple[bool, dict[str, Any] | None]:
+    secrets_state = state.get("secrets") if isinstance(state.get("secrets"), dict) else {}
+    password = str(payload.get("password") or "")
+    if not verify_secret_password(secrets_state, password):
+        return False, None
+    return True, secrets_state
 
 
 def ensure_trash(state: dict[str, Any]) -> dict[str, Any]:
@@ -181,7 +230,144 @@ def app(environ: dict[str, Any], start_response: Any) -> list[bytes]:
     if method == "GET" and path == "/api/state":
         state = select_defaults(load_state(BASE_DIR))
         save_state(BASE_DIR, state)
-        status, headers, body = json_response("200 OK", state)
+        status, headers, body = json_response("200 OK", public_state(state))
+        start_response(status, headers)
+        return body
+
+    if method == "POST" and path == "/api/secrets/setup":
+        payload = parse_json(environ)
+        password = str(payload.get("password") or "")
+        confirm = str(payload.get("confirm_password") or "")
+        if len(password) < 4:
+            status, headers, body = json_response("400 Bad Request", {"error": "Password must be at least 4 characters"})
+            start_response(status, headers)
+            return body
+        if password != confirm:
+            status, headers, body = json_response("400 Bad Request", {"error": "Passwords do not match"})
+            start_response(status, headers)
+            return body
+
+        state = select_defaults(load_state(BASE_DIR))
+        secrets_state = state.get("secrets") if isinstance(state.get("secrets"), dict) else {}
+        if secrets_state.get("password_hash"):
+            status, headers, body = json_response("400 Bad Request", {"error": "Secrets password already set"})
+            start_response(status, headers)
+            return body
+
+        salt = token_secrets.token_bytes(16).hex()
+        secrets_state["password_salt"] = salt
+        secrets_state["password_hash"] = hash_password(password, salt)
+        secrets_state["topics"] = []
+        secrets_state["selected_topic_id"] = None
+        secrets_state["updated_at"] = iso_now()
+        state["secrets"] = secrets_state
+        state = save_state(BASE_DIR, state)
+        status, headers, body = json_response("200 OK", {"secrets": secret_dashboard_payload(state["secrets"])})
+        start_response(status, headers)
+        return body
+
+    if method == "POST" and path == "/api/secrets/unlock":
+        payload = parse_json(environ)
+        state = select_defaults(load_state(BASE_DIR))
+        ok, secrets_state = require_secret_password(state, payload)
+        if not ok or secrets_state is None:
+            status, headers, body = json_response("401 Unauthorized", {"error": "Invalid password"})
+            start_response(status, headers)
+            return body
+        status, headers, body = json_response("200 OK", {"secrets": secret_dashboard_payload(secrets_state)})
+        start_response(status, headers)
+        return body
+
+    if method == "POST" and path == "/api/secrets/topics":
+        payload = parse_json(environ)
+        state = select_defaults(load_state(BASE_DIR))
+        ok, secrets_state = require_secret_password(state, payload)
+        if not ok or secrets_state is None:
+            status, headers, body = json_response("401 Unauthorized", {"error": "Invalid password"})
+            start_response(status, headers)
+            return body
+
+        title = str(payload.get("title") or "").strip() or "Untitled"
+        created_at = iso_now()
+        topic_id = new_id("secret")
+        topic = {
+            "id": topic_id,
+            "category_id": SECRETS_CATEGORY_ID,
+            "title": title,
+            "content": "",
+            "paragraphs": [],
+            "created_at": created_at,
+            "updated_at": created_at,
+        }
+        secrets_state.setdefault("topics", []).append(topic)
+        secrets_state["selected_topic_id"] = topic_id
+        secrets_state["updated_at"] = created_at
+        state["secrets"] = secrets_state
+        state = save_state(BASE_DIR, state)
+        status, headers, body = json_response("200 OK", {"secrets": secret_dashboard_payload(state["secrets"])})
+        start_response(status, headers)
+        return body
+
+    if path.startswith("/api/secrets/topics/"):
+        topic_id = path.removeprefix("/api/secrets/topics/").strip("/")
+        payload = parse_json(environ)
+        state = select_defaults(load_state(BASE_DIR))
+        ok, secrets_state = require_secret_password(state, payload)
+        if not ok or secrets_state is None:
+            status, headers, body = json_response("401 Unauthorized", {"error": "Invalid password"})
+            start_response(status, headers)
+            return body
+
+        topics = secrets_state.get("topics") or []
+        idx = next((i for i, topic in enumerate(topics) if topic.get("id") == topic_id), None)
+        if idx is None:
+            status, headers, body = json_response("404 Not Found", {"error": "Secret topic not found"})
+            start_response(status, headers)
+            return body
+
+        if method == "PUT":
+            title = str(payload.get("title") or "").strip() or "Untitled"
+            content = str(payload.get("content") or "")
+            paragraphs = payload.get("paragraphs")
+            updated_at = iso_now()
+            topics[idx]["title"] = title
+            topics[idx]["content"] = content
+            topics[idx]["paragraphs"] = merge_paragraph_updates(topics[idx].get("paragraphs"), paragraphs, updated_at)
+            topics[idx]["updated_at"] = updated_at
+            secrets_state["topics"] = topics
+            secrets_state["selected_topic_id"] = topic_id
+            secrets_state["updated_at"] = updated_at
+            state["secrets"] = secrets_state
+            state = save_state(BASE_DIR, state)
+            status, headers, body = json_response("200 OK", {"secrets": secret_dashboard_payload(state["secrets"])})
+            start_response(status, headers)
+            return body
+
+        if method == "DELETE":
+            topics.pop(idx)
+            secrets_state["topics"] = topics
+            secrets_state["selected_topic_id"] = topics[0]["id"] if topics else None
+            secrets_state["updated_at"] = iso_now()
+            state["secrets"] = secrets_state
+            state = save_state(BASE_DIR, state)
+            status, headers, body = json_response("200 OK", {"secrets": secret_dashboard_payload(state["secrets"])})
+            start_response(status, headers)
+            return body
+
+    if method == "POST" and path == "/api/secrets/select":
+        payload = parse_json(environ)
+        state = select_defaults(load_state(BASE_DIR))
+        ok, secrets_state = require_secret_password(state, payload)
+        if not ok or secrets_state is None:
+            status, headers, body = json_response("401 Unauthorized", {"error": "Invalid password"})
+            start_response(status, headers)
+            return body
+        topic_id = str(payload.get("topic_id") or "").strip()
+        if topic_id in {topic.get("id") for topic in secrets_state.get("topics", [])}:
+            secrets_state["selected_topic_id"] = topic_id
+            state["secrets"] = secrets_state
+            state = save_state(BASE_DIR, state)
+        status, headers, body = json_response("200 OK", {"secrets": secret_dashboard_payload(state["secrets"])})
         start_response(status, headers)
         return body
 
@@ -203,7 +389,7 @@ def app(environ: dict[str, Any], start_response: Any) -> list[bytes]:
             state["theme"] = theme
 
         state = save_state(BASE_DIR, state)
-        status, headers, body = json_response("200 OK", state)
+        status, headers, body = json_response("200 OK", public_state(state))
         start_response(status, headers)
         return body
 
@@ -229,7 +415,7 @@ def app(environ: dict[str, Any], start_response: Any) -> list[bytes]:
         state["selected"]["topic_id"] = None
         state = select_defaults(state)
         state = save_state(BASE_DIR, state)
-        status, headers, body = json_response("200 OK", state)
+        status, headers, body = json_response("200 OK", public_state(state))
         start_response(status, headers)
         return body
 
@@ -260,7 +446,7 @@ def app(environ: dict[str, Any], start_response: Any) -> list[bytes]:
         state["selected"]["category_id"] = category_id
         state["selected"]["topic_id"] = topic_id
         state = save_state(BASE_DIR, state)
-        status, headers, body = json_response("200 OK", state)
+        status, headers, body = json_response("200 OK", public_state(state))
         start_response(status, headers)
         return body
 
@@ -298,7 +484,7 @@ def app(environ: dict[str, Any], start_response: Any) -> list[bytes]:
                 state["selected"] = sel
             state = select_defaults(state)
             state = save_state(BASE_DIR, state)
-            status, headers, body = json_response("200 OK", state)
+            status, headers, body = json_response("200 OK", public_state(state))
             start_response(status, headers)
             return body
 
@@ -314,7 +500,7 @@ def app(environ: dict[str, Any], start_response: Any) -> list[bytes]:
             categories[idx]["updated_at"] = iso_now()
             state["categories"] = categories
             state = save_state(BASE_DIR, state)
-            status, headers, body = json_response("200 OK", state)
+            status, headers, body = json_response("200 OK", public_state(state))
             start_response(status, headers)
             return body
 
@@ -340,7 +526,7 @@ def app(environ: dict[str, Any], start_response: Any) -> list[bytes]:
             topics[idx]["updated_at"] = updated_at
             state["topics"] = topics
             state = save_state(BASE_DIR, state)
-            status, headers, body = json_response("200 OK", state)
+            status, headers, body = json_response("200 OK", public_state(state))
             start_response(status, headers)
             return body
 
@@ -357,7 +543,7 @@ def app(environ: dict[str, Any], start_response: Any) -> list[bytes]:
                 state["selected"] = sel
                 state = select_defaults(state)
             state = save_state(BASE_DIR, state)
-            status, headers, body = json_response("200 OK", state)
+            status, headers, body = json_response("200 OK", public_state(state))
             start_response(status, headers)
             return body
 
@@ -396,7 +582,7 @@ def app(environ: dict[str, Any], start_response: Any) -> list[bytes]:
             state["selected"]["topic_id"] = restored_topics[0]["id"] if restored_topics else None
             state = select_defaults(state)
             state = save_state(BASE_DIR, state)
-            status, headers, body = json_response("200 OK", state)
+            status, headers, body = json_response("200 OK", public_state(state))
             start_response(status, headers)
             return body
 
@@ -424,7 +610,7 @@ def app(environ: dict[str, Any], start_response: Any) -> list[bytes]:
             category = next((c for c in state["categories"] if c["id"] == category_id), None)
             state["selected"]["segment_key"] = (category or {}).get("segment_key") or DEFAULT_SEGMENT_KEY
             state = save_state(BASE_DIR, state)
-            status, headers, body = json_response("200 OK", state)
+            status, headers, body = json_response("200 OK", public_state(state))
             start_response(status, headers)
             return body
 
@@ -437,7 +623,7 @@ def app(environ: dict[str, Any], start_response: Any) -> list[bytes]:
         state["trash"]["categories"] = []
         state["trash"]["topics"] = []
         state = save_state(BASE_DIR, state)
-        status, headers, body = json_response("200 OK", state)
+        status, headers, body = json_response("200 OK", public_state(state))
         start_response(status, headers)
         return body
 
@@ -478,7 +664,7 @@ def app(environ: dict[str, Any], start_response: Any) -> list[bytes]:
                 state["selected"] = sel
 
         state = save_state(BASE_DIR, state)
-        status, headers, body = json_response("200 OK", state)
+        status, headers, body = json_response("200 OK", public_state(state))
         start_response(status, headers)
         return body
 

@@ -121,6 +121,10 @@ button,input,textarea,select{ font:inherit; }
   stroke-linecap:round;
   stroke-linejoin:round;
 }
+.themeToggle--active{
+  border-color:color-mix(in srgb, var(--accent) 52%, white);
+  box-shadow:0 0 0 4px var(--accent-weak), var(--shadow-soft);
+}
 
 .subbar{
   display:grid;
@@ -305,6 +309,15 @@ button,input,textarea,select{ font:inherit; }
   margin-top:18px;
 }
 .modalShell__field--hidden{ display:none; }
+.modalSecretWrap{ margin-top:18px; }
+.modalSecretWrap--hidden{ display:none; }
+.modalShell__error{
+  min-height:18px;
+  margin-top:10px;
+  color:#b42318;
+  font-size:13px;
+  font-weight:800;
+}
 .modalShell__label{
   font-size:13px;
   font-weight:800;

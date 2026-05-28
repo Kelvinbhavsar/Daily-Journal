@@ -57,6 +57,7 @@ STATIC_SEGMENTS: list[dict[str, str]] = [
 
 DEFAULT_SEGMENT_KEY = "financial"
 THEMES = {"light", "dark"}
+SECRETS_CATEGORY_ID = "secrets_main_thread"
 
 
 def static_segment_keys() -> set[str]:
@@ -78,6 +79,40 @@ def paragraph_records_from_content(content: str, fallback_updated_at: str) -> li
         {"text": paragraph, "updated_at": fallback_updated_at, "mood": DEFAULT_EMOTION_KEY}
         for paragraph in split_paragraphs(content)
     ]
+
+
+def default_secrets() -> dict[str, Any]:
+    return {
+        "password_salt": "",
+        "password_hash": "",
+        "topics": [],
+        "selected_topic_id": None,
+        "updated_at": None,
+    }
+
+
+def normalize_secrets(raw: Any) -> dict[str, Any]:
+    secrets = default_secrets()
+    if not isinstance(raw, dict):
+        return secrets
+
+    secrets["password_salt"] = str(raw.get("password_salt") or "")
+    secrets["password_hash"] = str(raw.get("password_hash") or "")
+    secrets["selected_topic_id"] = raw.get("selected_topic_id") if isinstance(raw.get("selected_topic_id"), str) else None
+    secrets["updated_at"] = raw.get("updated_at") if isinstance(raw.get("updated_at"), str) else None
+
+    topics = []
+    for topic in raw.get("topics", []):
+        if not isinstance(topic, dict):
+            continue
+        normalized = normalize_topic(topic)
+        normalized["category_id"] = SECRETS_CATEGORY_ID
+        topics.append(normalized)
+    secrets["topics"] = topics
+
+    if secrets["selected_topic_id"] not in {topic.get("id") for topic in topics}:
+        secrets["selected_topic_id"] = topics[0]["id"] if topics else None
+    return secrets
 
 
 def normalize_topic(topic: dict[str, Any]) -> dict[str, Any]:
@@ -219,6 +254,7 @@ def default_state() -> dict[str, Any]:
             }
         ],
         "trash": {"categories": [], "topics": []},
+        "secrets": default_secrets(),
         "updated_at": iso_now(),
     }
 
@@ -228,7 +264,7 @@ def coerce_state(raw: dict[str, Any] | None) -> dict[str, Any]:
         return default_state()
 
     state = default_state()
-    state.update({k: raw.get(k) for k in ("version", "app_title", "accent", "font", "theme", "categories", "topics", "trash", "selected", "updated_at") if k in raw})
+    state.update({k: raw.get(k) for k in ("version", "app_title", "accent", "font", "theme", "categories", "topics", "trash", "selected", "updated_at", "secrets") if k in raw})
     state["version"] = 4
 
     if state.get("accent") not in MATERIAL_ACCENTS:
@@ -247,6 +283,7 @@ def coerce_state(raw: dict[str, Any] | None) -> dict[str, Any]:
         state["selected"] = default_state()["selected"]
     if not isinstance(state.get("trash"), dict):
         state["trash"] = default_state()["trash"]
+    state["secrets"] = normalize_secrets(state.get("secrets"))
     if not isinstance(state["trash"].get("categories"), list):
         state["trash"]["categories"] = []
     if not isinstance(state["trash"].get("topics"), list):
