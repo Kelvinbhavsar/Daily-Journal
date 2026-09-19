@@ -1,54 +1,1163 @@
 {
-  "version": 1,
-  "app_title": "Trading journal",
-  "accent": "orange",
-  "font": "nunito",
+  "version": 4,
+  "app_title": "Daily Journal",
+  "accent": "pink",
+  "font": "quicksand",
+  "theme": "dark",
   "selected": {
-    "category_id": "cat_c1be7c58ec00",
-    "topic_id": "topic_d8cf9c4365aa"
+    "category_id": "cat_25313bf229f1",
+    "topic_id": "topic_ec184c9793c7",
+    "segment_key": "financial"
   },
   "categories": [
     {
       "id": "cat_25313bf229f1",
-      "name": "General",
-      "created_at": "2026-03-31T00:19:40"
+      "name": "Daily Trading Updates",
+      "created_at": "2026-03-31T00:19:40",
+      "segment_key": "financial",
+      "updated_at": "2026-04-04T01:58:41"
     },
     {
       "id": "cat_a07a41138c90",
       "name": "FIIs",
-      "created_at": "2026-03-31T00:24:48"
+      "created_at": "2026-03-31T00:24:48",
+      "segment_key": "financial"
     },
     {
       "id": "cat_c1be7c58ec00",
       "name": "Iran-USA War",
-      "created_at": "2026-03-31T00:25:03"
+      "created_at": "2026-03-31T00:25:03",
+      "segment_key": "financial"
+    },
+    {
+      "id": "cat_b70fc4dee87c",
+      "name": "Trading Mistakes",
+      "created_at": "2026-03-31T01:11:15",
+      "segment_key": "financial"
+    },
+    {
+      "id": "cat_19caca3306b7",
+      "name": "Trading Rules",
+      "created_at": "2026-03-31T01:27:34",
+      "segment_key": "financial"
+    },
+    {
+      "id": "cat_f267bdc96a16",
+      "name": "Flutter Skills",
+      "segment_key": "professional",
+      "created_at": "2026-04-01T20:22:30"
+    },
+    {
+      "id": "cat_06bb31481b05",
+      "name": "Bollywood Dialouges",
+      "segment_key": "personal",
+      "created_at": "2026-04-06T15:42:12"
+    },
+    {
+      "id": "cat_7015030ad94e",
+      "name": "Goals",
+      "segment_key": "personal",
+      "created_at": "2026-04-11T12:01:43"
+    },
+    {
+      "id": "cat_208f78c23a99",
+      "name": "GPT Prompts",
+      "segment_key": "financial",
+      "created_at": "2026-04-11T15:41:19"
+    },
+    {
+      "id": "cat_c26f06bbeb7e",
+      "name": "Relationship goals",
+      "segment_key": "personal",
+      "created_at": "2026-04-13T01:08:21"
+    },
+    {
+      "id": "cat_fd9bc453811e",
+      "name": "Drawdown Management",
+      "segment_key": "financial",
+      "created_at": "2026-04-13T17:15:48"
+    },
+    {
+      "id": "cat_eda4dc6335ae",
+      "name": "Daily running commentary",
+      "segment_key": "financial",
+      "created_at": "2026-05-14T09:42:13"
+    },
+    {
+      "id": "cat_ab55086fb3f7",
+      "name": "Observations",
+      "segment_key": "personal",
+      "created_at": "2026-05-15T01:00:23"
+    },
+    {
+      "id": "cat_4e00e1920635",
+      "name": "Trading Learnings",
+      "segment_key": "financial",
+      "created_at": "2026-05-20T23:42:52"
+    },
+    {
+      "id": "cat_82e331fd3004",
+      "name": "Achievements",
+      "segment_key": "personal",
+      "created_at": "2026-05-21T19:49:27"
+    },
+    {
+      "id": "cat_b8bc5580d87c",
+      "name": "Weekend Startegies",
+      "segment_key": "financial",
+      "created_at": "2026-05-22T20:34:03"
+    },
+    {
+      "id": "cat_e7391c2d7ec1",
+      "name": "1 Liners",
+      "segment_key": "personal",
+      "created_at": "2026-05-28T09:21:13"
+    },
+    {
+      "id": "cat_9d1fcb5954df",
+      "name": "Secrets",
+      "segment_key": "personal",
+      "created_at": "2026-06-13T14:34:28"
+    },
+    {
+      "id": "cat_ed05449867eb",
+      "name": "NIFTY UPDATE",
+      "segment_key": "financial",
+      "created_at": "2026-09-11T16:20:49"
     }
   ],
   "topics": [
     {
       "id": "topic_ec184c9793c7",
       "category_id": "cat_25313bf229f1",
-      "title": "Welcome",
-      "content": "Start writing your notes here.\n\nCreate categories on the left, then add sub-topics in the middle column.",
+      "title": "2 April 2026",
+      "content": "One of the most haunted day of my trading career i can say.\n\nRecently i had a dramatic experience with my trading ",
       "created_at": "2026-03-31T00:19:40",
-      "updated_at": "2026-03-31T00:19:40"
+      "updated_at": "2026-04-13T16:52:05",
+      "paragraphs": [
+        {
+          "text": "One of the most haunted day of my trading career i can say.",
+          "updated_at": "2026-04-13T16:52:05",
+          "mood": "normal"
+        },
+        {
+          "text": "Recently i had a dramatic experience with my trading",
+          "updated_at": "2026-04-13T16:52:05",
+          "mood": "normal"
+        }
+      ]
     },
     {
       "id": "topic_b3173bafd218",
       "category_id": "cat_a07a41138c90",
-      "title": "New note",
-      "content": "",
+      "title": "FIIs in March 2026",
+      "content": "FIIs have sold 100,000 Cr in Indian equity markets. It is the highest since the March 2020 COVID crash selling.\nI see this as two events, as is the nature of the FIIs; they are chasing fast returns, which are Korea, China, and other emerging markets like Indonesia and others. \n\nHow this will be changed:\nIn my opinion, for a year or 18 months until the AI bubble/hype is there, other markets will perform better than India for sure. In the meantime, India has to change its moat for the growth of India and what it should be, which will be defined by the current government actions, and IMO, we will find something to attract FIIs back to the economy, and also, the government and RBI will take actions to strengthen the rupee from now on. \n\nFrom 1991 to 2022, we have given many liberties to FIIs, or foreign private equity firms, also, but now this India will make its own way in Indian style. After COVID-19 there are numerous changes that the central government has made to strengthen the infrastructure and also the connectivity in freight as well as air connectivity. \n\nNo matter if FIIs are moving out now, strengthening the rupee and the fastest growth in any bigger economy are still with Indian markets only. \nIndians will find their jugad to continue with these changes. Panic will persist till the last quarter of 2026, but then India will be back on the growth trajectory, and then for the next 2 years FIIs will pump in and buy from the Indian market at a higher price. \n\nRetail investors should continue to have the pain for the next 2 years max; after that, they will have all the returns that they never imagined while investing. ",
       "created_at": "2026-03-31T00:26:21",
-      "updated_at": "2026-03-31T00:26:21"
+      "updated_at": "2026-04-04T02:16:31",
+      "paragraphs": [
+        {
+          "text": "FIIs have sold 100,000 Cr in Indian equity markets. It is the highest since the March 2020 COVID crash selling.\nI see this as two events, as is the nature of the FIIs; they are chasing fast returns, which are Korea, China, and other emerging markets like Indonesia and others.",
+          "updated_at": "2026-04-04T02:16:31",
+          "mood": "normal"
+        },
+        {
+          "text": "How this will be changed:\nIn my opinion, for a year or 18 months until the AI bubble/hype is there, other markets will perform better than India for sure. In the meantime, India has to change its moat for the growth of India and what it should be, which will be defined by the current government actions, and IMO, we will find something to attract FIIs back to the economy, and also, the government and RBI will take actions to strengthen the rupee from now on.",
+          "updated_at": "2026-04-04T02:16:31",
+          "mood": "normal"
+        },
+        {
+          "text": "From 1991 to 2022, we have given many liberties to FIIs, or foreign private equity firms, also, but now this India will make its own way in Indian style. After COVID-19 there are numerous changes that the central government has made to strengthen the infrastructure and also the connectivity in freight as well as air connectivity.",
+          "updated_at": "2026-04-04T02:16:31",
+          "mood": "normal"
+        },
+        {
+          "text": "No matter if FIIs are moving out now, strengthening the rupee and the fastest growth in any bigger economy are still with Indian markets only. \nIndians will find their jugad to continue with these changes. Panic will persist till the last quarter of 2026, but then India will be back on the growth trajectory, and then for the next 2 years FIIs will pump in and buy from the Indian market at a higher price.",
+          "updated_at": "2026-04-04T02:16:31",
+          "mood": "normal"
+        },
+        {
+          "text": "Retail investors should continue to have the pain for the next 2 years max; after that, they will have all the returns that they never imagined while investing.",
+          "updated_at": "2026-04-04T02:16:31",
+          "mood": "normal"
+        }
+      ]
     },
     {
       "id": "topic_d8cf9c4365aa",
       "category_id": "cat_c1be7c58ec00",
       "title": "Iran - USA war update 31st march",
-      "content": "AJKgjsagaj sgajg ajgajdg ajdg asjdgasjd gajsgd ajsg dasjgd ajd asjdgasjdg asjgd asjhdg asjgd ajsgd asjgd ajsgd AJKgjsagaj sgajg ajgajdg ajdg asjdgasjd gajsgd ajsg dasjgd ajd asjdgasjdg asjgd asjhdg asjgd ajsgd asjgd ajsgd AJKgjsagaj sgajg ajgajdg ajdg asjdgasjd gajsgd ajsg dasjgd ajd asjdgasjdg asjgd asjhdg asjgd ajsgd asjgd ajsgd AJKgjsagaj sgajg ajgajdg ajdg asjdgasjd gajsgd ajsg dasjgd ajd asjdgasjdg asjgd asjhdg asjgd ajsgd asjgd ajsgd AJKgjsagaj sgajg ajgajdg ajdg asjdgasjd gajsgd ajsg dasjgd ajd asjdgasjdg asjgd asjhdg asjgd ajsgd asjgd ajsgd AJKgjsagaj sgajg ajgajdg ajdg asjdgasjd gajsgd ajsg dasjgd ajd asjdgasjdg asjgd asjhdg asjgd ajsgd asjgd ajsgd AJKgjsagaj sgajg ajgajdg ajdg asjdgasjd gajsgd ajsg dasjgd ajd asjdgasjdg asjgd asjhdg asjgd ajsgd asjgd ajsgd AJKgjsagaj sgajg ajgajdg ajdg asjdgasjd gajsgd ajsg dasjgd ajd asjdgasjdg asjgd asjhdg asjgd ajsgd asjgd ajsgd AJKgjsagaj sgajg ajgajdg ajdg asjdgasjd gajsgd ajsg dasjgd ajd asjdgasjdg asjgd asjhdg asjgd ajsgd asjgd ajsgd AJKgjsagaj sgajg ajgajdg ajdg asjdgasjd gajsgd ajsg dasjgd ajd asjdgasjdg asjgd asjhdg asjgd ajsgd asjgd ajsgd AJKgjsagaj sgajg ajgajdg ajdg asjdgasjd gajsgd ajsg dasjgd ajd asjdgasjdg asjgd asjhdg asjgd ajsgd asjgd ajsgd AJKgjsagaj sgajg ajgajdg ajdg asjdgasjd gajsgd ajsg dasjgd ajd asjdgasjdg asjgd asjhdg asjgd ajsgd asjgd ajsgd AJKgjsagaj sgajg ajgajdg ajdg asjdgasjd gajsgd ajsg dasjgd ajd asjdgasjdg asjgd asjhdg asjgd ajsgd asjgd ajsgd AJKgjsagaj sgajg ajgajdg ajdg asjdgasjd gajsgd ajsg dasjgd ajd asjdgasjdg asjgd asjhdg asjgd ajsgd asjgd ajsgd AJKgjsagaj sgajg ajgajdg ajdg asjdgasjd gajsgd ajsg dasjgd ajd asjdgasjdg asjgd asjhdg asjgd ajsgd asjgd ajsgd AJKgjsagaj sgajg ajgajdg ajdg asjdgasjd gajsgd ajsg dasjgd ajd asjdgasjdg asjgd asjhdg asjgd ajsgd asjgd ajsgd AJKgjsagaj sgajg ajgajdg ajdg asjdgasjd gajsgd ajsg dasjgd ajd asjdgasjdg asjgd asjhdg asjgd ajsgd asjgd ajsgd AJKgjsagaj sgajg ajgajdg ajdg asjdgasjd gajsgd ajsg dasjgd ajd asjdgasjdg asjgd asjhdg asjgd ajsgd asjgd ajsgd AJKgjsagaj sgajg ajgajdg ajdg asjdgasjd gajsgd ajsg dasjgd ajd asjdgasjdg asjgd asjhdg asjgd ajsgd asjgd ajsgd AJKgjsagaj sgajg ajgajdg ajdg asjdgasjd gajsgd ajsg dasjgd ajd asjdgasjdg asjgd asjhdg asjgd ajsgd asjgd ajsgd AJKgjsagaj sgajg ajgajdg ajdg asjdgasjd gajsgd ajsg dasjgd ajd asjdgasjdg asjgd asjhdg asjgd ajsgd asjgd ajsgd AJKgjsagaj sgajg ajgajdg ajdg asjdgasjd gajsgd ajsg dasjgd ajd asjdgasjdg asjgd asjhdg asjgd ajsgd asjgd ajsgd AJKgjsagaj sgajg ajgajdg ajdg asjdgasjd gajsgd ajsg dasjgd ajd asjdgasjdg asjgd asjhdg asjgd ajsgd asjgd ajsgd AJKgjsagaj sgajg ajgajdg ajdg asjdgasjd gajsgd ajsg dasjgd ajd asjdgasjdg asjgd asjhdg asjgd ajsgd asjgd ajsgd AJKgjsagaj sgajg ajgajdg ajdg asjdgasjd gajsgd ajsg dasjgd ajd asjdgasjdg asjgd asjhdg asjgd ajsgd asjgd ajsgd AJKgjsagaj sgajg ajgajdg ajdg asjdgasjd gajsgd ajsg dasjgd ajd asjdgasjdg asjgd asjhdg asjgd ajsgd asjgd ajsgd AJKgjsagaj sgajg ajgajdg ajdg asjdgasjd gajsgd ajsg dasjgd ajd asjdgasjdg asjgd asjhdg asjgd ajsgd asjgd ajsgd AJKgjsagaj sgajg ajgajdg ajdg asjdgasjd gajsgd ajsg dasjgd ajd asjdgasjdg asjgd asjhdg asjgd ajsgd asjgd ajsgd AJKgjsagaj sgajg ajgajdg ajdg asjdgasjd gajsgd ajsg dasjgd ajd asjdgasjdg asjgd asjhdg asjgd ajsgd asjgd ajsgd AJKgjsagaj sgajg ajgajdg ajdg asjdgasjd gajsgd ajsg dasjgd ajd asjdgasjdg asjgd asjhdg asjgd ajsgd asjgd ajsgd AJKgjsagaj sgajg ajgajdg ajdg asjdgasjd gajsgd ajsg dasjgd ajd asjdgasjdg asjgd asjhdg asjgd ajsgd asjgd ajsgd AJKgjsagaj sgajg ajgajdg ajdg asjdgasjd gajsgd ajsg dasjgd ajd asjdgasjdg asjgd asjhdg asjgd ajsgd asjgd ajsgd AJKgjsagaj sgajg ajgajdg ajdg asjdgasjd gajsgd ajsg dasjgd ajd asjdgasjdg asjgd asjhdg asjgd ajsgd asjgd ajsgd AJKgjsagaj sgajg ajgajdg ajdg asjdgasjd gajsgd ajsg dasjgd ajd asjdgasjdg asjgd asjhdg asjgd ajsgd asjgd ajsgd AJKgjsagaj sgajg ajgajdg ajdg asjdgasjd gajsgd ajsg dasjgd ajd asjdgasjdg asjgd asjhdg asjgd ajsgd asjgd ajsgd AJKgjsagaj sgajg ajgajdg ajdg asjdgasjd gajsgd ajsg dasjgd ajd asjdgasjdg asjgd asjhdg asjgd ajsgd asjgd ajsgd AJKgjsagaj sgajg ajgajdg ajdg asjdgasjd gajsgd ajsg dasjgd ajd asjdgasjdg asjgd asjhdg asjgd ajsgd asjgd ajsgd AJKgjsagaj sgajg ajgajdg ajdg asjdgasjd gajsgd ajsg dasjgd ajd asjdgasjdg asjgd asjhdg asjgd ajsgd asjgd ajsgd AJKgjsagaj sgajg ajgajdg ajdg asjdgasjd gajsgd ajsg dasjgd ajd asjdgasjdg asjgd asjhdg asjgd ajsgd asjgd ajsgd AJKgjsagaj sgajg ajgajdg ajdg asjdgasjd gajsgd ajsg dasjgd ajd asjdgasjdg asjgd asjhdg asjgd ajsgd asjgd ajsgd AJKgjsagaj sgajg ajgajdg ajdg asjdgasjd gajsgd ajsg dasjgd ajd asjdgasjdg asjgd asjhdg asjgd ajsgd asjgd ajsgd AJKgjsagaj sgajg ajgajdg ajdg asjdgasjd gajsgd ajsg dasjgd ajd asjdgasjdg asjgd asjhdg asjgd ajsgd asjgd ajsgd AJKgjsagaj sgajg ajgajdg ajdg asjdgasjd gajsgd ajsg dasjgd ajd asjdgasjdg asjgd asjhdg asjgd ajsgd asjgd ajsgd AJKgjsagaj sgajg ajgajdg ajdg asjdgasjd gajsgd ajsg dasjgd ajd asjdgasjdg asjgd asjhdg asjgd ajsgd asjgd ajsgd AJKgjsagaj sgajg ajgajdg ajdg asjdgasjd gajsgd ajsg dasjgd ajd asjdgasjdg asjgd asjhdg asjgd ajsgd asjgd ajsgd AJKgjsagaj sgajg ajgajdg ajdg asjdgasjd gajsgd ajsg dasjgd ajd asjdgasjdg asjgd asjhdg asjgd ajsgd asjgd ajsgd AJKgjsagaj sgajg ajgajdg ajdg asjdgasjd gajsgd ajsg dasjgd ajd asjdgasjdg asjgd asjhdg asjgd ajsgd asjgd ajsgd AJKgjsagaj sgajg ajgajdg ajdg asjdgasjd gajsgd ajsg dasjgd ajd asjdgasjdg asjgd asjhdg asjgd ajsgd asjgd ajsgd AJKgjsagaj sgajg ajgajdg ajdg asjdgasjd gajsgd ajsg dasjgd ajd asjdgasjdg asjgd asjhdg asjgd ajsgd asjgd ajsgd AJKgjsagaj sgajg ajgajdg ajdg asjdgasjd gajsgd ajsg dasjgd ajd asjdgasjdg asjgd asjhdg asjgd ajsgd asjgd ajsgd AJKgjsagaj sgajg ajgajdg ajdg asjdgasjd gajsgd ajsg dasjgd ajd asjdgasjdg asjgd asjhdg asjgd ajsgd asjgd ajsgd AJKgjsagaj sgajg ajgajdg ajdg asjdgasjd gajsgd ajsg dasjgd ajd asjdgasjdg asjgd asjhdg asjgd ajsgd asjgd ajsgd AJKgjsagaj sgajg ajgajdg ajdg asjdgasjd gajsgd ajsg dasjgd ajd asjdgasjdg asjgd asjhdg asjgd ajsgd asjgd ajsgd AJKgjsagaj sgajg ajgajdg ajdg asjdgasjd gajsgd ajsg dasjgd ajd asjdgasjdg asjgd asjhdg asjgd ajsgd asjgd ajsgd AJKgjsagaj sgajg ajgajdg ajdg asjdgasjd gajsgd ajsg dasjgd ajd asjdgasjdg asjgd asjhdg asjgd ajsgd asjgd ajsgd AJKgjsagaj sgajg ajgajdg ajdg asjdgasjd gajsgd ajsg dasjgd ajd asjdgasjdg asjgd asjhdg asjgd ajsgd asjgd ajsgd AJKgjsagaj sgajg ajgajdg ajdg asjdgasjd gajsgd ajsg dasjgd ajd asjdgasjdg asjgd asjhdg asjgd ajsgd asjgd ajsgd AJKgjsagaj sgajg ajgajdg ajdg asjdgasjd gajsgd ajsg dasjgd ajd asjdgasjdg asjgd asjhdg asjgd ajsgd asjgd ajsgd AJKgjsagaj sgajg ajgajdg ajdg asjdgasjd gajsgd ajsg dasjgd ajd asjdgasjdg asjgd asjhdg asjgd ajsgd asjgd ajsgd AJKgjsagaj sgajg ajgajdg ajdg asjdgasjd gajsgd ajsg dasjgd ajd asjdgasjdg asjgd asjhdg asjgd ajsgd asjgd ajsgd AJKgjsagaj sgajg ajgajdg ajdg asjdgasjd gajsgd ajsg dasjgd ajd asjdgasjdg asjgd asjhdg asjgd ajsgd asjgd ajsgd AJKgjsagaj sgajg ajgajdg ajdg asjdgasjd gajsgd ajsg dasjgd ajd asjdgasjdg asjgd asjhdg asjgd ajsgd asjgd ajsgd AJKgjsagaj sgajg ajgajdg ajdg asjdgasjd gajsgd ajsg dasjgd ajd asjdgasjdg asjgd asjhdg asjgd ajsgd asjgd ajsgd AJKgjsagaj sgajg ajgajdg ajdg asjdgasjd gajsgd ajsg dasjgd ajd asjdgasjdg asjgd asjhdg asjgd ajsgd asjgd ajsgd AJKgjsagaj sgajg ajgajdg ajdg asjdgasjd gajsgd ajsg dasjgd ajd asjdgasjdg asjgd asjhdg asjgd ajsgd asjgd ajsgd AJKgjsagaj sgajg ajgajdg ajdg asjdgasjd gajsgd ajsg dasjgd ajd asjdgasjdg asjgd asjhdg asjgd ajsgd asjgd ajsgd AJKgjsagaj sgajg ajgajdg ajdg asjdgasjd gajsgd ajsg dasjgd ajd asjdgasjdg asjgd asjhdg asjgd ajsgd asjgd ajsgd AJKgjsagaj sgajg ajgajdg ajdg asjdgasjd gajsgd ajsg dasjgd ajd asjdgasjdg asjgd asjhdg asjgd ajsgd asjgd ajsgd AJKgjsagaj sgajg ajgajdg ajdg asjdgasjd gajsgd ajsg dasjgd ajd asjdgasjdg asjgd asjhdg asjgd ajsgd asjgd ajsgd AJKgjsagaj sgajg ajgajdg ajdg asjdgasjd gajsgd ajsg dasjgd ajd asjdgasjdg asjgd asjhdg asjgd ajsgd asjgd ajsgd AJKgjsagaj sgajg ajgajdg ajdg asjdgasjd gajsgd ajsg dasjgd ajd asjdgasjdg asjgd asjhdg asjgd ajsgd asjgd ajsgd AJKgjsagaj sgajg ajgajdg ajdg asjdgasjd gajsgd ajsg dasjgd ajd asjdgasjdg asjgd asjhdg asjgd ajsgd asjgd ajsgd AJKgjsagaj sgajg ajgajdg ajdg asjdgasjd gajsgd ajsg dasjgd ajd asjdgasjdg asjgd asjhdg asjgd ajsgd asjgd ajsgd AJKgjsagaj sgajg ajgajdg ajdg asjdgasjd gajsgd ajsg dasjgd ajd asjdgasjdg asjgd asjhdg asjgd ajsgd asjgd ajsgd AJKgjsagaj sgajg ajgajdg ajdg asjdgasjd gajsgd ajsg dasjgd ajd asjdgasjdg asjgd asjhdg asjgd ajsgd asjgd ajsgd AJKgjsagaj sgajg ajgajdg ajdg asjdgasjd gajsgd ajsg dasjgd ajd asjdgasjdg asjgd asjhdg asjgd ajsgd asjgd ajsgd AJKgjsagaj sgajg ajgajdg ajdg asjdgasjd gajsgd ajsg dasjgd ajd asjdgasjdg asjgd asjhdg asjgd ajsgd asjgd ajsgd AJKgjsagaj sgajg ajgajdg ajdg asjdgasjd gajsgd ajsg dasjgd ajd asjdgasjdg asjgd asjhdg asjgd ajsgd asjgd ajsgd AJKgjsagaj sgajg ajgajdg ajdg asjdgasjd gajsgd ajsg dasjgd ajd asjdgasjdg asjgd asjhdg asjgd ajsgd asjgd ajsgd AJKgjsagaj sgajg ajgajdg ajdg asjdgasjd gajsgd ajsg dasjgd ajd asjdgasjdg asjgd asjhdg asjgd ajsgd asjgd ajsgd AJKgjsagaj sgajg ajgajdg ajdg asjdgasjd gajsgd ajsg dasjgd ajd asjdgasjdg asjgd asjhdg asjgd ajsgd asjgd ajsgd AJKgjsagaj sgajg ajgajdg ajdg asjdgasjd gajsgd ajsg dasjgd ajd asjdgasjdg asjgd asjhdg asjgd ajsgd asjgd ajsgd AJKgjsagaj sgajg ajgajdg ajdg asjdgasjd gajsgd ajsg dasjgd ajd asjdgasjdg asjgd asjhdg asjgd ajsgd asjgd ajsgd AJKgjsagaj sgajg ajgajdg ajdg asjdgasjd gajsgd ajsg dasjgd ajd asjdgasjdg asjgd asjhdg asjgd ajsgd asjgd ajsgd AJKgjsagaj sgajg ajgajdg ajdg asjdgasjd gajsgd ajsg dasjgd ajd asjdgasjdg asjgd asjhdg asjgd ajsgd asjgd ajsgd AJKgjsagaj sgajg ajgajdg ajdg asjdgasjd gajsgd ajsg dasjgd ajd asjdgasjdg asjgd asjhdg asjgd ajsgd asjgd ajsgd AJKgjsagaj sgajg ajgajdg ajdg asjdgasjd gajsgd ajsg dasjgd ajd asjdgasjdg asjgd asjhdg asjgd ajsgd asjgd ajsgd AJKgjsagaj sgajg ajgajdg ajdg asjdgasjd gajsgd ajsg dasjgd ajd asjdgasjdg asjgd asjhdg asjgd ajsgd asjgd ajsgd AJKgjsagaj sgajg ajgajdg ajdg asjdgasjd gajsgd ajsg dasjgd ajd asjdgasjdg asjgd asjhdg asjgd ajsgd asjgd ajsgd ",
+      "content": "adsdada asd jhva shj hadgsjg sdajhg jhsg djhga sjgjsadgjsdg asdasdasdsad\nasdas da shasudbucadsuyuasydutuytuytdvuyastdvcuyatduyac \n\nascbdasgcdbxgadsdada asd jhva shj hadgsjg sdajhg jhsg djhga sjgjsadgjsdg asdasdasdsad\nasdas da shasudbucadsuyuasydutuytuytdvuyastdvcuyatduyac \nascbdasgcdbxgadsdada asd jhva shj hadgsjg sdajhg jhsg djhga sjgjsadgjsdg asdasdasdsad\nasdas da shasudbucadsuyuasydutuytuytdvuyastdvcuyatduyac \n\nascbdasgcdbxgadsdada asd jhva shj hadgsjg sdajhg jhsg djhga sjgjsadgjsdg asdasdasdsad\nasdas da shasudbucadsuyuasydutuytuytdvuyastdvcuyatduyac \n\nascbdasgcdbxg",
       "created_at": "2026-03-31T00:26:39",
-      "updated_at": "2026-03-31T00:28:25"
+      "updated_at": "2026-03-31T01:03:39",
+      "paragraphs": [
+        {
+          "text": "adsdada asd jhva shj hadgsjg sdajhg jhsg djhga sjgjsadgjsdg asdasdasdsad\nasdas da shasudbucadsuyuasydutuytuytdvuyastdvcuyatduyac",
+          "updated_at": "2026-03-31T01:03:39",
+          "mood": "normal"
+        },
+        {
+          "text": "ascbdasgcdbxgadsdada asd jhva shj hadgsjg sdajhg jhsg djhga sjgjsadgjsdg asdasdasdsad\nasdas da shasudbucadsuyuasydutuytuytdvuyastdvcuyatduyac \nascbdasgcdbxgadsdada asd jhva shj hadgsjg sdajhg jhsg djhga sjgjsadgjsdg asdasdasdsad\nasdas da shasudbucadsuyuasydutuytuytdvuyastdvcuyatduyac",
+          "updated_at": "2026-03-31T01:03:39",
+          "mood": "normal"
+        },
+        {
+          "text": "ascbdasgcdbxgadsdada asd jhva shj hadgsjg sdajhg jhsg djhga sjgjsadgjsdg asdasdasdsad\nasdas da shasudbucadsuyuasydutuytuytdvuyastdvcuyatduyac",
+          "updated_at": "2026-03-31T01:03:39",
+          "mood": "normal"
+        },
+        {
+          "text": "ascbdasgcdbxg",
+          "updated_at": "2026-03-31T01:03:39",
+          "mood": "normal"
+        }
+      ]
+    },
+    {
+      "id": "topic_c5e0b27bf848",
+      "category_id": "cat_b70fc4dee87c",
+      "title": "Half Account Blown - 31 Mar 2026",
+      "content": "This feeling of being a loser needs to be there with you. what you have done today is unimaginable and very disgusting; you just almost blown your account totally again\nYou have seen -3.4 L in the morning at 9:30 AM and right now at 4:49 PM. You can see it as -18.74 L. You have almost lost 14 L extra in the matter of 6 hrs\nThis is not just dumbness; this is showing that you can't manage any type of money\nYou can't control your emotions.\nWhere you wanted to be in the 20L for the full year, now you have only 5.2L remaining as a yearly profit in Zerodha.\nYou did the worst thing, or more than the worst, that anyone can even imagine. Why don't you understand this is business and businesses run on rules? If rules are broken or rules are met, then you should do a particular thing and not something like any random thing.\n\nNo matter You think that this trade result is reversible, but that never means that you take any trade that is not in your capacity to handle or you take any trade in panic.\nYou have to be responsible for every click you do on your device and every penny, and those decisions should be mostly in favor of yourself.\n\nYou should not manage money so recklessly. If you think you are good at trading while the VIX is high, you should make decisions based on charts and not based on the gut feeling only. If you feel this should happen, then that thing is inevitable; that is not how anything will work in this world. You have to check everything, and you have to maintain notes, and every decision of yours should be based on some logic. It should not be like, \"If I have taken the trade, it has to go right.\"\n\nToday also, 2 times you got a chance for a great exit, an exit that could have saved your 14 L. In trading, being right is not what you have to focus on, but money in hand is the one thing you have to mainly focus on. You are not doing trading because you have to. Right in the trading, you are doing trading because you have to have money in your hand\nSo when you are being wrong, accept all that and cut your losses. The earliest you could have stopped the trading was at 1 and saved 8L. That is also one thing to be noticed; you just held on to the position just because you thought that there would be a bounce coming, but you have to think and agree that the bounce may come or not, but you have to exit your position once certain rules are met. \n\nYou can only win this race by following all the rules; you can't just do whatever you want and expect that you'll win at the end of the day. \nYou have to follow the rules as you bow down to the almighty god; you have to bow down here also. Once a stop loss is gone, you have to close the trade; that's it, there are no ifs and buts. \n\nYou don't know what you have to face to recover this 18.75 L and how much charge you have to pay while doing that thing. with just 14 L of total capital, in which 9 L is the asset that is pledged, and you have only 6 L of cash in this. In this you have to think that you have to pay 40 rs also as an extra trading fee to not keep 50% cash. Dying is far better than doing this kind of mishap. You should have to think 1000% before trading. Whatever you have right now is money from banks and not your money; you have to pay them back at any given point. Losing money like this is not what you can afford, and you should not trade this much recklessly.\n\nYou have to understand in trading, 5-10% a month is more than enough. You can't win everything and anything in just a month; you have to have pattern recognition and mainly risk management. If you don't manage risk, you'll lose capital. Like today, you had everything today, every f*ing thing, to have your capital more than 31L, but now it is only 14L. Why? Because you did foolish trading; you never looked at charts or data; you just looked at hope, and hope will never let you win. If you want to win, you have to check all the possibilities with real-time data, and if that data is not supporting your vision, you have to leave that trade. You have to make sure that whatever you are trading is mainly based on your rules, and rules are not there to be broken. \n\nAll said and done, nothing is going to be guaranteed in this field; you have to think and also have faith in yourself that you can do or repeat all the processes that you have done in the past. \nFrom a total net worth of 5.8, or we can say 5 cash + 0.8 trading balance, you achieved 15L cash + 28L in trading balance. You surely can achieve anything, but you have to make sure that you don't make this fumble again. \n\"Write your rules differently, and you have to read them daily before starting the trade.\"\n\nYou have almost lost 80% of the profit on the last day of the year. That is not fair enough; you have to again work for all that money. You have to make careful decisions, and you have to get all the focus, decision-making, and different abilities in line to have that money back. But if you are not sure about your emotions, write it down in the rules, and once a rule is set, you won't break it. \n\nSearching for anything and working on anything won't give you a return. You'll have to stop at a point and make things autonomous. You have to understand that peace is your wealth, not the money. Until and unless you can't feel safe in any trade, you should not do that. No trade against the trend because of major stress you'll have from there only. You have to understand one simple thing: you can't lose huge money now onwards. If you are winning, that is the best thing, and that has to happen, and we have to repeat winning streaks and winning positions, but you should stop any trade that is too high or out of your peace zone, which can freeze or which can give you enormous stress. \n\nBUCK UP, MY BOY. YOU HAVE TO MAKE A 1.35X RETURN ON CURRENT CAPITAL, SO YOU'LL BE ON THE SAME HIGH LEVEL AS WE HAD TODAY.\n\nAND I KNOW YOU'LL COMPLETE THIS CHALLENGE TOO; JUST HAVE FAITH AND POSITIVITY IN YOURSELF; GOD IS WITH YOU AND HE'LL MAKE YOU WIN.\n\nJUST STAY CALM, HEAD DOWN, AND MOVE FORWARD.  THIS TIME TOO SHALL PASS",
+      "created_at": "2026-03-31T01:11:15",
+      "updated_at": "2026-03-31T01:19:23",
+      "paragraphs": [
+        {
+          "text": "This feeling of being a loser needs to be there with you. what you have done today is unimaginable and very disgusting; you just almost blown your account totally again\nYou have seen -3.4 L in the morning at 9:30 AM and right now at 4:49 PM. You can see it as -18.74 L. You have almost lost 14 L extra in the matter of 6 hrs\nThis is not just dumbness; this is showing that you can't manage any type of money\nYou can't control your emotions.\nWhere you wanted to be in the 20L for the full year, now you have only 5.2L remaining as a yearly profit in Zerodha.\nYou did the worst thing, or more than the worst, that anyone can even imagine. Why don't you understand this is business and businesses run on rules? If rules are broken or rules are met, then you should do a particular thing and not something like any random thing.",
+          "updated_at": "2026-03-31T01:19:23",
+          "mood": "normal"
+        },
+        {
+          "text": "No matter You think that this trade result is reversible, but that never means that you take any trade that is not in your capacity to handle or you take any trade in panic.\nYou have to be responsible for every click you do on your device and every penny, and those decisions should be mostly in favor of yourself.",
+          "updated_at": "2026-03-31T01:19:23",
+          "mood": "normal"
+        },
+        {
+          "text": "You should not manage money so recklessly. If you think you are good at trading while the VIX is high, you should make decisions based on charts and not based on the gut feeling only. If you feel this should happen, then that thing is inevitable; that is not how anything will work in this world. You have to check everything, and you have to maintain notes, and every decision of yours should be based on some logic. It should not be like, \"If I have taken the trade, it has to go right.\"",
+          "updated_at": "2026-03-31T01:19:23",
+          "mood": "normal"
+        },
+        {
+          "text": "Today also, 2 times you got a chance for a great exit, an exit that could have saved your 14 L. In trading, being right is not what you have to focus on, but money in hand is the one thing you have to mainly focus on. You are not doing trading because you have to. Right in the trading, you are doing trading because you have to have money in your hand\nSo when you are being wrong, accept all that and cut your losses. The earliest you could have stopped the trading was at 1 and saved 8L. That is also one thing to be noticed; you just held on to the position just because you thought that there would be a bounce coming, but you have to think and agree that the bounce may come or not, but you have to exit your position once certain rules are met.",
+          "updated_at": "2026-03-31T01:19:23",
+          "mood": "normal"
+        },
+        {
+          "text": "You can only win this race by following all the rules; you can't just do whatever you want and expect that you'll win at the end of the day. \nYou have to follow the rules as you bow down to the almighty god; you have to bow down here also. Once a stop loss is gone, you have to close the trade; that's it, there are no ifs and buts.",
+          "updated_at": "2026-03-31T01:19:23",
+          "mood": "normal"
+        },
+        {
+          "text": "You don't know what you have to face to recover this 18.75 L and how much charge you have to pay while doing that thing. with just 14 L of total capital, in which 9 L is the asset that is pledged, and you have only 6 L of cash in this. In this you have to think that you have to pay 40 rs also as an extra trading fee to not keep 50% cash. Dying is far better than doing this kind of mishap. You should have to think 1000% before trading. Whatever you have right now is money from banks and not your money; you have to pay them back at any given point. Losing money like this is not what you can afford, and you should not trade this much recklessly.",
+          "updated_at": "2026-03-31T01:19:23",
+          "mood": "normal"
+        },
+        {
+          "text": "You have to understand in trading, 5-10% a month is more than enough. You can't win everything and anything in just a month; you have to have pattern recognition and mainly risk management. If you don't manage risk, you'll lose capital. Like today, you had everything today, every f*ing thing, to have your capital more than 31L, but now it is only 14L. Why? Because you did foolish trading; you never looked at charts or data; you just looked at hope, and hope will never let you win. If you want to win, you have to check all the possibilities with real-time data, and if that data is not supporting your vision, you have to leave that trade. You have to make sure that whatever you are trading is mainly based on your rules, and rules are not there to be broken.",
+          "updated_at": "2026-03-31T01:19:23",
+          "mood": "normal"
+        },
+        {
+          "text": "All said and done, nothing is going to be guaranteed in this field; you have to think and also have faith in yourself that you can do or repeat all the processes that you have done in the past. \nFrom a total net worth of 5.8, or we can say 5 cash + 0.8 trading balance, you achieved 15L cash + 28L in trading balance. You surely can achieve anything, but you have to make sure that you don't make this fumble again. \n\"Write your rules differently, and you have to read them daily before starting the trade.\"",
+          "updated_at": "2026-03-31T01:19:23",
+          "mood": "normal"
+        },
+        {
+          "text": "You have almost lost 80% of the profit on the last day of the year. That is not fair enough; you have to again work for all that money. You have to make careful decisions, and you have to get all the focus, decision-making, and different abilities in line to have that money back. But if you are not sure about your emotions, write it down in the rules, and once a rule is set, you won't break it.",
+          "updated_at": "2026-03-31T01:19:23",
+          "mood": "normal"
+        },
+        {
+          "text": "Searching for anything and working on anything won't give you a return. You'll have to stop at a point and make things autonomous. You have to understand that peace is your wealth, not the money. Until and unless you can't feel safe in any trade, you should not do that. No trade against the trend because of major stress you'll have from there only. You have to understand one simple thing: you can't lose huge money now onwards. If you are winning, that is the best thing, and that has to happen, and we have to repeat winning streaks and winning positions, but you should stop any trade that is too high or out of your peace zone, which can freeze or which can give you enormous stress.",
+          "updated_at": "2026-03-31T01:19:23",
+          "mood": "normal"
+        },
+        {
+          "text": "BUCK UP, MY BOY. YOU HAVE TO MAKE A 1.35X RETURN ON CURRENT CAPITAL, SO YOU'LL BE ON THE SAME HIGH LEVEL AS WE HAD TODAY.",
+          "updated_at": "2026-03-31T01:19:23",
+          "mood": "normal"
+        },
+        {
+          "text": "AND I KNOW YOU'LL COMPLETE THIS CHALLENGE TOO; JUST HAVE FAITH AND POSITIVITY IN YOURSELF; GOD IS WITH YOU AND HE'LL MAKE YOU WIN.",
+          "updated_at": "2026-03-31T01:19:23",
+          "mood": "normal"
+        },
+        {
+          "text": "JUST STAY CALM, HEAD DOWN, AND MOVE FORWARD.  THIS TIME TOO SHALL PASS",
+          "updated_at": "2026-03-31T01:19:23",
+          "mood": "normal"
+        }
+      ]
+    },
+    {
+      "id": "topic_2be7a6da76d5",
+      "category_id": "cat_19caca3306b7",
+      "title": "High VIX",
+      "content": "- High VIX makes sure that volatility is high\n- ",
+      "created_at": "2026-03-31T01:27:34",
+      "updated_at": "2026-04-06T09:12:35",
+      "paragraphs": [
+        {
+          "text": "- High VIX makes sure that volatility is high\n-",
+          "updated_at": "2026-04-06T09:12:35",
+          "mood": "normal"
+        }
+      ]
+    },
+    {
+      "id": "topic_a97163eca541",
+      "category_id": "cat_19caca3306b7",
+      "title": "Low VIX",
+      "content": "",
+      "created_at": "2026-03-31T01:27:53",
+      "updated_at": "2026-03-31T01:27:54",
+      "paragraphs": []
+    },
+    {
+      "id": "topic_1885dd937625",
+      "category_id": "cat_f267bdc96a16",
+      "title": "New version updates",
+      "content": "Find what is new in flutter 3.14.\n\nHEy there we are going to learn about new verison",
+      "created_at": "2026-04-01T20:22:30",
+      "updated_at": "2026-06-13T14:38:27",
+      "paragraphs": [
+        {
+          "text": "Find what is new in flutter 3.14.",
+          "updated_at": "2026-04-01T20:23:01",
+          "mood": "normal"
+        },
+        {
+          "text": "HEy there we are going to learn about new verison",
+          "updated_at": "2026-06-13T14:38:27",
+          "mood": "happy"
+        }
+      ]
+    },
+    {
+      "id": "topic_fc6d1341a17a",
+      "category_id": "cat_25313bf229f1",
+      "title": "06 Apr 2026",
+      "content": "Initial capital is 17.13L, and my final expectation for today is 22.50L which is 5.30L return.\n\n-will add all the position commentary so in future i can check how past trades worked and how i changed my emotions there.\n\nmarket took a deep and i deplyod 98%. of cash with initial 15 min of pain now i can see some positive retuurns  [9:37 AM] (Some. wha panicked)\n\nwhile seeing some positive return (Feared and opitimistic )\n\ngone all postive and.  now in negative (confsed and optimistic)\n\nsome more down ( bleeding in pain and swaering ) \n\nhad a thought if went back to zero. will cut half my position ( less angry but still feared )\n\nnear break out reduced negaive by 66%, shacking leg ( optimistic ) \n\nmarket moves wildly on both side {not market but MTM} (still trying to keep you calm and focus as less as i can on moving MTM )\n\nNow again in -2L zone thinking to cut down al position at 1L loss. \n\nTalking with J in between i had hit lowest of 3.5L also (didn't panicked but thought to close position, position soon recovered and i stayed in position )\n\n[quite a normal to high volatile day not a single direction, in first 1.15-2 hours it was in down trend but gave major reversal and went up now in a slight up trend but giving full candles in revesal like major red candles and then again slowly up]\n\nalmost back to 0 right nw it is -0.5L only\n\nstill talking to J and MTM is howering near -0.5, 0, 0.3 most of the time. \n\npostive in range 0.5 to 1.5 L\n\n(Breathing calm and watching markets)\n\nNow feeling freeze as market move from +1.2 to -1L felt like i am freeze and waiting for recovery only \n\nNow hovering between 0.8, 1.0, 1.2 but in negative (Curious finding pattern in chart, thinking should i hold or cut the position )\n\nback in positive +1.3L zone\n\nnow moved the range upside to +2.5L to +3.5L range, market is moving very quickly upside (I have 3 position deep ITM sensex, ATM nifty and ATM sensex call )\n\nNow i am seeing +3.8-4.5L range (quite calm and a small happy)\n\nseeing +6L (todays total expected profit i can achieve if i will book it here )\n\nits +7.2 now the force is so high that i belive now sensex will cross 74000 which was at day low at 72750. CMP 73800\n\nif it goes to 74000 i'll be seeing 10L profit, let's see \ni just seen daily chart if we hit 74200 i may hit a jackpot with all these position \n\nNow i am being impatiend i can see 7.5L positive retunrn have doubt that should i book or still wait because i can hit 25% more \n\npanicking swearing 8.5L not able to handle profit\n\nClosed at 10.28L profit. decent one.. ",
+      "created_at": "2026-04-06T09:36:23",
+      "updated_at": "2026-04-06T15:08:54",
+      "paragraphs": [
+        {
+          "text": "Initial capital is 17.13L, and my final expectation for today is 22.50L which is 5.30L return.",
+          "updated_at": "2026-04-06T15:08:54",
+          "mood": "normal"
+        },
+        {
+          "text": "-will add all the position commentary so in future i can check how past trades worked and how i changed my emotions there.",
+          "updated_at": "2026-04-06T15:08:54",
+          "mood": "normal"
+        },
+        {
+          "text": "market took a deep and i deplyod 98%. of cash with initial 15 min of pain now i can see some positive retuurns  [9:37 AM] (Some. wha panicked)",
+          "updated_at": "2026-04-06T15:08:54",
+          "mood": "normal"
+        },
+        {
+          "text": "while seeing some positive return (Feared and opitimistic )",
+          "updated_at": "2026-04-06T15:08:54",
+          "mood": "normal"
+        },
+        {
+          "text": "gone all postive and.  now in negative (confsed and optimistic)",
+          "updated_at": "2026-04-06T15:08:54",
+          "mood": "normal"
+        },
+        {
+          "text": "some more down ( bleeding in pain and swaering )",
+          "updated_at": "2026-04-06T15:08:54",
+          "mood": "normal"
+        },
+        {
+          "text": "had a thought if went back to zero. will cut half my position ( less angry but still feared )",
+          "updated_at": "2026-04-06T15:08:54",
+          "mood": "normal"
+        },
+        {
+          "text": "near break out reduced negaive by 66%, shacking leg ( optimistic )",
+          "updated_at": "2026-04-06T15:08:54",
+          "mood": "normal"
+        },
+        {
+          "text": "market moves wildly on both side {not market but MTM} (still trying to keep you calm and focus as less as i can on moving MTM )",
+          "updated_at": "2026-04-06T15:08:54",
+          "mood": "normal"
+        },
+        {
+          "text": "Now again in -2L zone thinking to cut down al position at 1L loss.",
+          "updated_at": "2026-04-06T15:08:54",
+          "mood": "normal"
+        },
+        {
+          "text": "Talking with J in between i had hit lowest of 3.5L also (didn't panicked but thought to close position, position soon recovered and i stayed in position )",
+          "updated_at": "2026-04-06T15:08:54",
+          "mood": "normal"
+        },
+        {
+          "text": "[quite a normal to high volatile day not a single direction, in first 1.15-2 hours it was in down trend but gave major reversal and went up now in a slight up trend but giving full candles in revesal like major red candles and then again slowly up]",
+          "updated_at": "2026-04-06T15:08:54",
+          "mood": "normal"
+        },
+        {
+          "text": "almost back to 0 right nw it is -0.5L only",
+          "updated_at": "2026-04-06T15:08:54",
+          "mood": "normal"
+        },
+        {
+          "text": "still talking to J and MTM is howering near -0.5, 0, 0.3 most of the time.",
+          "updated_at": "2026-04-06T15:08:54",
+          "mood": "normal"
+        },
+        {
+          "text": "postive in range 0.5 to 1.5 L",
+          "updated_at": "2026-04-06T15:08:54",
+          "mood": "normal"
+        },
+        {
+          "text": "(Breathing calm and watching markets)",
+          "updated_at": "2026-04-06T15:08:54",
+          "mood": "normal"
+        },
+        {
+          "text": "Now feeling freeze as market move from +1.2 to -1L felt like i am freeze and waiting for recovery only",
+          "updated_at": "2026-04-06T15:08:54",
+          "mood": "normal"
+        },
+        {
+          "text": "Now hovering between 0.8, 1.0, 1.2 but in negative (Curious finding pattern in chart, thinking should i hold or cut the position )",
+          "updated_at": "2026-04-06T15:08:54",
+          "mood": "normal"
+        },
+        {
+          "text": "back in positive +1.3L zone",
+          "updated_at": "2026-04-06T15:08:54",
+          "mood": "normal"
+        },
+        {
+          "text": "now moved the range upside to +2.5L to +3.5L range, market is moving very quickly upside (I have 3 position deep ITM sensex, ATM nifty and ATM sensex call )",
+          "updated_at": "2026-04-06T15:08:54",
+          "mood": "normal"
+        },
+        {
+          "text": "Now i am seeing +3.8-4.5L range (quite calm and a small happy)",
+          "updated_at": "2026-04-06T15:08:54",
+          "mood": "normal"
+        },
+        {
+          "text": "seeing +6L (todays total expected profit i can achieve if i will book it here )",
+          "updated_at": "2026-04-06T15:08:54",
+          "mood": "normal"
+        },
+        {
+          "text": "its +7.2 now the force is so high that i belive now sensex will cross 74000 which was at day low at 72750. CMP 73800",
+          "updated_at": "2026-04-06T15:08:54",
+          "mood": "normal"
+        },
+        {
+          "text": "if it goes to 74000 i'll be seeing 10L profit, let's see \ni just seen daily chart if we hit 74200 i may hit a jackpot with all these position",
+          "updated_at": "2026-04-06T15:08:54",
+          "mood": "normal"
+        },
+        {
+          "text": "Now i am being impatiend i can see 7.5L positive retunrn have doubt that should i book or still wait because i can hit 25% more",
+          "updated_at": "2026-04-06T15:08:54",
+          "mood": "normal"
+        },
+        {
+          "text": "panicking swearing 8.5L not able to handle profit",
+          "updated_at": "2026-04-06T15:08:54",
+          "mood": "normal"
+        },
+        {
+          "text": "Closed at 10.28L profit. decent one..",
+          "updated_at": "2026-04-06T15:08:54",
+          "mood": "normal"
+        }
+      ]
+    },
+    {
+      "id": "topic_b98312c793a8",
+      "category_id": "cat_06bb31481b05",
+      "title": "Bajirao mastani",
+      "content": "Bajirao ki raftar hi bajirao ki  pehchan hain mastani bai !!!",
+      "created_at": "2026-04-06T15:42:12",
+      "updated_at": "2026-04-13T01:08:19",
+      "paragraphs": [
+        {
+          "text": "Bajirao ki raftar hi bajirao ki  pehchan hain mastani bai !!!",
+          "updated_at": "2026-04-13T01:08:19",
+          "mood": "normal"
+        }
+      ]
+    },
+    {
+      "id": "topic_08eb5883475b",
+      "category_id": "cat_25313bf229f1",
+      "title": "07 Apr 2026",
+      "content": "Initial capital is 27.36 L, and my final expectation for today is 30.50 L, which is a 3.14 L return.\n\nDone for the Day (10:01 AM)\n\nTook new bet, biggest bet, with 30.7 L in value. \n\nNow in 8% profit in that, thinking that I can maximise the profit till 25% in this trade\n\nIt reached 35%. \n\ninstead of 3.14 L target MTM for daily is showing 13.23 L. \n\nThough I have booked 9.7L-9.9L, some position is still open for tomorrow's RBI policy.\n",
+      "created_at": "2026-04-07T09:13:02",
+      "updated_at": "2026-04-07T15:44:02",
+      "paragraphs": [
+        {
+          "text": "Initial capital is 27.36 L, and my final expectation for today is 30.50 L, which is a 3.14 L return.",
+          "updated_at": "2026-04-07T15:44:02",
+          "mood": "normal"
+        },
+        {
+          "text": "Done for the Day (10:01 AM)",
+          "updated_at": "2026-04-07T15:44:02",
+          "mood": "normal"
+        },
+        {
+          "text": "Took new bet, biggest bet, with 30.7 L in value.",
+          "updated_at": "2026-04-07T15:44:02",
+          "mood": "normal"
+        },
+        {
+          "text": "Now in 8% profit in that, thinking that I can maximise the profit till 25% in this trade",
+          "updated_at": "2026-04-07T15:44:02",
+          "mood": "normal"
+        },
+        {
+          "text": "It reached 35%.",
+          "updated_at": "2026-04-07T15:44:02",
+          "mood": "normal"
+        },
+        {
+          "text": "instead of 3.14 L target MTM for daily is showing 13.23 L.",
+          "updated_at": "2026-04-07T15:44:02",
+          "mood": "normal"
+        },
+        {
+          "text": "Though I have booked 9.7L-9.9L, some position is still open for tomorrow's RBI policy.",
+          "updated_at": "2026-04-07T15:44:02",
+          "mood": "normal"
+        }
+      ]
+    },
+    {
+      "id": "topic_73e59cc6ff51",
+      "category_id": "cat_25313bf229f1",
+      "title": "8 Apr 2026",
+      "content": "As mentioned that some position is open and had carry forward position from the last day. \n\nI never thought this day can be the day when my whole life perspective will be change and ",
+      "created_at": "2026-04-10T01:50:30",
+      "updated_at": "2026-04-10T01:59:09",
+      "paragraphs": [
+        {
+          "text": "As mentioned that some position is open and had carry forward position from the last day.",
+          "updated_at": "2026-04-10T01:59:09",
+          "mood": "normal"
+        },
+        {
+          "text": "I never thought this day can be the day when my whole life perspective will be change and",
+          "updated_at": "2026-04-10T01:59:09",
+          "mood": "normal"
+        }
+      ]
+    },
+    {
+      "id": "topic_8ee9b4a8a2eb",
+      "category_id": "cat_25313bf229f1",
+      "title": "9 Apr 2026",
+      "content": "",
+      "created_at": "2026-04-10T01:50:38",
+      "updated_at": "2026-04-10T01:50:40",
+      "paragraphs": []
+    },
+    {
+      "id": "topic_3498bc659326",
+      "category_id": "cat_06bb31481b05",
+      "title": "Golmaal Again",
+      "content": "Jab God ki marzi ho!!! chizo me logic nahi magic hota hain!!!",
+      "created_at": "2026-04-11T00:38:07",
+      "updated_at": "2026-04-11T00:38:46",
+      "paragraphs": [
+        {
+          "text": "Jab God ki marzi ho!!! chizo me logic nahi magic hota hain!!!",
+          "updated_at": "2026-04-11T00:38:46",
+          "mood": "normal"
+        }
+      ]
+    },
+    {
+      "id": "topic_7633ed5af59f",
+      "category_id": "cat_7015030ad94e",
+      "title": "Pent House",
+      "content": "2,25,00,000 \n\nIt is 2.25 Cr. \n\nChalo karte hain. \n\nG**** ka jor lagate hain now this is the new goal kelvin \ndekhliya beth gaya dimag me \nNow let start the imagination and FUCKING STRUGLE for that. \n\nkarte hain adi choti ki mehnat and ab kuchh bhi karke ye to karna hi hain hain.\n\nA FUCKING PENT HOUSE !!\nOWNED, SIGNED AND DONE!!",
+      "created_at": "2026-04-11T12:01:43",
+      "updated_at": "2026-05-15T00:50:27",
+      "paragraphs": [
+        {
+          "text": "2,25,00,000",
+          "updated_at": "2026-04-11T12:04:14",
+          "mood": "normal"
+        },
+        {
+          "text": "It is 2.25 Cr.",
+          "updated_at": "2026-04-11T12:04:14",
+          "mood": "normal"
+        },
+        {
+          "text": "Chalo karte hain.",
+          "updated_at": "2026-04-11T12:04:14",
+          "mood": "normal"
+        },
+        {
+          "text": "G**** ka jor lagate hain now this is the new goal kelvin\ndekhliya beth gaya dimag me\nNow let start the imagination and FUCKING STRUGLE for that.",
+          "updated_at": "2026-05-15T00:50:17",
+          "mood": "normal"
+        },
+        {
+          "text": "karte hain adi choti ki mehnat and ab kuchh bhi karke ye to karna hi hain hain.",
+          "updated_at": "2026-04-11T12:04:14",
+          "mood": "normal"
+        },
+        {
+          "text": "A FUCKING PENT HOUSE !!\nOWNED, SIGNED AND DONE!!",
+          "updated_at": "2026-04-11T12:04:14",
+          "mood": "normal"
+        }
+      ]
+    },
+    {
+      "id": "topic_34f0cdd85526",
+      "category_id": "cat_208f78c23a99",
+      "title": "Buy New Pent House - Prompt",
+      "content": "I am person having decent savings og 60-65L \ni have seen a pent house and planning to purchase that cosider that i am tax payer to indian govt and staying in gujrat \nconsider yourself as a my persaonal CA and think and advice accordingly here are my questions how much money i need to earn to afford 2.25 CR pent house with 4 bhk \nwhat could be my extra costs like furniture etc etc consider ITR and filling taxes in this too. I want to take least home loan but even if i have to take home loan least how much it should be and what will be my EMIs what is your take on purchasing so much lavish pent house is it ambitious or i should not directly purchase something like that I am thinking to expand my income and will be reaching 1.3Cr in next quarter and by year end i want to reach till 2-2.5 CR with my business growing fastly. give me specific report and details on this topic. Do check all the aspects and create a full detail video.\n\n\nwhat are the chances of managing home once i earn total 2Cr in cash and buy the home in cash explain me if i earn 2cr in cash how much i have to pay in taxes and also calculate amount that i have to earn which give me 2.5 Cr after taxes and also what monthly expenses i have to bear after owning that size of a house and lifestyle which comes with it.",
+      "created_at": "2026-04-11T15:41:19",
+      "updated_at": "2026-04-13T00:02:01",
+      "paragraphs": [
+        {
+          "text": "I am person having decent savings og 60-65L \ni have seen a pent house and planning to purchase that cosider that i am tax payer to indian govt and staying in gujrat \nconsider yourself as a my persaonal CA and think and advice accordingly here are my questions how much money i need to earn to afford 2.25 CR pent house with 4 bhk \nwhat could be my extra costs like furniture etc etc consider ITR and filling taxes in this too. I want to take least home loan but even if i have to take home loan least how much it should be and what will be my EMIs what is your take on purchasing so much lavish pent house is it ambitious or i should not directly purchase something like that I am thinking to expand my income and will be reaching 1.3Cr in next quarter and by year end i want to reach till 2-2.5 CR with my business growing fastly. give me specific report and details on this topic. Do check all the aspects and create a full detail video.",
+          "updated_at": "2026-04-13T00:02:01",
+          "mood": "normal"
+        },
+        {
+          "text": "what are the chances of managing home once i earn total 2Cr in cash and buy the home in cash explain me if i earn 2cr in cash how much i have to pay in taxes and also calculate amount that i have to earn which give me 2.5 Cr after taxes and also what monthly expenses i have to bear after owning that size of a house and lifestyle which comes with it.",
+          "updated_at": "2026-04-13T00:02:01",
+          "mood": "normal"
+        }
+      ]
+    },
+    {
+      "id": "topic_1be990b45966",
+      "category_id": "cat_c26f06bbeb7e",
+      "title": "Notes",
+      "content": "You are not in a right relationship if it is not uplifting you in your life.",
+      "created_at": "2026-04-13T01:08:21",
+      "updated_at": "2026-05-15T00:51:08",
+      "paragraphs": [
+        {
+          "text": "You are not in a right relationship if it is not uplifting you in your life.",
+          "updated_at": "2026-04-13T16:51:35",
+          "mood": "normal"
+        }
+      ]
+    },
+    {
+      "id": "topic_0ca802faa7ba",
+      "category_id": "cat_25313bf229f1",
+      "title": "13 Apr 2026",
+      "content": "So the question is, why did you do this?\n\nI know you can change the issue; you can re-run and get all the money, but the main concern is why you did this.\n\nSo the last time you did was an 18L blunder, but this time you did 23L. That is too massive, and that too just before your birthday.\n\nAgain, the same mistakes you are making and losing all the money, which can make you a different person, a different kind of human being, who can literally be on his own and do whatever he wants to do. \n\nTo achieve a proper escape from the 9 to 5, one has to make his account so rich that he can be the one and only one who can do anything without refueling his account. once you get over the phenomenon of refueling your account every month you think way beyond your limits to achieve what can be possible by anything. ",
+      "created_at": "2026-04-13T16:52:28",
+      "updated_at": "2026-04-13T17:15:31",
+      "paragraphs": [
+        {
+          "text": "So the question is, why did you do this?",
+          "updated_at": "2026-04-13T17:15:31",
+          "mood": "normal"
+        },
+        {
+          "text": "I know you can change the issue; you can re-run and get all the money, but the main concern is why you did this.",
+          "updated_at": "2026-04-13T17:15:31",
+          "mood": "normal"
+        },
+        {
+          "text": "So the last time you did was an 18L blunder, but this time you did 23L. That is too massive, and that too just before your birthday.",
+          "updated_at": "2026-04-13T17:15:31",
+          "mood": "normal"
+        },
+        {
+          "text": "Again, the same mistakes you are making and losing all the money, which can make you a different person, a different kind of human being, who can literally be on his own and do whatever he wants to do.",
+          "updated_at": "2026-04-13T17:15:31",
+          "mood": "normal"
+        },
+        {
+          "text": "To achieve a proper escape from the 9 to 5, one has to make his account so rich that he can be the one and only one who can do anything without refueling his account. once you get over the phenomenon of refueling your account every month you think way beyond your limits to achieve what can be possible by anything.",
+          "updated_at": "2026-04-13T17:15:31",
+          "mood": "normal"
+        }
+      ]
+    },
+    {
+      "id": "topic_8f452b944892",
+      "category_id": "cat_fd9bc453811e",
+      "title": "23L (13 Apr)",
+      "content": "What happened:\nLost almost 46% of the capital, this event is not the first time.\n\nMaybe life is going to be wiped out in a few days, so that's why the market also gave the biggest loss of all time in those times.",
+      "created_at": "2026-04-13T17:15:48",
+      "updated_at": "2026-05-14T15:39:49",
+      "paragraphs": [
+        {
+          "text": "What happened:\nLost almost 46% of the capital, this event is not the first time.",
+          "updated_at": "2026-05-14T15:39:34",
+          "mood": "normal"
+        },
+        {
+          "text": "Maybe life is going to be wiped out in a few days, so that's why the market also gave the biggest loss of all time in those times.",
+          "updated_at": "2026-05-14T15:39:49",
+          "mood": "normal"
+        }
+      ]
+    },
+    {
+      "id": "topic_9b1ab60118b4",
+      "category_id": "cat_19caca3306b7",
+      "title": "General Rules",
+      "content": "During execution, you have to be strict with your entries. If you didn't get entry at your desirable point, you have to go through an early stop loss and many other pains with time.\n\nFUCKING NO TRADES ON EXPIRY; YOU HAVE TO ACCEPT THAT YOU ARE THE WORST 0DTE-BUYING PERSON. WHATEVER YOU BUY WILL GO TO 0 ONLY. (Hmm, in this case you can reverse the strategy and try to sell it.)\n",
+      "created_at": "2026-04-13T17:20:07",
+      "updated_at": "2026-04-13T17:25:46",
+      "paragraphs": [
+        {
+          "text": "During execution, you have to be strict with your entries. If you didn't get entry at your desirable point, you have to go through an early stop loss and many other pains with time.",
+          "updated_at": "2026-04-13T17:25:46",
+          "mood": "normal"
+        },
+        {
+          "text": "FUCKING NO TRADES ON EXPIRY; YOU HAVE TO ACCEPT THAT YOU ARE THE WORST 0DTE-BUYING PERSON. WHATEVER YOU BUY WILL GO TO 0 ONLY. (Hmm, in this case you can reverse the strategy and try to sell it.)",
+          "updated_at": "2026-04-13T17:25:46",
+          "mood": "normal"
+        }
+      ]
+    },
+    {
+      "id": "topic_cff696c52765",
+      "category_id": "cat_25313bf229f1",
+      "title": "13 May 2026",
+      "content": "So basically i am not trading everyday now.\n\nI have created a position from the 26th of April or a day before or after that and i am holding that position now. i have taken the puts for the 23800 of the May monthly expiry and after going till 24400. now again market is moving southwards in last 4 days markets almost moved 1000 pts down and my position which was 75% in the loss now in some wahat 10% profit.\n\nI believe it'll still move around this range in next 1-2 days and may it will break the range to the down side only which make a probability for me to double my risk capital in that trade and that's why i am holding that position either to make it double or to cut in a good profit when the month ends and also the market stays in the range which can give me some profits.\n\nLet's see what will happend and i will try to put here all the details which i can possibly on the daily basis.",
+      "paragraphs": [
+        {
+          "text": "So basically i am not trading everyday now.",
+          "updated_at": "2026-05-13T22:31:18",
+          "mood": "normal"
+        },
+        {
+          "text": "I have created a position from the 26th of April or a day before or after that and i am holding that position now. i have taken the puts for the 23800 of the May monthly expiry and after going till 24400. now again market is moving southwards in last 4 days markets almost moved 1000 pts down and my position which was 75% in the loss now in some wahat 10% profit.",
+          "updated_at": "2026-05-13T22:31:18",
+          "mood": "normal"
+        },
+        {
+          "text": "I believe it'll still move around this range in next 1-2 days and may it will break the range to the down side only which make a probability for me to double my risk capital in that trade and that's why i am holding that position either to make it double or to cut in a good profit when the month ends and also the market stays in the range which can give me some profits.",
+          "updated_at": "2026-05-13T22:31:18",
+          "mood": "normal"
+        },
+        {
+          "text": "Let's see what will happend and i will try to put here all the details which i can possibly on the daily basis.",
+          "updated_at": "2026-05-13T22:32:07",
+          "mood": "normal"
+        }
+      ],
+      "created_at": "2026-05-13T22:22:40",
+      "updated_at": "2026-05-13T22:32:07"
+    },
+    {
+      "id": "topic_caee72e7bb0e",
+      "category_id": "cat_c1be7c58ec00",
+      "title": "US-IRAN ceasefire",
+      "content": "A while back may be a month before US-Iran annouced a ceasefire but that is not working in practical world.\n\nThe war has been stopped, but other tactics are in play now. Basically, first Iran blocked the Strait of Hormuz from the inside, and now America is blocking it from outside so Iran cannot send their oil to the outside world and be broke financially.\n\nThe ceasefire is going to break as Iran decided some terms and gave the proposal to the USA, but the USA thinks those asks are \"too much\" to give to Iran in replacement for opening the Strait. So basically it is possible that a ceasefire can be violated and war can start again.\n\nRight now POTUS is in China. for a meeting with the chinese president for doing a new trade deal; if that happened, then it would is good for the Chinese and US markets, but somehow it is bad for the Indian market. because all the focus of the india-USA trade deal will be less in the Pentagon office, and the China-US deal will be the most priority task. if some hiccups happen in the current meeting than US can come back to india on the table for completing the deal as soon as possible but chances are so less in that. now we have to wait for the US-China trade deal negotiation and the outcome of that before predictiong the markets.",
+      "paragraphs": [
+        {
+          "text": "A while back may be a month before US-Iran annouced a ceasefire but that is not working in practical world.",
+          "updated_at": "2026-05-13T22:41:58",
+          "mood": "normal"
+        },
+        {
+          "text": "The war has been stopped, but other tactics are in play now. Basically, first Iran blocked the Strait of Hormuz from the inside, and now America is blocking it from outside so Iran cannot send their oil to the outside world and be broke financially.",
+          "updated_at": "2026-05-13T22:53:51",
+          "mood": "normal"
+        },
+        {
+          "text": "The ceasefire is going to break as Iran decided some terms and gave the proposal to the USA, but the USA thinks those asks are \"too much\" to give to Iran in replacement for opening the Strait. So basically it is possible that a ceasefire can be violated and war can start again.",
+          "updated_at": "2026-05-13T22:47:02",
+          "mood": "normal"
+        },
+        {
+          "text": "Right now POTUS is in China. for a meeting with the chinese president for doing a new trade deal; if that happened, then it would is good for the Chinese and US markets, but somehow it is bad for the Indian market. because all the focus of the india-USA trade deal will be less in the Pentagon office, and the China-US deal will be the most priority task. if some hiccups happen in the current meeting than US can come back to india on the table for completing the deal as soon as possible but chances are so less in that. now we have to wait for the US-China trade deal negotiation and the outcome of that before predictiong the markets.",
+          "updated_at": "2026-05-13T22:52:48",
+          "mood": "normal"
+        }
+      ],
+      "created_at": "2026-05-13T22:41:26",
+      "updated_at": "2026-05-13T22:53:51"
+    },
+    {
+      "id": "topic_a864b369f99c",
+      "category_id": "cat_eda4dc6335ae",
+      "title": "14 may 2026",
+      "content": "Today is thursday sensex expiry. nifty opened with gapup went till 170 + points but first 15 min candle is now engulefed by the 2nd candle and now gain is around 90 pts only. clasic trap boom scenario. IMO (let's see how day pan out)\n\nThe trap-boom pattern is panning out; the market is taking some support around the 23500 level. I am sensing more downside from here, so I took another bet on the Sensex puts in the Kotak security account for 1.6L. I will update the progress on that too. (monthly expiry puts)\n\nThe market has taken a sharp U-turn and is trading at 1% positive side as of now; we need to check whether this is only an expiry move or if tomorrow also this positivity will be sustained and move forward.\n\nThe market is still holding the higher high position. I am still waiting now. I am quite pessimistic about my view; possibly I can go wrong and the market can go higher from here onwards as Dow futures are also going up only, but as per policy, what I have decided is to hold the position as max as I can, so I will hold both the Sensex and Nifty positions till tomorrow.\n\nThe market retraced down a little and closed around 23700, with 270 pts from the previous close. Now we have to watch the overnight action and how Trump and Xi Jinping's meeting pans out and how it directs the market for tomorrow's opening. [Done for the day]",
+      "paragraphs": [
+        {
+          "text": "Today is thursday sensex expiry. nifty opened with gapup went till 170 + points but first 15 min candle is now engulefed by the 2nd candle and now gain is around 90 pts only. clasic trap boom scenario. IMO (let's see how day pan out)",
+          "updated_at": "2026-05-14T09:44:27",
+          "mood": "normal"
+        },
+        {
+          "text": "The trap-boom pattern is panning out; the market is taking some support around the 23500 level. I am sensing more downside from here, so I took another bet on the Sensex puts in the Kotak security account for 1.6L. I will update the progress on that too. (monthly expiry puts)",
+          "updated_at": "2026-05-14T10:28:35",
+          "mood": "normal"
+        },
+        {
+          "text": "The market has taken a sharp U-turn and is trading at 1% positive side as of now; we need to check whether this is only an expiry move or if tomorrow also this positivity will be sustained and move forward.",
+          "updated_at": "2026-05-14T12:45:47",
+          "mood": "normal"
+        },
+        {
+          "text": "The market is still holding the higher high position. I am still waiting now. I am quite pessimistic about my view; possibly I can go wrong and the market can go higher from here onwards as Dow futures are also going up only, but as per policy, what I have decided is to hold the position as max as I can, so I will hold both the Sensex and Nifty positions till tomorrow.",
+          "updated_at": "2026-05-14T14:34:46",
+          "mood": "normal"
+        },
+        {
+          "text": "The market retraced down a little and closed around 23700, with 270 pts from the previous close. Now we have to watch the overnight action and how Trump and Xi Jinping's meeting pans out and how it directs the market for tomorrow's opening. [Done for the day]",
+          "updated_at": "2026-05-14T15:42:43",
+          "mood": "normal"
+        }
+      ],
+      "created_at": "2026-05-14T09:42:13",
+      "updated_at": "2026-05-14T15:42:45"
+    },
+    {
+      "id": "topic_cf8347e8ac61",
+      "category_id": "cat_ab55086fb3f7",
+      "title": "50-50",
+      "content": "No matter how much you try to be perfect, there are always chances of your failure, and it is in the same amount as success.\n\nNo matter how good you are at anything, the prediction on any upcoming event will never change to anything other than 50-50. It will stay the same for every future instance despite you having major experience in the game or good skill in the game/process.\n\nEdge, or the better result, can only come from the process tweak that a player does. Basically, from 100 instances or from all the previous instances of the play/process, the player has to summarize and choose the moves that can be beneficial for him and make him win the game/process. You as a player have to register all the response in your logbook (head) to take future decisions.\n\nIn the stock market, everyone says, while gambling or making predictions, that past predictions are never proof that future predictions will give the same outputs. Because every time you make a decision on any particular event that has the same possibility to go right or wrong, it is never and will never happen in this world till the world exists that if you made 100 right decisions, your 101st decision by default is chosen to be right. No, then also the possibility of being wrong in a decision is the same as being right.\n\nSo basically I came up with this idea from the thinking that if you work hard, you can achieve anything, but hard work does not pay you off well every time. So there is so much luck also; you need to be right every time, and even after staying right for N number of times, you can go wrong on the other bet, and that is how working hard is not directly related to your success. We can only relate that to experience that player has of the same type of game, and that registered experience also needs to be used properly; if the player doesn't remember the decision he/she took, then there is no meaning. The player should have to know the previous results and how he reached to that result.\n\nEven if he/she does all the same things, just some natural or non-human condition changed for a fraction of a second, and then the whole result can be different. So luck and being in the right place at the right time are also as important for any person as hard work. In current scenarios, hard work is being depreciated; you have to do smart work. Be it in manufacturing, be it in marketing or sales, you have to do smart work. In some years the term \"hard work\" will be obsolete because we are making computers that can do every hard work that a human can do, and that is the major change we are going to see in the near future; the motto that praises hard work too much will be under threat of vanishing. On the other side, smart work: we encourage communication and completing the task as soon as possible.\n\nContinue learning and registering new experiences in life, and possibly, somehow, someday, we also can predict some decisions that will change our current win-lose ratio, and that wisdom we can get only after going so much wrong or right is all the data that we save in the brain as the experience feedback.\n\nConclude: Luck is also a major factor that decides whether you get the right time, right place, or opportunity or not. Hard work won't always open you the best doors. It will only make you enough to survive; to thrive, you need to have time and luck also in you pocket.",
+      "paragraphs": [
+        {
+          "text": "No matter how much you try to be perfect, there are always chances of your failure, and it is in the same amount as success.",
+          "updated_at": "2026-05-15T01:03:18",
+          "mood": "calm"
+        },
+        {
+          "text": "No matter how good you are at anything, the prediction on any upcoming event will never change to anything other than 50-50. It will stay the same for every future instance despite you having major experience in the game or good skill in the game/process.",
+          "updated_at": "2026-05-15T01:21:10",
+          "mood": "calm"
+        },
+        {
+          "text": "Edge, or the better result, can only come from the process tweak that a player does. Basically, from 100 instances or from all the previous instances of the play/process, the player has to summarize and choose the moves that can be beneficial for him and make him win the game/process. You as a player have to register all the response in your logbook (head) to take future decisions.",
+          "updated_at": "2026-05-15T01:21:10",
+          "mood": "calm"
+        },
+        {
+          "text": "In the stock market, everyone says, while gambling or making predictions, that past predictions are never proof that future predictions will give the same outputs. Because every time you make a decision on any particular event that has the same possibility to go right or wrong, it is never and will never happen in this world till the world exists that if you made 100 right decisions, your 101st decision by default is chosen to be right. No, then also the possibility of being wrong in a decision is the same as being right.",
+          "updated_at": "2026-05-15T01:21:10",
+          "mood": "calm"
+        },
+        {
+          "text": "So basically I came up with this idea from the thinking that if you work hard, you can achieve anything, but hard work does not pay you off well every time. So there is so much luck also; you need to be right every time, and even after staying right for N number of times, you can go wrong on the other bet, and that is how working hard is not directly related to your success. We can only relate that to experience that player has of the same type of game, and that registered experience also needs to be used properly; if the player doesn't remember the decision he/she took, then there is no meaning. The player should have to know the previous results and how he reached to that result.",
+          "updated_at": "2026-05-15T01:32:14",
+          "mood": "calm"
+        },
+        {
+          "text": "Even if he/she does all the same things, just some natural or non-human condition changed for a fraction of a second, and then the whole result can be different. So luck and being in the right place at the right time are also as important for any person as hard work. In current scenarios, hard work is being depreciated; you have to do smart work. Be it in manufacturing, be it in marketing or sales, you have to do smart work. In some years the term \"hard work\" will be obsolete because we are making computers that can do every hard work that a human can do, and that is the major change we are going to see in the near future; the motto that praises hard work too much will be under threat of vanishing. On the other side, smart work: we encourage communication and completing the task as soon as possible.",
+          "updated_at": "2026-05-15T01:39:36",
+          "mood": "calm"
+        },
+        {
+          "text": "Continue learning and registering new experiences in life, and possibly, somehow, someday, we also can predict some decisions that will change our current win-lose ratio, and that wisdom we can get only after going so much wrong or right is all the data that we save in the brain as the experience feedback.",
+          "updated_at": "2026-05-15T01:44:19",
+          "mood": "calm"
+        },
+        {
+          "text": "Conclude: Luck is also a major factor that decides whether you get the right time, right place, or opportunity or not. Hard work won't always open you the best doors. It will only make you enough to survive; to thrive, you need to have time and luck also in you pocket.",
+          "updated_at": "2026-05-15T01:44:19",
+          "mood": "calm"
+        }
+      ],
+      "created_at": "2026-05-15T01:00:23",
+      "updated_at": "2026-05-15T01:44:19"
+    },
+    {
+      "id": "topic_2fe417314863",
+      "category_id": "cat_4e00e1920635",
+      "title": "The monthly Trade",
+      "content": "So basically after an emotional roller coaster in April, I thought to hold a trade for the whole of May and took positions accordingly in that.\n\nToday I cut the trade, as there are 4 days left in the month to end it. and volatility in these 4 days can be extreme. So with that reason and also because the market was moving against my position, I have terminated the position mainly due to that.\n\nWhat i have learnt fro this trade? Peaceful trading can be achieved with proper view, data reading and waiting for the support and resistance to brake and we can continue trade after that only and we can stop the jumping baby or jumping frog behaviour if we have time or the risk defined in that.\n\nWhat things need to improve? I have to set a fix and achievable and realist target after that target i have to cut the trade, mainly i lost in those trade which i hold convincegly even after that profit is becoming less then 0 and then trade gone in to loss. i have to improve the satisfactory ratio and how to manage that easly.\n\nWhat is different from intraday trading? You don't need to check the price of the trade every time, and you don't need to put the chart on every time and have one eye on it. Basically, you have a time advantage in this type of trade. With time you can see all the data changing and make a proper view. in intraday you can check many possibilities.",
+      "paragraphs": [
+        {
+          "text": "So basically after an emotional roller coaster in April, I thought to hold a trade for the whole of May and took positions accordingly in that.",
+          "updated_at": "2026-05-20T23:46:42",
+          "mood": "calm"
+        },
+        {
+          "text": "Today I cut the trade, as there are 4 days left in the month to end it. and volatility in these 4 days can be extreme. So with that reason and also because the market was moving against my position, I have terminated the position mainly due to that.",
+          "updated_at": "2026-05-20T23:46:42",
+          "mood": "calm"
+        },
+        {
+          "text": "What i have learnt fro this trade? Peaceful trading can be achieved with proper view, data reading and waiting for the support and resistance to brake and we can continue trade after that only and we can stop the jumping baby or jumping frog behaviour if we have time or the risk defined in that.",
+          "updated_at": "2026-05-20T23:59:26",
+          "mood": "calm"
+        },
+        {
+          "text": "What things need to improve? I have to set a fix and achievable and realist target after that target i have to cut the trade, mainly i lost in those trade which i hold convincegly even after that profit is becoming less then 0 and then trade gone in to loss. i have to improve the satisfactory ratio and how to manage that easly.",
+          "updated_at": "2026-05-20T23:59:26",
+          "mood": "calm"
+        },
+        {
+          "text": "What is different from intraday trading? You don't need to check the price of the trade every time, and you don't need to put the chart on every time and have one eye on it. Basically, you have a time advantage in this type of trade. With time you can see all the data changing and make a proper view. in intraday you can check many possibilities.",
+          "updated_at": "2026-05-21T00:09:43",
+          "mood": "calm"
+        }
+      ],
+      "created_at": "2026-05-20T23:42:52",
+      "updated_at": "2026-05-21T00:09:43"
+    },
+    {
+      "id": "topic_97e6007bdd8b",
+      "category_id": "cat_82e331fd3004",
+      "title": "Office table and rotating chair",
+      "content": "The cost of owning a table and a chair is not much,\n\nBut to have it for a child who has seen the dreams of it all his life is the biggest happiness of all, and while I am writing this text i am feeling the immense joy and feeling of achievement.\n\nGratitude, gratitude, gratitude... Thank to the Almighty for making me this capable and then giving me this joy. 🙏",
+      "paragraphs": [
+        {
+          "text": "The cost of owning a table and a chair is not much,",
+          "updated_at": "2026-05-21T19:55:48",
+          "mood": "happy"
+        },
+        {
+          "text": "But to have it for a child who has seen the dreams of it all his life is the biggest happiness of all, and while I am writing this text i am feeling the immense joy and feeling of achievement.",
+          "updated_at": "2026-05-21T19:55:48",
+          "mood": "happy"
+        },
+        {
+          "text": "Gratitude, gratitude, gratitude... Thank to the Almighty for making me this capable and then giving me this joy. 🙏",
+          "updated_at": "2026-05-21T19:55:48",
+          "mood": "happy"
+        }
+      ],
+      "created_at": "2026-05-21T19:49:27",
+      "updated_at": "2026-05-21T19:55:48"
+    },
+    {
+      "id": "topic_f770135adf51",
+      "category_id": "cat_25313bf229f1",
+      "title": "22 May 2026",
+      "content": "I have 2 short positions from the previous day, and as market opened gap up and was only positive in first 15-30 minutes, I added another new shorts in the positions.\n\nShorting with your remaining capital won't work for you. If you only go short with all your capital, it won't change the market. You have to understand that the market will move with its own pace and its own movement. You can just stay in the direction in which the market is going, or you have to have enough time with your position that they won't get liquidated until the market comes in your direction and you get in the profits.\n\nSometimes the market may give you 3L in 3 minutes, and sometimes even when you wait for the whole month, you have to take a loss of 5L. Mainly, it is the process to understand your position and your capital deployment that is risk-prone, so you have to manage that risk or you have to have enough time in the market.\n\nRight now in the almost 17-20% of the loss waiting and watching market to turn back and come to profit.\n\nToday is Friday, and due to war news, the market can take a wild move over the weekend, and I am also out of the station for the coming 1-2 trading sessions after the weekend, so I am thinking of closing all the positions in the F&O by today EOD only. Let's see if I get a 0-0 close or what.\n\nJust a note: PCR climbing from 0.9 to 1.2 might get to see a fall in intraday.\n\nat the end market shown a",
+      "paragraphs": [
+        {
+          "text": "I have 2 short positions from the previous day, and as market opened gap up and was only positive in first 15-30 minutes, I added another new shorts in the positions.",
+          "updated_at": "2026-05-22T10:48:36",
+          "mood": "happy"
+        },
+        {
+          "text": "Shorting with your remaining capital won't work for you. If you only go short with all your capital, it won't change the market. You have to understand that the market will move with its own pace and its own movement. You can just stay in the direction in which the market is going, or you have to have enough time with your position that they won't get liquidated until the market comes in your direction and you get in the profits.",
+          "updated_at": "2026-05-22T11:08:01",
+          "mood": "happy"
+        },
+        {
+          "text": "Sometimes the market may give you 3L in 3 minutes, and sometimes even when you wait for the whole month, you have to take a loss of 5L. Mainly, it is the process to understand your position and your capital deployment that is risk-prone, so you have to manage that risk or you have to have enough time in the market.",
+          "updated_at": "2026-05-22T11:10:29",
+          "mood": "normal"
+        },
+        {
+          "text": "Right now in the almost 17-20% of the loss waiting and watching market to turn back and come to profit.",
+          "updated_at": "2026-05-22T11:11:00",
+          "mood": "normal"
+        },
+        {
+          "text": "Today is Friday, and due to war news, the market can take a wild move over the weekend, and I am also out of the station for the coming 1-2 trading sessions after the weekend, so I am thinking of closing all the positions in the F&O by today EOD only. Let's see if I get a 0-0 close or what.",
+          "updated_at": "2026-05-22T11:12:57",
+          "mood": "normal"
+        },
+        {
+          "text": "Just a note: PCR climbing from 0.9 to 1.2 might get to see a fall in intraday.",
+          "updated_at": "2026-05-22T11:24:49",
+          "mood": "normal"
+        },
+        {
+          "text": "at the end market shown a",
+          "updated_at": "2026-05-22T16:33:01",
+          "mood": "normal"
+        }
+      ],
+      "created_at": "2026-05-22T10:46:29",
+      "updated_at": "2026-05-22T16:33:01"
+    },
+    {
+      "id": "topic_b0a72c336f18",
+      "category_id": "cat_b8bc5580d87c",
+      "title": "Weekend 21",
+      "content": "I have 3 put positions open for current weekend, what should be my plan and how should i focused on to enjoy the weekend and not to check the markets again and again.\n\nI have puts of 24000 and 23800 of the 2 DTE and another 23400 from the 10-DTE.\n\nBasically, I should have to only look at the market if it closes above 23900 once. until and unless gifty goes below 23600 i am not going to get profitable and that's why either above 23900 or below 23600 only i have to check the market not in between that.",
+      "paragraphs": [
+        {
+          "text": "I have 3 put positions open for current weekend, what should be my plan and how should i focused on to enjoy the weekend and not to check the markets again and again.",
+          "updated_at": "2026-05-22T20:35:39",
+          "mood": "normal"
+        },
+        {
+          "text": "I have puts of 24000 and 23800 of the 2 DTE and another 23400 from the 10-DTE.",
+          "updated_at": "2026-05-22T21:02:31",
+          "mood": "normal"
+        },
+        {
+          "text": "Basically, I should have to only look at the market if it closes above 23900 once. until and unless gifty goes below 23600 i am not going to get profitable and that's why either above 23900 or below 23600 only i have to check the market not in between that.",
+          "updated_at": "2026-05-22T22:12:38",
+          "mood": "normal"
+        }
+      ],
+      "created_at": "2026-05-22T20:34:03",
+      "updated_at": "2026-05-22T22:12:38"
+    },
+    {
+      "id": "topic_f993229825b4",
+      "category_id": "cat_e7391c2d7ec1",
+      "title": "Quotes",
+      "content": "Thank you, Genie! I owe you everything.",
+      "paragraphs": [
+        {
+          "text": "Thank you, Genie! I owe you everything.",
+          "updated_at": "2026-05-28T09:22:01",
+          "mood": "normal"
+        }
+      ],
+      "created_at": "2026-05-28T09:21:13",
+      "updated_at": "2026-05-28T09:22:01"
+    },
+    {
+      "id": "topic_533560d4fc4a",
+      "category_id": "cat_ed05449867eb",
+      "title": "Nifty - BNF chart reading",
+      "content": "Nifty weekly is showing we can see a deadly down move in coming 2 week\n\nBascially daily candle is showing bb band is expanding downward side only and a short retracement is also done so the remaining part of a whole trend is like we can see a major downmove on mon or tues expiry or max by wednesady first half and if we breaks 23k and 22840 in that move; we can see deep levels\n\nthough 22600 is a point on a trendline while created from connecting 2024 election low and recent monthly candle low so we can go till there and rest sometimes there. and finally if those levels also gone we have to pray only in that case because we can see major panic (i don't the reason, it could be crude also or it could be RBI policy rate hike also or any deal or No deal or anything) but in current scenario we will have levels first and news will follow (as ravi kishan said so);\n\nI am not negative on the indian market but if we broke these major support we can see very low levels surely atractive for inversting but we have to very careful with trading position should be least untill we see drop in VIX;\n\nAnd as VIX will be rising money making opportunity is also here only we have to take proper trend suported bets but with longer time horizon and also we have to have 2 extra eyes on USDINR and crude also; we can make money but to save that money we have to let go every trading opportunity we have to let go some points once we reach oiutr goal.\n\nNifty BNF not showing major bounce from current levels which shows bearishness adn makett is preemtpting some of bad news and also global banks are tightning the liquididty and also with higher bond yeild many investor will go the govt bond market and it wil suck liquidity from the market and also there are major IPOs are there in mrket which can suck liquidity it will make so easy for market to tumble down majorly.",
+      "paragraphs": [
+        {
+          "text": "Nifty weekly is showing we can see a deadly down move in coming 2 week",
+          "updated_at": "2026-09-19T02:21:55",
+          "mood": "normal"
+        },
+        {
+          "text": "Bascially daily candle is showing bb band is expanding downward side only and a short retracement is also done so the remaining part of a whole trend is like we can see a major downmove on mon or tues expiry or max by wednesady first half and if we breaks 23k and 22840 in that move; we can see deep levels",
+          "updated_at": "2026-09-19T02:21:55",
+          "mood": "normal"
+        },
+        {
+          "text": "though 22600 is a point on a trendline while created from connecting 2024 election low and recent monthly candle low so we can go till there and rest sometimes there. and finally if those levels also gone we have to pray only in that case because we can see major panic (i don't the reason, it could be crude also or it could be RBI policy rate hike also or any deal or No deal or anything) but in current scenario we will have levels first and news will follow (as ravi kishan said so);",
+          "updated_at": "2026-09-19T02:21:55",
+          "mood": "normal"
+        },
+        {
+          "text": "I am not negative on the indian market but if we broke these major support we can see very low levels surely atractive for inversting but we have to very careful with trading position should be least untill we see drop in VIX;",
+          "updated_at": "2026-09-19T02:21:55",
+          "mood": "normal"
+        },
+        {
+          "text": "And as VIX will be rising money making opportunity is also here only we have to take proper trend suported bets but with longer time horizon and also we have to have 2 extra eyes on USDINR and crude also; we can make money but to save that money we have to let go every trading opportunity we have to let go some points once we reach oiutr goal.",
+          "updated_at": "2026-09-19T02:21:55",
+          "mood": "normal"
+        },
+        {
+          "text": "Nifty BNF not showing major bounce from current levels which shows bearishness adn makett is preemtpting some of bad news and also global banks are tightning the liquididty and also with higher bond yeild many investor will go the govt bond market and it wil suck liquidity from the market and also there are major IPOs are there in mrket which can suck liquidity it will make so easy for market to tumble down majorly.",
+          "updated_at": "2026-09-19T02:21:55",
+          "mood": "normal"
+        }
+      ],
+      "created_at": "2026-09-11T16:20:49",
+      "updated_at": "2026-09-19T02:21:55"
     }
   ],
-  "updated_at": "2026-03-31T00:28:25"
+  "trash": {
+    "categories": [
+      {
+        "id": "cat_26888c3eb74c",
+        "name": "ABC",
+        "segment_key": "personal",
+        "created_at": "2026-04-01T00:27:18",
+        "deleted_at": "2026-04-06T15:43:02"
+      },
+      {
+        "id": "cat_1f95ef2caf96",
+        "name": "13 Apr 2026",
+        "segment_key": "financial",
+        "created_at": "2026-04-13T16:52:06",
+        "deleted_at": "2026-04-13T16:52:13"
+      },
+      {
+        "id": "cat_1be04b6ae8c0",
+        "name": "Prayers",
+        "segment_key": "spiritual",
+        "created_at": "2026-03-31T16:46:57",
+        "deleted_at": "2026-09-19T01:09:55"
+      }
+    ],
+    "topics": [
+      {
+        "id": "topic_b8775007a235",
+        "category_id": "cat_26888c3eb74c",
+        "title": "CDF",
+        "content": "",
+        "created_at": "2026-04-01T00:27:24",
+        "updated_at": "2026-04-01T00:27:24",
+        "deleted_at": "2026-04-06T15:43:02",
+        "deleted_with_category_id": "cat_26888c3eb74c"
+      },
+      {
+        "id": "topic_1808dedd86a2",
+        "category_id": "cat_1f95ef2caf96",
+        "title": "New note",
+        "content": "",
+        "created_at": "2026-04-13T16:52:06",
+        "updated_at": "2026-04-13T16:52:06",
+        "deleted_at": "2026-04-13T16:52:13",
+        "deleted_with_category_id": "cat_1f95ef2caf96"
+      },
+      {
+        "id": "topic_73a8ce6d712a",
+        "category_id": "cat_1be04b6ae8c0",
+        "title": "Morning Prayers",
+        "content": "jasdjasgd asgdajs dajsdg ajshgd jasd jashd ajsgd hjas djhsa da asdas das d\njasdjasgd asgdajs dajsdg ajshgd jasd jashd ajsgd hjas djhsa da asdas das djasdjasgd asgdajs dajsdg ajshgd jasd jashd ajsgd hjas djhsa da asdas das djasdjasgd asgdajs dajsdg ajshgd jasd jashd ajsgd hjas djhsa da asdas das \ndjasdjasgd asgdajs dajsdg ajshgd jasd jashd ajsgd hjas djhsa da asdas das djasdjasgd asgdajs dajsdg ajshgd jasd jashd ajsgd hjas djhsa da asdas das djasdjasgd asgdajs dajsdg ajshgd jasd jashd ajsgd hjas djhsa da asdas das djasdjasgd asgdajs dajsdg ajshgd jasd jashd ajsgd hjas djhsa da asdas das djasdjasgd asgdajs dajsdg ajshgd jasd jashd ajsgd hjas djhsa da \n\nasdas das djasdjasgd asgdajs dajsdg ajshgd jasd jashd ajsgd hjas djhsa da asdas das djasdjasgd asgdajs dajsdg ajshgd jasd jashd ajsgd hjas djhsa da asdas das djasdjasgd asgdajs dajsdg ajshgd jasd jashd ajsgd hjas djhsa da asdas das d",
+        "created_at": "2026-03-31T16:47:15",
+        "updated_at": "2026-04-04T12:31:50",
+        "paragraphs": [
+          {
+            "text": "jasdjasgd asgdajs dajsdg ajshgd jasd jashd ajsgd hjas djhsa da asdas das d\njasdjasgd asgdajs dajsdg ajshgd jasd jashd ajsgd hjas djhsa da asdas das djasdjasgd asgdajs dajsdg ajshgd jasd jashd ajsgd hjas djhsa da asdas das djasdjasgd asgdajs dajsdg ajshgd jasd jashd ajsgd hjas djhsa da asdas das \ndjasdjasgd asgdajs dajsdg ajshgd jasd jashd ajsgd hjas djhsa da asdas das djasdjasgd asgdajs dajsdg ajshgd jasd jashd ajsgd hjas djhsa da asdas das djasdjasgd asgdajs dajsdg ajshgd jasd jashd ajsgd hjas djhsa da asdas das djasdjasgd asgdajs dajsdg ajshgd jasd jashd ajsgd hjas djhsa da asdas das djasdjasgd asgdajs dajsdg ajshgd jasd jashd ajsgd hjas djhsa da",
+            "updated_at": "2026-04-04T12:31:50",
+            "mood": "normal"
+          },
+          {
+            "text": "asdas das djasdjasgd asgdajs dajsdg ajshgd jasd jashd ajsgd hjas djhsa da asdas das djasdjasgd asgdajs dajsdg ajshgd jasd jashd ajsgd hjas djhsa da asdas das djasdjasgd asgdajs dajsdg ajshgd jasd jashd ajsgd hjas djhsa da asdas das d",
+            "updated_at": "2026-04-04T12:31:50",
+            "mood": "normal"
+          }
+        ],
+        "deleted_at": "2026-09-19T01:09:53",
+        "deleted_with_category_id": null
+      },
+      {
+        "id": "topic_c601467b55f2",
+        "category_id": "cat_1be04b6ae8c0",
+        "title": "New note",
+        "content": "",
+        "paragraphs": [],
+        "created_at": "2026-09-19T01:09:53",
+        "updated_at": "2026-09-19T01:09:53",
+        "deleted_at": "2026-09-19T01:09:55",
+        "deleted_with_category_id": "cat_1be04b6ae8c0"
+      },
+      {
+        "id": "topic_b5f317bdc0af",
+        "category_id": "cat_f267bdc96a16",
+        "title": "Untitled",
+        "content": "",
+        "paragraphs": [],
+        "created_at": "2026-06-13T14:41:06",
+        "updated_at": "2026-06-13T14:41:06",
+        "deleted_at": "2026-09-19T01:11:54",
+        "deleted_with_category_id": null
+      }
+    ]
+  },
+  "secrets": {
+    "password_salt": "b2767290fb17a83ea503e35785dc5547",
+    "password_hash": "9542904b2ac5f4f23ca4fd60067bd27ae617c9e4c3c7558bd5a7100e58d468d2",
+    "topics": [],
+    "selected_topic_id": null,
+    "updated_at": "2026-06-13T14:39:10"
+  },
+  "updated_at": "2026-09-20T01:47:48"
 }
