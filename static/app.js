@@ -27,6 +27,7 @@ const els = {
   modalInputWrap: document.getElementById("modalInputWrap"),
   modalInputLabel: document.getElementById("modalInputLabel"),
   modalInput: document.getElementById("modalInput"),
+  modalCustom: document.getElementById("modalCustom"),
   modalSecretWrap: document.getElementById("modalSecretWrap"),
   modalSecretPasswordLabel: document.getElementById("modalSecretPasswordLabel"),
   modalSecretPassword: document.getElementById("modalSecretPassword"),
@@ -58,6 +59,7 @@ const els = {
   undoBtn: document.getElementById("undoBtn"),
   redoBtn: document.getElementById("redoBtn"),
   saveNowBtn: document.getElementById("saveNowBtn"),
+  exportXBtn: document.getElementById("exportXBtn"),
   accent: document.getElementById("accent"),
   font: document.getElementById("font"),
   newCategory: document.getElementById("newCategory"),
@@ -123,6 +125,8 @@ function openModal({
   inputValue = "",
   inputPlaceholder = "",
   requireInput = false,
+  customMarkup = "",
+  wide = false,
   moodKey = "",
   moodPrompt = false,
   secretPrompt = false,
@@ -149,6 +153,9 @@ function openModal({
     } else {
       els.modalMoodOptions.innerHTML = "";
     }
+    els.modalCustom.innerHTML = customMarkup;
+    els.modalCustom.classList.toggle("modalCustom--hidden", !customMarkup);
+    els.modalLayer.querySelector(".modalShell")?.classList.toggle("modalShell--wide", !!wide);
     els.modalLayer.classList.remove("modalLayer--hidden");
     els.modalLayer.setAttribute("aria-hidden", "false");
     if (requireInput) {
@@ -166,7 +173,14 @@ function openModal({
       }, 0);
     } else {
       setTimeout(() => {
-        els.modalConfirm.focus();
+        const customFocus = els.modalCustom.querySelector("[data-autofocus]");
+        if (customMarkup && customFocus) {
+          customFocus.focus({ preventScroll: true });
+        } else {
+          els.modalConfirm.focus({ preventScroll: true });
+        }
+        const shell = els.modalLayer.querySelector(".modalShell");
+        if (shell) shell.scrollTop = 0;
       }, 0);
     }
   });
@@ -1350,6 +1364,12 @@ function bind() {
   });
   els.emptyTrash.addEventListener("click", () => void emptyTrash());
   els.modalBackdrop.addEventListener("click", () => closeModal({ confirmed: false }));
+  els.modalCustom.addEventListener("click", (ev) => {
+    const target = ev.target.closest("[data-action]");
+    if (!target) return;
+    ev.preventDefault();
+    void handleModalCustomAction(target);
+  });
   els.modalCancel.addEventListener("click", () => closeModal({ confirmed: false }));
   els.modalConfirm.addEventListener("click", () => {
     if (!modalState) return;
@@ -1402,6 +1422,7 @@ function bind() {
   els.undoBtn.addEventListener("click", doUndo);
   els.redoBtn.addEventListener("click", doRedo);
   els.saveNowBtn.addEventListener("click", () => void autosave({ force: true }));
+  els.exportXBtn.addEventListener("click", () => void openXPreview());
   els.newCategory.addEventListener("click", () => void createCategory());
   els.newTopic.addEventListener("click", () => void createTopic());
   els.themeToggle.addEventListener("click", () => void toggleTheme());
@@ -1479,3 +1500,174 @@ refresh().catch((err) => {
   setStatus("Failed to load");
   console.error(err);
 });
+
+// --- EXPORT TO X FEATURE ---
+function sanitizeWhitespace(text) {
+  return String(text || "")
+    .replace(/\r\n/g, "\n")
+    .replace(/\t/g, " ")
+    .replace(/[ ]{2,}/g, " ")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
+function splitLongWord(word, limit) {
+  const parts = [];
+  let rest = word;
+  while (rest.length > limit) {
+    parts.push(rest.slice(0, Math.max(1, limit - 1)) + "-");
+    rest = rest.slice(Math.max(1, limit - 1));
+  }
+  if (rest) parts.push(rest);
+  return parts;
+}
+function splitParagraphToFit(paragraph, limit) {
+  const words = String(paragraph || "").split(/\s+/).filter(Boolean);
+  const segments = [];
+  let current = "";
+  words.forEach((word) => {
+    const pieces = word.length > limit ? splitLongWord(word, limit) : [word];
+    pieces.forEach((piece) => {
+      const candidate = current ? `${current} ${piece}` : piece;
+      if (candidate.length <= limit) current = candidate;
+      else {
+        if (current) segments.push(current);
+        current = piece;
+      }
+    });
+  });
+  if (current) segments.push(current);
+  return segments.length ? segments : [""];
+}
+
+function buildThreadChunks(blocks, reserve) {
+  const limit = 280 - reserve;
+  const chunks = [];
+  let current = "";
+  blocks.forEach((block) => {
+    if (!block) return;
+    const parts = block.length <= limit ? [block] : splitParagraphToFit(block, limit);
+    parts.forEach((part) => {
+      const candidate = current ? `${current}\n\n${part}` : part;
+      if (candidate.length <= limit) current = candidate;
+      else {
+        if (current) chunks.push(current);
+        current = part;
+      }
+    });
+  });
+  if (current) chunks.push(current);
+  return chunks.length ? chunks : [""];
+}
+
+function formatXThread(title, content) {
+  const cleanTitle = sanitizeWhitespace(title);
+  const cleanContent = sanitizeWhitespace(content);
+  const blocks = [];
+  if (cleanTitle) blocks.push(cleanTitle);
+  if (cleanContent) {
+    blocks.push(...cleanContent.split(/\n{2,}/).map((part) => sanitizeWhitespace(part)).filter(Boolean));
+  }
+  if (!blocks.length) return [];
+
+  let reserve = 0;
+  let chunks = buildThreadChunks(blocks, reserve);
+  while (chunks.length > 1) {
+    const nextReserve = `\n\n(${chunks.length}/${chunks.length})`.length;
+    if (nextReserve === reserve) break;
+    reserve = nextReserve;
+    chunks = buildThreadChunks(blocks, reserve);
+  }
+
+  if (chunks.length === 1 && chunks[0].length <= 280) return chunks;
+  return chunks.map((chunk, index) => `${chunk}\n\n(${index + 1}/${chunks.length})`);
+}
+
+async function copyText(text, successMessage) {
+  try {
+    if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(text);
+    } else {
+      const helper = document.createElement("textarea");
+      helper.value = text;
+      helper.setAttribute("readonly", "true");
+      helper.style.position = "fixed";
+      helper.style.opacity = "0";
+      document.body.appendChild(helper);
+      helper.focus();
+      helper.select();
+      document.execCommand("copy");
+      helper.remove();
+    }
+    setStatus(successMessage);
+  } catch (error) {
+    console.error(error);
+    setStatus("Copy failed");
+  }
+}
+
+function renderXPreviewMarkup(posts) {
+  const summary = posts.length === 1 ? "1 X post ready to copy" : `${posts.length} X posts ready as a thread`;
+  return `
+    <div class="exportSheet">
+      <div class="exportSheet__topbar">
+        <div class="exportSheet__summary">${escapeHtml(summary)}</div>
+        <button class="btn btn--ghost btn--small" type="button" data-action="copy-all-posts" data-autofocus>Copy All</button>
+      </div>
+      <div class="exportSheet__list">
+        ${posts.map((post, index) => `
+          <section class="exportCard">
+            <div class="exportCard__head">
+              <div>
+                <div class="exportCard__label">${posts.length === 1 ? "Single post" : `Post ${index + 1}`}</div>
+                <div class="exportCard__count">${post.length}/280 characters</div>
+              </div>
+              <button class="btn btn--ghost btn--small" type="button" data-action="copy-post" data-index="${index}">Copy</button>
+            </div>
+            <pre class="exportCard__text">${escapeHtml(post)}</pre>
+          </section>
+        `).join("")}
+      </div>
+    </div>
+  `;
+}
+
+async function openXPreview() {
+  const topicId = selectedTopicId();
+  if (!topicId) {
+    setStatus("Open a topic first");
+    return;
+  }
+  if (dirty) await autosave();
+  let contentValue = els.topicContent.value;
+  if (els.topicEditor && typeof serializeEditor === "function") {
+    contentValue = serializeEditor();
+  }
+  const posts = formatXThread(els.topicTitle.value, contentValue);
+  if (!posts.length) {
+    setStatus("Add some content first");
+    return;
+  }
+  await openModal({
+    title: "Preview X Thread",
+    message: "Review the generated X-ready post(s), then copy them for manual posting.",
+    confirmLabel: "Close",
+    cancelLabel: "Cancel",
+    customMarkup: renderXPreviewMarkup(posts),
+    wide: true,
+  });
+}
+
+async function handleModalCustomAction(target) {
+  if (!modalState) return;
+  const action = target.getAttribute("data-action");
+  if (action === "copy-all-posts") {
+    const posts = Array.from(els.modalCustom.querySelectorAll(".exportCard__text")).map((node) => node.textContent || "");
+    await copyText(posts.join("\n\n---\n\n"), "Copied all X posts");
+  }
+  if (action === "copy-post") {
+    const index = Number(target.getAttribute("data-index"));
+    const postNode = els.modalCustom.querySelectorAll(".exportCard__text")[index];
+    if (!postNode) return;
+    await copyText(postNode.textContent || "", `Copied post ${index + 1}`);
+  }
+}

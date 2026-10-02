@@ -739,3 +739,19 @@ button,input,textarea,select{ font:inherit; }
   .editorParagraph__meta{ margin-top:8px; }
   .editorParagraph__time{ text-align:left; }
 }
+
+/* EXPORT TO X STYLES */
+.modalShell--wide{ width:min(100%, 860px); }
+.modalCustom{ margin-top:18px; }
+.modalCustom--hidden{ display:none; }
+.exportSheet{ display:flex; flex-direction:column; gap:18px; }
+.exportSheet__topbar{ display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; }
+.exportSheet__summary{ font-size:14px; color:var(--muted); }
+.exportSheet__list{ display:flex; flex-direction:column; gap:14px; max-height: 60vh; overflow-y: auto; padding-right: 8px; }
+.exportCard{ padding:16px; border-radius:20px; border:1px solid var(--border); background:var(--surface); box-shadow:var(--shadow-soft); }
+.exportCard__head{ display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:12px; flex-wrap:wrap; }
+.exportCard__label{ font-size:14px; font-weight:900; color:var(--text); }
+.exportCard__count{ font-size:13px; color:var(--muted); }
+.exportCard__text{ margin:0; white-space:pre-wrap; word-break:break-word; font-size:15px; line-height:1.7; color:var(--text); }
+.btn--small{ padding:10px 14px; font-size:13px; box-shadow:none; }
+@media (max-width:768px){ .modalShell--wide{ width:min(100%, 100%); } }

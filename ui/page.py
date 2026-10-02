@@ -135,6 +135,7 @@ def render_index(state: dict[str, Any]) -> bytes:
                 <div class="editor__meta">
                   <span id="saveStatus" class="badge badge--status">Ready</span>
                   <div class="editor__actions" role="toolbar" aria-label="Editor actions">
+                    <button id="exportXBtn" class="btn btn--ghost" type="button" title="Preview X thread" aria-label="Preview X thread">Export to X</button>
                     <button id="undoBtn" class="btn btn--ghost btn--icon" type="button" title="Undo (⌘Z / Ctrl+Z)" aria-label="Undo">
                       <svg class="btn__icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"/></svg>
                     </button>
@@ -170,6 +171,7 @@ def render_index(state: dict[str, Any]) -> bytes:
         <span id="modalInputLabel" class="modalShell__label">Label</span>
         <input id="modalInput" class="modalShell__input" type="text" autocomplete="off">
       </label>
+      <div id="modalCustom" class="modalCustom modalCustom--hidden"></div>
       <div id="modalSecretWrap" class="modalSecretWrap modalSecretWrap--hidden">
         <label class="modalShell__field">
           <span id="modalSecretPasswordLabel" class="modalShell__label">Password</span>
