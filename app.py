@@ -6,6 +6,8 @@ import hmac
 import json
 import os
 import secrets as token_secrets
+import urllib.parse
+import urllib.request
 from pathlib import Path
 from typing import Any
 from wsgiref.simple_server import make_server
@@ -31,6 +33,40 @@ PORT = 9000
 
 STATIC_DIR = BASE_DIR / "static"
 PASSWORD_ITERATIONS = 200_000
+
+SUPPORTED_LANGUAGES = {
+    "en": "English",
+    "hi": "Hindi",
+    "gu": "Gujarati",
+}
+
+GOOGLE_TRANSLITERATE_URL = "https://inputtools.google.com/request"
+
+
+def transliterate_text(text: str, lang: str) -> list[str]:
+    """Call Google Input Tools to transliterate text from English to the target language."""
+    if lang == "en" or lang not in SUPPORTED_LANGUAGES:
+        return [text]
+    params = urllib.parse.urlencode({
+        "text": text,
+        "itc": f"{lang}-t-i0-und",
+        "num": "5",
+        "cp": "0",
+        "cs": "1",
+        "ie": "utf-8",
+        "oe": "utf-8",
+        "app": "demopage",
+    })
+    url = f"{GOOGLE_TRANSLITERATE_URL}?{params}"
+    try:
+        req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+        with urllib.request.urlopen(req, timeout=5) as resp:
+            data = json.loads(resp.read().decode("utf-8"))
+        if data[0] == "SUCCESS" and data[1]:
+            return data[1][0][1]
+    except Exception:
+        pass
+    return [text]
 
 
 def hash_password(password: str, salt: str) -> str:
@@ -379,6 +415,7 @@ def app(environ: dict[str, Any], start_response: Any) -> list[bytes]:
         accent = payload.get("accent")
         font = payload.get("font")
         theme = payload.get("theme")
+        input_language = payload.get("input_language")
 
         state["app_title"] = title
         if accent in MATERIAL_ACCENTS:
@@ -387,6 +424,8 @@ def app(environ: dict[str, Any], start_response: Any) -> list[bytes]:
             state["font"] = font
         if theme in {"light", "dark"}:
             state["theme"] = theme
+        if input_language in SUPPORTED_LANGUAGES:
+            state["input_language"] = input_language
 
         state = save_state(BASE_DIR, state)
         status, headers, body = json_response("200 OK", public_state(state))
@@ -671,6 +710,24 @@ def app(environ: dict[str, Any], start_response: Any) -> list[bytes]:
     # legacy compatibility: show state file for debugging
     if method == "GET" and path == "/api/debug/state-path":
         status, headers, body = json_response("200 OK", {"path": str(state_path(BASE_DIR))})
+        start_response(status, headers)
+        return body
+
+    if method == "GET" and path == "/api/languages":
+        status, headers, body = json_response("200 OK", {"languages": SUPPORTED_LANGUAGES, "default": "en"})
+        start_response(status, headers)
+        return body
+
+    if method == "POST" and path == "/api/transliterate":
+        payload = parse_json(environ)
+        text = str(payload.get("text") or "").strip()
+        lang = str(payload.get("lang") or "en").strip()
+        if not text or lang == "en":
+            status, headers, body = json_response("200 OK", {"suggestions": [text] if text else []})
+            start_response(status, headers)
+            return body
+        suggestions = transliterate_text(text, lang)
+        status, headers, body = json_response("200 OK", {"suggestions": suggestions})
         start_response(status, headers)
         return body
 

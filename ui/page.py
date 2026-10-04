@@ -17,6 +17,7 @@ def render_index(state: dict[str, Any]) -> bytes:
             "accent": state.get("accent"),
             "font": state.get("font"),
             "theme": state.get("theme"),
+            "input_language": state.get("input_language", "en"),
             "selected": state.get("selected"),
         }
     )
@@ -51,6 +52,14 @@ def render_index(state: dict[str, Any]) -> bytes:
         <div class="control">
             <label class="control__label" for="font">Font</label>
             <select id="font" class="control__select" aria-label="Font"></select>
+        </div>
+        <div class="control">
+          <label class="control__label" for="inputLang">Lang</label>
+          <select id="inputLang" class="control__select" aria-label="Input language">
+            <option value="en">English</option>
+            <option value="hi">हिंदी</option>
+            <option value="gu">ગુજરાતી</option>
+          </select>
         </div>
         <button id="themeToggle" class="themeToggle" type="button" aria-label="Toggle theme">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"></path></svg>

@@ -62,6 +62,7 @@ const els = {
   exportXBtn: document.getElementById("exportXBtn"),
   accent: document.getElementById("accent"),
   font: document.getElementById("font"),
+  inputLang: document.getElementById("inputLang"),
   newCategory: document.getElementById("newCategory"),
   newTopic: document.getElementById("newTopic"),
 };
@@ -893,6 +894,7 @@ function applyAppearanceFromState() {
   setAccent(els.accent.value);
   setFont(els.font.value);
   setTheme(state?.theme || "light");
+  els.inputLang.value = state?.input_language || "en";
   els.appTitle.value = state?.app_title || "Daily-Journal";
   document.title = els.appTitle.value;
   els.secretToggle.classList.toggle("themeToggle--active", secretMode);
@@ -1027,7 +1029,7 @@ function fillSelectOptions() {
 async function saveSettings() {
   state = await api("/api/settings", {
     method: "POST",
-    body: { app_title: els.appTitle.value, accent: els.accent.value, font: els.font.value, theme: state?.theme || "light" },
+    body: { app_title: els.appTitle.value, accent: els.accent.value, font: els.font.value, theme: state?.theme || "light", input_language: els.inputLang.value },
   });
   renderAll();
   setStatus("Saved settings");
@@ -1435,6 +1437,11 @@ function bind() {
   els.font.addEventListener("change", () => {
     setFont(els.font.value);
     void saveSettings();
+  });
+  els.inputLang.addEventListener("change", () => {
+    void saveSettings();
+    const langLabel = els.inputLang.options[els.inputLang.selectedIndex]?.text || "English";
+    setStatus(`Input: ${langLabel}`);
   });
   els.appTitle.addEventListener("input", () => {
     document.title = els.appTitle.value || "Daily-Journal";
