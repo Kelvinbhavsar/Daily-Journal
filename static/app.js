@@ -1331,6 +1331,214 @@ function handleClick(ev) {
   }
 }
 
+// --- TRANSLITERATION ENGINE ---
+const translitCache = new Map();
+let prefetchTimer = null;
+let lastTransliteration = null;
+
+function currentInputLanguage() {
+  return els.inputLang?.value || state?.input_language || "en";
+}
+
+function setInputLanguage(lang) {
+  if (!els.inputLang) return;
+  els.inputLang.value = lang;
+  void saveSettings();
+  const label = els.inputLang.options[els.inputLang.selectedIndex]?.text || "English";
+  setStatus(`Input: ${label}`);
+}
+
+function cycleInputLanguage() {
+  const langs = ["en", "hi", "gu"];
+  const current = currentInputLanguage();
+  const nextIdx = (langs.indexOf(current) + 1) % langs.length;
+  setInputLanguage(langs[nextIdx]);
+}
+
+async function getTransliteration(word, lang) {
+  if (!word || lang === "en") return [word];
+  const key = `${lang}:${word.toLowerCase()}`;
+  if (translitCache.has(key)) {
+    return translitCache.get(key);
+  }
+  try {
+    const res = await api("/api/transliterate", {
+      method: "POST",
+      body: { text: word, lang },
+    });
+    const suggestions = res?.suggestions?.length ? res.suggestions : [word];
+    translitCache.set(key, suggestions);
+    return suggestions;
+  } catch (err) {
+    console.error("Transliteration failed:", err);
+    return [word];
+  }
+}
+
+function triggerPrefetch(word) {
+  const lang = currentInputLanguage();
+  if (lang === "en" || !word || word.length < 2) return;
+  const key = `${lang}:${word.toLowerCase()}`;
+  if (translitCache.has(key)) return;
+  clearTimeout(prefetchTimer);
+  prefetchTimer = setTimeout(() => {
+    void getTransliteration(word, lang);
+  }, 100);
+}
+
+function getWordBeforeInputCaret(input) {
+  const pos = input.selectionStart;
+  if (pos === null || pos !== input.selectionEnd) return null;
+  const before = input.value.slice(0, pos);
+  const match = before.match(/([a-zA-Z]+)$/);
+  if (!match) return null;
+  return {
+    word: match[1],
+    start: pos - match[1].length,
+    end: pos,
+  };
+}
+
+async function handleInputTransliteration(input, e, { appendSpace = true } = {}) {
+  const lang = currentInputLanguage();
+  if (lang === "en") return false;
+
+  const wordInfo = getWordBeforeInputCaret(input);
+  if (!wordInfo) return false;
+
+  e.preventDefault();
+  const word = wordInfo.word;
+  const suggestions = await getTransliteration(word, lang);
+  const replacementText = suggestions[0] || word;
+  const replacement = replacementText + (appendSpace ? " " : "");
+
+  const val = input.value;
+  const before = val.slice(0, wordInfo.start);
+  const after = val.slice(wordInfo.end);
+
+  input.value = before + replacement + after;
+  const newPos = before.length + replacement.length;
+  input.setSelectionRange(newPos, newPos);
+  input.dispatchEvent(new Event("input", { bubbles: true }));
+
+  lastTransliteration = {
+    isInput: true,
+    input,
+    before,
+    after,
+    candidates: suggestions,
+    candidateIndex: 0,
+    appendSpace,
+    timestamp: Date.now(),
+  };
+  return true;
+}
+
+function getWordBeforeCaret() {
+  const selection = window.getSelection();
+  if (!selection || !selection.rangeCount) return null;
+  const range = selection.getRangeAt(0);
+  if (!range.collapsed) return null;
+
+  const node = range.startContainer;
+  if (node.nodeType !== Node.TEXT_NODE) return null;
+
+  const textBefore = node.nodeValue.slice(0, range.startOffset);
+  const match = textBefore.match(/([a-zA-Z]+)$/);
+  if (!match) return null;
+
+  return {
+    node,
+    word: match[1],
+    start: range.startOffset - match[1].length,
+    end: range.startOffset,
+  };
+}
+
+async function handleContentEditableTransliteration(e, { appendSpace = true } = {}) {
+  const lang = currentInputLanguage();
+  if (lang === "en") return false;
+
+  const wordInfo = getWordBeforeCaret();
+  if (!wordInfo) return false;
+
+  e.preventDefault();
+  const word = wordInfo.word;
+  const targetNode = wordInfo.node;
+
+  const suggestions = await getTransliteration(word, lang);
+  const replacementText = suggestions[0] || word;
+  const replacement = replacementText + (appendSpace ? " " : "");
+
+  if (!targetNode.isConnected) return false;
+
+  const selection = window.getSelection();
+  const replaceRange = document.createRange();
+  replaceRange.setStart(targetNode, wordInfo.start);
+  replaceRange.setEnd(targetNode, wordInfo.end);
+  replaceRange.deleteContents();
+
+  const insertedNode = document.createTextNode(replacement);
+  replaceRange.insertNode(insertedNode);
+
+  const newRange = document.createRange();
+  newRange.setStart(insertedNode, insertedNode.nodeValue.length);
+  newRange.collapse(true);
+  selection.removeAllRanges();
+  selection.addRange(newRange);
+
+  handleEditorInput();
+
+  lastTransliteration = {
+    isInput: false,
+    textNode: insertedNode,
+    candidates: suggestions,
+    candidateIndex: 0,
+    appendSpace,
+    timestamp: Date.now(),
+  };
+  return true;
+}
+
+function cycleLastTransliteration() {
+  if (!lastTransliteration) return false;
+  if (Date.now() - lastTransliteration.timestamp > 15000) {
+    lastTransliteration = null;
+    return false;
+  }
+  const { candidates, isInput, appendSpace } = lastTransliteration;
+  if (!candidates || candidates.length <= 1) return false;
+
+  lastTransliteration.candidateIndex = (lastTransliteration.candidateIndex + 1) % candidates.length;
+  const nextWord = candidates[lastTransliteration.candidateIndex];
+  const trailing = appendSpace ? " " : "";
+
+  if (isInput) {
+    const { input, before, after } = lastTransliteration;
+    if (!input.isConnected) return false;
+    input.value = before + nextWord + trailing + after;
+    const newPos = before.length + nextWord.length + trailing.length;
+    input.setSelectionRange(newPos, newPos);
+    input.dispatchEvent(new Event("input", { bubbles: true }));
+    return true;
+  }
+
+  const { textNode } = lastTransliteration;
+  if (!textNode || !textNode.isConnected) return false;
+
+  textNode.nodeValue = nextWord + trailing;
+  const selection = window.getSelection();
+  if (selection) {
+    const range = document.createRange();
+    range.setStart(textNode, textNode.nodeValue.length);
+    range.collapse(true);
+    selection.removeAllRanges();
+    selection.addRange(range);
+  }
+  handleEditorInput();
+  return true;
+}
+
 function bind() {
   fillSelectOptions();
   els.segmentGrid.addEventListener("click", handleClick);
@@ -1448,18 +1656,80 @@ function bind() {
   });
   els.appTitle.addEventListener("change", () => void saveSettings());
 
-  els.topicTitle.addEventListener("input", () => markDirty());
+  els.topicTitle.addEventListener("input", () => {
+    markDirty();
+    if (currentInputLanguage() !== "en") {
+      const info = getWordBeforeInputCaret(els.topicTitle);
+      if (info?.word) triggerPrefetch(info.word);
+    }
+  });
+  els.topicTitle.addEventListener("keydown", async (e) => {
+    if (e.key === "Tab" && lastTransliteration?.isInput && lastTransliteration.input === els.topicTitle) {
+      if (cycleLastTransliteration()) {
+        e.preventDefault();
+        return;
+      }
+    }
+    if (e.key === " " && currentInputLanguage() !== "en") {
+      const handled = await handleInputTransliteration(els.topicTitle, e, { appendSpace: true });
+      if (handled) return;
+    }
+    if (e.key === "Enter" && currentInputLanguage() !== "en") {
+      await handleInputTransliteration(els.topicTitle, e, { appendSpace: false });
+    }
+  });
+
+  els.topicContent.addEventListener("input", () => {
+    markDirty();
+    if (currentInputLanguage() !== "en") {
+      const info = getWordBeforeInputCaret(els.topicContent);
+      if (info?.word) triggerPrefetch(info.word);
+    }
+  });
+  els.topicContent.addEventListener("keydown", async (e) => {
+    if (e.key === "Tab" && lastTransliteration?.isInput && lastTransliteration.input === els.topicContent) {
+      if (cycleLastTransliteration()) {
+        e.preventDefault();
+        return;
+      }
+    }
+    if (e.key === " " && currentInputLanguage() !== "en") {
+      const handled = await handleInputTransliteration(els.topicContent, e, { appendSpace: true });
+      if (handled) return;
+    }
+    if (e.key === "Enter" && currentInputLanguage() !== "en") {
+      await handleInputTransliteration(els.topicContent, e, { appendSpace: false });
+    }
+  });
+
   els.topicEditor.addEventListener("input", (e) => {
     if (!e.target.closest(".editorParagraph__text")) return;
     handleEditorInput();
+    if (currentInputLanguage() !== "en") {
+      const info = getWordBeforeCaret();
+      if (info?.word) triggerPrefetch(info.word);
+    }
   });
-  els.topicEditor.addEventListener("keydown", (e) => {
+  els.topicEditor.addEventListener("keydown", async (e) => {
     const target = e.target.closest(".editorParagraph__text");
     if (!target) return;
+    if (e.key === "Tab" && lastTransliteration && !lastTransliteration.isInput) {
+      if (cycleLastTransliteration()) {
+        e.preventDefault();
+        return;
+      }
+    }
     if (e.key === "Enter") {
       e.preventDefault();
+      if (currentInputLanguage() !== "en") {
+        await handleContentEditableTransliteration(e, { appendSpace: false });
+      }
       splitEditorParagraph(target);
       return;
+    }
+    if (e.key === " " && currentInputLanguage() !== "en") {
+      const handled = await handleContentEditableTransliteration(e, { appendSpace: true });
+      if (handled) return;
     }
     if (e.key === "Backspace" && !normalizeParagraphText(target.innerText).trim()) {
       e.preventDefault();
@@ -1482,8 +1752,15 @@ function bind() {
     }
     const isMac = navigator.platform.toLowerCase().includes("mac");
     const mod = isMac ? e.metaKey : e.ctrlKey;
-    if (!mod) return;
     const key = (e.key || "").toLowerCase();
+
+    if ((e.altKey && key === "l") || (mod && e.shiftKey && key === "l")) {
+      e.preventDefault();
+      cycleInputLanguage();
+      return;
+    }
+
+    if (!mod) return;
     if (key === "s") {
       e.preventDefault();
       void autosave({ force: true });

@@ -57,8 +57,8 @@ def render_index(state: dict[str, Any]) -> bytes:
           <label class="control__label" for="inputLang">Lang</label>
           <select id="inputLang" class="control__select" aria-label="Input language">
             <option value="en">English</option>
-            <option value="hi">हिंदी</option>
-            <option value="gu">ગુજરાતી</option>
+            <option value="hi">हिंदी (Hindi)</option>
+            <option value="gu">ગુજરાતી (Gujarati)</option>
           </select>
         </div>
         <button id="themeToggle" class="themeToggle" type="button" aria-label="Toggle theme">

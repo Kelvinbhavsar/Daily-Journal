@@ -6,6 +6,7 @@ import hmac
 import json
 import os
 import secrets as token_secrets
+import ssl
 import urllib.parse
 import urllib.request
 from pathlib import Path
@@ -43,6 +44,16 @@ SUPPORTED_LANGUAGES = {
 GOOGLE_TRANSLITERATE_URL = "https://inputtools.google.com/request"
 
 
+def _ssl_context() -> ssl.SSLContext:
+    ctx = ssl.create_default_context()
+    try:
+        import certifi
+        ctx.load_verify_locations(certifi.where())
+    except Exception:
+        ctx = ssl._create_unverified_context()
+    return ctx
+
+
 def transliterate_text(text: str, lang: str) -> list[str]:
     """Call Google Input Tools to transliterate text from English to the target language."""
     if lang == "en" or lang not in SUPPORTED_LANGUAGES:
@@ -60,7 +71,7 @@ def transliterate_text(text: str, lang: str) -> list[str]:
     url = f"{GOOGLE_TRANSLITERATE_URL}?{params}"
     try:
         req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
-        with urllib.request.urlopen(req, timeout=5) as resp:
+        with urllib.request.urlopen(req, timeout=5, context=_ssl_context()) as resp:
             data = json.loads(resp.read().decode("utf-8"))
         if data[0] == "SUCCESS" and data[1]:
             return data[1][0][1]
