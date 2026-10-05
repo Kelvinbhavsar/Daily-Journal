@@ -894,7 +894,8 @@ function applyAppearanceFromState() {
   setAccent(els.accent.value);
   setFont(els.font.value);
   setTheme(state?.theme || "light");
-  els.inputLang.value = state?.input_language || "en";
+  const savedLang = state?.input_language || localStorage.getItem("daily_journal_input_lang") || "en";
+  if (els.inputLang) els.inputLang.value = savedLang;
   els.appTitle.value = state?.app_title || "Daily-Journal";
   document.title = els.appTitle.value;
   els.secretToggle.classList.toggle("themeToggle--active", secretMode);
@@ -1027,9 +1028,13 @@ function fillSelectOptions() {
 }
 
 async function saveSettings() {
+  const currentLang = els.inputLang?.value || state?.input_language || localStorage.getItem("daily_journal_input_lang") || "en";
+  try {
+    localStorage.setItem("daily_journal_input_lang", currentLang);
+  } catch {}
   state = await api("/api/settings", {
     method: "POST",
-    body: { app_title: els.appTitle.value, accent: els.accent.value, font: els.font.value, theme: state?.theme || "light", input_language: els.inputLang.value },
+    body: { app_title: els.appTitle.value, accent: els.accent.value, font: els.font.value, theme: state?.theme || "light", input_language: currentLang },
   });
   renderAll();
   setStatus("Saved settings");
@@ -1337,12 +1342,15 @@ let prefetchTimer = null;
 let lastTransliteration = null;
 
 function currentInputLanguage() {
-  return els.inputLang?.value || state?.input_language || "en";
+  return els.inputLang?.value || state?.input_language || localStorage.getItem("daily_journal_input_lang") || "en";
 }
 
 function setInputLanguage(lang) {
   if (!els.inputLang) return;
   els.inputLang.value = lang;
+  try {
+    localStorage.setItem("daily_journal_input_lang", lang);
+  } catch {}
   void saveSettings();
   const label = els.inputLang.options[els.inputLang.selectedIndex]?.text || "English";
   setStatus(`Input: ${label}`);
@@ -1647,6 +1655,9 @@ function bind() {
     void saveSettings();
   });
   els.inputLang.addEventListener("change", () => {
+    try {
+      localStorage.setItem("daily_journal_input_lang", els.inputLang.value);
+    } catch {}
     void saveSettings();
     const langLabel = els.inputLang.options[els.inputLang.selectedIndex]?.text || "English";
     setStatus(`Input: ${langLabel}`);

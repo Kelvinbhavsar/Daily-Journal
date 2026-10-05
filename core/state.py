@@ -222,6 +222,7 @@ def default_state() -> dict[str, Any]:
         "accent": "indigo",
         "font": "fredoka",
         "theme": "light",
+        "input_language": "en",
         "selected": {"segment_key": DEFAULT_SEGMENT_KEY, "category_id": cat_id, "topic_id": topic_id},
         "categories": [
             {
@@ -264,7 +265,7 @@ def coerce_state(raw: dict[str, Any] | None) -> dict[str, Any]:
         return default_state()
 
     state = default_state()
-    state.update({k: raw.get(k) for k in ("version", "app_title", "accent", "font", "theme", "categories", "topics", "trash", "selected", "updated_at", "secrets") if k in raw})
+    state.update({k: raw.get(k) for k in ("version", "app_title", "accent", "font", "theme", "input_language", "categories", "topics", "trash", "selected", "updated_at", "secrets") if k in raw})
     state["version"] = 4
 
     if state.get("accent") not in MATERIAL_ACCENTS:
@@ -273,6 +274,8 @@ def coerce_state(raw: dict[str, Any] | None) -> dict[str, Any]:
         state["font"] = "fredoka"
     if state.get("theme") not in THEMES:
         state["theme"] = "light"
+    if state.get("input_language") not in {"en", "hi", "gu"}:
+        state["input_language"] = "en"
 
     if not isinstance(state.get("categories"), list):
         state["categories"] = default_state()["categories"]
