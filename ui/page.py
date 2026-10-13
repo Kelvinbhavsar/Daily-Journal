@@ -157,6 +157,18 @@ def render_index(state: dict[str, Any]) -> bytes:
                   </div>
                 </div>
               </div>
+              <div id="topicImageBar" class="topicImageBar" aria-label="Attached images">
+                <div id="topicImageList" class="topicImageList"></div>
+                <button id="addImageBtn" class="imageAddBtn" type="button" title="Attach an image (Max 5, up to 5MB each)" aria-label="Attach image">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                    <circle cx="8.5" cy="8.5" r="1.5"/>
+                    <polyline points="21 15 16 10 5 21"/>
+                  </svg>
+                  <span>Attach image</span>
+                </button>
+                <input type="file" id="imageFileInput" accept="image/png,image/jpeg,image/webp,image/gif,image/svg+xml" style="display:none">
+              </div>
               <textarea id="topicContent" class="editor__textarea editor__textarea--hidden" placeholder="Write your journal notes here..." aria-hidden="true" tabindex="-1"></textarea>
               <div id="topicEditor" class="editor__surface" aria-label="Write your journal notes here"></div>
             </div>
@@ -164,6 +176,37 @@ def render_index(state: dict[str, Any]) -> bytes:
         </div>
       </section>
     </main>
+  <!-- Mention Autocomplete Popup -->
+  <div id="mentionAutocomplete" class="mentionPopup mentionPopup--hidden" role="listbox" aria-label="Attached image mentions"></div>
+
+  <!-- Modern Image Viewer Lightbox -->
+  <div id="imageViewerModal" class="imageViewer imageViewer--hidden" aria-hidden="true" role="dialog" aria-label="Image viewer">
+    <div id="imageViewerBackdrop" class="imageViewer__backdrop"></div>
+    <div class="imageViewer__content">
+      <div class="imageViewer__topbar">
+        <span id="imageViewerTitle" class="imageViewer__title">Image preview</span>
+        <div class="imageViewer__actions">
+          <a id="imageViewerDownload" class="imageViewer__btn" href="#" download title="Download image" aria-label="Download image">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          </a>
+          <button id="imageViewerClose" class="imageViewer__btn imageViewer__btn--close" type="button" title="Close (Esc)" aria-label="Close viewer">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="imageViewer__stage">
+        <button id="imageViewerPrev" class="imageViewer__nav imageViewer__nav--prev" type="button" title="Previous image (Left Arrow)" aria-label="Previous image">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        <div class="imageViewer__imgWrap">
+          <img id="imageViewerImg" class="imageViewer__img" src="" alt="Attached image preview">
+        </div>
+        <button id="imageViewerNext" class="imageViewer__nav imageViewer__nav--next" type="button" title="Next image (Right Arrow)" aria-label="Next image">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+      </div>
+      <div id="imageViewerMeta" class="imageViewer__meta"></div>
+    </div>
   </div>
 
   <div id="modalLayer" class="modalLayer modalLayer--hidden" aria-hidden="true">

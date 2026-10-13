@@ -65,6 +65,20 @@ const els = {
   inputLang: document.getElementById("inputLang"),
   newCategory: document.getElementById("newCategory"),
   newTopic: document.getElementById("newTopic"),
+  topicImageBar: document.getElementById("topicImageBar"),
+  topicImageList: document.getElementById("topicImageList"),
+  addImageBtn: document.getElementById("addImageBtn"),
+  imageFileInput: document.getElementById("imageFileInput"),
+  mentionAutocomplete: document.getElementById("mentionAutocomplete"),
+  imageViewerModal: document.getElementById("imageViewerModal"),
+  imageViewerBackdrop: document.getElementById("imageViewerBackdrop"),
+  imageViewerTitle: document.getElementById("imageViewerTitle"),
+  imageViewerImg: document.getElementById("imageViewerImg"),
+  imageViewerClose: document.getElementById("imageViewerClose"),
+  imageViewerDownload: document.getElementById("imageViewerDownload"),
+  imageViewerPrev: document.getElementById("imageViewerPrev"),
+  imageViewerNext: document.getElementById("imageViewerNext"),
+  imageViewerMeta: document.getElementById("imageViewerMeta"),
 };
 
 let state = null;
@@ -632,6 +646,7 @@ function renderEditor() {
   els.topicContent.value = topic?.content || "";
   els.topicTitle.disabled = !topic;
   els.topicContent.disabled = !topic;
+  renderTopicImages(topic);
   renderEditorSurface(topic);
   resetHistoryForTopic(topic?.id || null);
 }
@@ -722,7 +737,7 @@ function renderEditorSurface(topic, { focusIndex = null, focusOffset = null, dra
             role="textbox"
             aria-multiline="true"
             data-placeholder="Write your journal notes here..."
-          >${escapeHtml(item.text).replaceAll("\n", "<br>")}</div>
+          >${formatParagraphHtml(item.text, topic?.images || [])}</div>
           <div class="editorParagraph__meta" contenteditable="false">
             <span class="editorParagraph__mood" aria-label="${escapeHtml(moodByKey(item.mood).label)} mood">${moodByKey(item.mood).emoji}</span>
             <span class="editorParagraph__time">${item.pending ? "Updates on save" : escapeHtml(formatParagraphTime(item.updatedAt))}</span>
@@ -1336,6 +1351,410 @@ function handleClick(ev) {
   }
 }
 
+// --- IMAGE ATTACHMENTS & LIGHTBOX VIEWER ---
+let currentViewerImages = [];
+let currentViewerIndex = 0;
+let mentionActiveIndex = -1;
+
+function escapeRegExp(string) {
+  return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function formatParagraphHtml(text, images = []) {
+  let escaped = escapeHtml(text).replaceAll("\n", "<br>");
+  if (!images || !images.length) return escaped;
+
+  const validImages = images.filter((img) => img && img.alias);
+  if (!validImages.length) return escaped;
+
+  const aliases = validImages.map((img) => img.alias).sort((a, b) => b.length - a.length);
+  const pattern = new RegExp(`@(${aliases.map(escapeRegExp).join("|")})(?=[\\s,.:;!?)]|$)`, "gi");
+
+  return escaped.replace(pattern, (match, alias) => {
+    return `<span class="imageMentionBadge" data-alias="${escapeHtml(alias.toLowerCase())}" contenteditable="false" title="Click to view @${escapeHtml(alias)}">@${escapeHtml(alias)}</span>`;
+  });
+}
+
+function renderTopicImages(topic) {
+  if (!els.topicImageBar || !els.topicImageList) return;
+  if (!topic) {
+    els.topicImageBar.style.display = "none";
+    return;
+  }
+  els.topicImageBar.style.display = "flex";
+  const images = Array.isArray(topic.images) ? topic.images : [];
+
+  els.topicImageList.innerHTML = images
+    .map((img, idx) => `
+      <div class="imageThumb" data-action="view-image" data-index="${idx}" title="Click to view @${escapeHtml(img.alias)}">
+        <img class="imageThumb__img" src="/api/images/${escapeHtml(img.filename)}" alt="@${escapeHtml(img.alias)}">
+        <div class="imageThumb__badge" data-action="rename-image" data-id="${escapeHtml(img.id)}" data-alias="${escapeHtml(img.alias)}" title="Click to rename alias">@${escapeHtml(img.alias)}</div>
+        <button class="imageThumb__delete" type="button" data-action="delete-image" data-id="${escapeHtml(img.id)}" data-alias="${escapeHtml(img.alias)}" title="Delete image" aria-label="Delete image">×</button>
+      </div>
+    `)
+    .join("");
+
+  els.addImageBtn.disabled = images.length >= 5;
+  if (images.length >= 5) {
+    els.addImageBtn.title = "Maximum 5 images attached (limit reached)";
+  } else {
+    els.addImageBtn.title = `Attach an image (${images.length}/5 attached, max 5MB each)`;
+  }
+}
+
+async function handleAddImageClick() {
+  const topicId = selectedTopicId();
+  if (!topicId) {
+    setStatus("Select a topic first");
+    return;
+  }
+  const topic = getTopicById(topicId);
+  const images = Array.isArray(topic?.images) ? topic.images : [];
+  if (images.length >= 5) {
+    await openModal({
+      title: "Limit Reached",
+      message: "You can attach a maximum of 5 images per entry.",
+      confirmLabel: "OK",
+    });
+    return;
+  }
+  els.imageFileInput.click();
+}
+
+async function handleImageFileSelected(e) {
+  const file = e.target.files?.[0];
+  els.imageFileInput.value = "";
+  if (!file) return;
+
+  const maxBytes = 5 * 1024 * 1024;
+  if (file.size > maxBytes) {
+    const sizeMb = (file.size / (1024 * 1024)).toFixed(1);
+    await openModal({
+      title: "Image Limit Exceeded",
+      message: `The selected image is ${sizeMb}MB, which exceeds the 5MB limit. Please choose a smaller image.`,
+      confirmLabel: "OK",
+    });
+    return;
+  }
+
+  const topicId = selectedTopicId();
+  if (!topicId) return;
+  const topic = getTopicById(topicId);
+  const images = Array.isArray(topic?.images) ? topic.images : [];
+  if (images.length >= 5) {
+    await openModal({
+      title: "Limit Reached",
+      message: "You can attach a maximum of 5 images per entry.",
+      confirmLabel: "OK",
+    });
+    return;
+  }
+
+  const rawBaseName = file.name.replace(/\.[^/.]+$/, "").replace(/[^a-zA-Z0-9_-]/g, "_").toLowerCase();
+  const defaultAlias = rawBaseName || `img${images.length + 1}`;
+
+  const modalRes = await openModal({
+    title: "Name Attached Image",
+    message: "Give this image an @name to reference it in your writing (e.g. @chart1):",
+    requireInput: true,
+    inputLabel: "Image @alias",
+    inputValue: defaultAlias,
+    confirmLabel: "Attach",
+    cancelLabel: "Cancel",
+  });
+
+  if (!modalRes.confirmed) return;
+
+  const chosenAlias = (modalRes.value || defaultAlias).trim().replace(/^@/, "").replace(/[^a-zA-Z0-9_-]/g, "_").toLowerCase() || defaultAlias;
+
+  const dataUrl = await new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+
+  setStatus("Uploading image...");
+  try {
+    const res = await api(`/api/topics/${topicId}/images`, {
+      method: "POST",
+      body: {
+        alias: chosenAlias,
+        filename: file.name,
+        data: dataUrl,
+      },
+    });
+
+    if (res?.state) {
+      state = res.state;
+    } else {
+      await refresh();
+    }
+    const updatedTopic = getTopicById(topicId);
+    renderTopicImages(updatedTopic);
+    renderEditorSurface(updatedTopic);
+    setStatus(`Attached image @${res?.image?.alias || chosenAlias}`);
+  } catch (err) {
+    console.error(err);
+    await openModal({
+      title: "Upload Failed",
+      message: err.message || "Could not upload image. Please try again.",
+      confirmLabel: "OK",
+    });
+    setStatus("Upload failed");
+  }
+}
+
+async function handleDeleteImage(imageId, alias) {
+  const topicId = selectedTopicId();
+  if (!topicId) return;
+
+  const res = await openModal({
+    title: "Delete Image",
+    message: `Are you sure you want to remove @${alias} from this entry?`,
+    confirmLabel: "Delete",
+    cancelLabel: "Cancel",
+  });
+  if (!res.confirmed) return;
+
+  try {
+    state = await api(`/api/topics/${topicId}/images/${imageId}`, {
+      method: "DELETE",
+    });
+    const topic = getTopicById(topicId);
+    renderTopicImages(topic);
+    renderEditorSurface(topic);
+    setStatus(`Removed @${alias}`);
+  } catch (err) {
+    console.error(err);
+    setStatus("Failed to delete image");
+  }
+}
+
+async function handleRenameImage(imageId, currentAlias) {
+  const topicId = selectedTopicId();
+  if (!topicId) return;
+
+  const res = await openModal({
+    title: "Rename Image @alias",
+    message: "Change the mention alias for this image:",
+    requireInput: true,
+    inputLabel: "New alias",
+    inputValue: currentAlias,
+    confirmLabel: "Rename",
+    cancelLabel: "Cancel",
+  });
+  if (!res.confirmed) return;
+
+  const newAlias = (res.value || "").trim().replace(/^@/, "").replace(/[^a-zA-Z0-9_-]/g, "_").toLowerCase();
+  if (!newAlias || newAlias === currentAlias) return;
+
+  try {
+    state = await api(`/api/topics/${topicId}/images/${imageId}`, {
+      method: "PUT",
+      body: { alias: newAlias },
+    });
+    const topic = getTopicById(topicId);
+    renderTopicImages(topic);
+    renderEditorSurface(topic);
+    setStatus(`Renamed to @${newAlias}`);
+  } catch (err) {
+    console.error(err);
+    setStatus("Failed to rename image");
+  }
+}
+
+function openImageViewer(images, startIndex = 0) {
+  if (!images || !images.length) return;
+  currentViewerImages = images;
+  currentViewerIndex = Math.max(0, Math.min(startIndex, images.length - 1));
+  updateImageViewer();
+  els.imageViewerModal.classList.remove("imageViewer--hidden");
+  els.imageViewerModal.setAttribute("aria-hidden", "false");
+}
+
+function updateImageViewer() {
+  const img = currentViewerImages[currentViewerIndex];
+  if (!img) return;
+  els.imageViewerImg.src = `/api/images/${img.filename}`;
+  els.imageViewerTitle.textContent = `@${img.alias}`;
+  els.imageViewerDownload.href = `/api/images/${img.filename}`;
+  els.imageViewerDownload.setAttribute("download", img.filename);
+
+  const sizeKb = img.size ? ` • ${(img.size / 1024).toFixed(0)} KB` : "";
+  els.imageViewerMeta.textContent = `${currentViewerIndex + 1} of ${currentViewerImages.length}${sizeKb}`;
+
+  els.imageViewerPrev.style.display = currentViewerImages.length > 1 ? "grid" : "none";
+  els.imageViewerNext.style.display = currentViewerImages.length > 1 ? "grid" : "none";
+}
+
+function closeImageViewer() {
+  els.imageViewerModal.classList.add("imageViewer--hidden");
+  els.imageViewerModal.setAttribute("aria-hidden", "true");
+  currentViewerImages = [];
+}
+
+function nextViewerImage() {
+  if (currentViewerImages.length <= 1) return;
+  currentViewerIndex = (currentViewerIndex + 1) % currentViewerImages.length;
+  updateImageViewer();
+}
+
+function prevViewerImage() {
+  if (currentViewerImages.length <= 1) return;
+  currentViewerIndex = (currentViewerIndex - 1 + currentViewerImages.length) % currentViewerImages.length;
+  updateImageViewer();
+}
+
+function getMentionQueryAtCaret() {
+  const selection = window.getSelection();
+  if (!selection || !selection.rangeCount) return null;
+  const range = selection.getRangeAt(0);
+  if (!range.collapsed) return null;
+  const node = range.startContainer;
+  if (node.nodeType !== Node.TEXT_NODE) return null;
+
+  const textBefore = node.nodeValue.slice(0, range.startOffset);
+  const match = textBefore.match(/@([a-zA-Z0-9_-]*)$/);
+  if (!match) return null;
+
+  return {
+    node,
+    query: match[1].toLowerCase(),
+    start: range.startOffset - match[0].length,
+    end: range.startOffset,
+  };
+}
+
+function checkMentionAutocomplete() {
+  const topic = getTopicById(selectedTopicId());
+  const images = Array.isArray(topic?.images) ? topic.images : [];
+  if (!images.length) {
+    hideMentionAutocomplete();
+    return;
+  }
+
+  const mention = getMentionQueryAtCaret();
+  if (!mention) {
+    hideMentionAutocomplete();
+    return;
+  }
+
+  const matching = images.filter((img) => img.alias.toLowerCase().startsWith(mention.query));
+  if (!matching.length) {
+    hideMentionAutocomplete();
+    return;
+  }
+
+  showMentionAutocomplete(matching, mention);
+}
+
+function showMentionAutocomplete(matchingImages, mentionInfo) {
+  mentionActiveIndex = 0;
+  els.mentionAutocomplete.innerHTML = matchingImages
+    .map((img, idx) => `
+      <div class="mentionPopup__item ${idx === 0 ? "mentionPopup__item--active" : ""}" data-alias="${escapeHtml(img.alias)}" data-index="${idx}">
+        <img class="mentionPopup__itemImg" src="/api/images/${escapeHtml(img.filename)}" alt="">
+        <span class="mentionPopup__itemAlias">@${escapeHtml(img.alias)}</span>
+      </div>
+    `)
+    .join("");
+
+  const selection = window.getSelection();
+  if (selection && selection.rangeCount) {
+    const range = selection.getRangeAt(0);
+    const rect = range.getBoundingClientRect();
+    if (rect.bottom > 0) {
+      els.mentionAutocomplete.style.top = `${window.scrollY + rect.bottom + 6}px`;
+      els.mentionAutocomplete.style.left = `${window.scrollX + Math.max(10, rect.left)}px`;
+    }
+  }
+
+  els.mentionAutocomplete.classList.remove("mentionPopup--hidden");
+}
+
+function hideMentionAutocomplete() {
+  if (els.mentionAutocomplete) {
+    els.mentionAutocomplete.classList.add("mentionPopup--hidden");
+  }
+  mentionActiveIndex = -1;
+}
+
+function selectNextMention() {
+  const items = Array.from(els.mentionAutocomplete.querySelectorAll(".mentionPopup__item"));
+  if (!items.length) return;
+  mentionActiveIndex = (mentionActiveIndex + 1) % items.length;
+  items.forEach((item, idx) => {
+    item.classList.toggle("mentionPopup__item--active", idx === mentionActiveIndex);
+  });
+  items[mentionActiveIndex]?.scrollIntoView({ block: "nearest" });
+}
+
+function selectPrevMention() {
+  const items = Array.from(els.mentionAutocomplete.querySelectorAll(".mentionPopup__item"));
+  if (!items.length) return;
+  mentionActiveIndex = (mentionActiveIndex - 1 + items.length) % items.length;
+  items.forEach((item, idx) => {
+    item.classList.toggle("mentionPopup__item--active", idx === mentionActiveIndex);
+  });
+  items[mentionActiveIndex]?.scrollIntoView({ block: "nearest" });
+}
+
+function getActiveMentionAlias() {
+  const items = Array.from(els.mentionAutocomplete.querySelectorAll(".mentionPopup__item"));
+  if (!items.length) return null;
+  if (mentionActiveIndex >= 0 && mentionActiveIndex < items.length) {
+    return items[mentionActiveIndex].getAttribute("data-alias");
+  }
+  return items[0]?.getAttribute("data-alias") || null;
+}
+
+function insertMention(alias) {
+  const mention = getMentionQueryAtCaret();
+  if (!mention) return;
+
+  const { node, start, end } = mention;
+  const selection = window.getSelection();
+  const range = document.createRange();
+  range.setStart(node, start);
+  range.setEnd(node, end);
+  range.deleteContents();
+
+  const badge = document.createElement("span");
+  badge.className = "imageMentionBadge";
+  badge.setAttribute("data-alias", alias.toLowerCase());
+  badge.setAttribute("contenteditable", "false");
+  badge.setAttribute("title", `Click to view @${alias}`);
+  badge.textContent = `@${alias}`;
+
+  const spaceNode = document.createTextNode("\u00A0");
+
+  const frag = document.createDocumentFragment();
+  frag.appendChild(badge);
+  frag.appendChild(spaceNode);
+  range.insertNode(frag);
+
+  const nextRange = document.createRange();
+  nextRange.setStartAfter(spaceNode);
+  nextRange.collapse(true);
+  selection.removeAllRanges();
+  selection.addRange(nextRange);
+
+  hideMentionAutocomplete();
+  handleEditorInput();
+}
+
+function formatParagraphMentions(paragraphEl) {
+  const topic = getTopicById(selectedTopicId());
+  const images = Array.isArray(topic?.images) ? topic.images : [];
+  if (!images.length) return;
+  const rawText = normalizeParagraphText(paragraphEl.innerText);
+  const formatted = formatParagraphHtml(rawText, images);
+  if (paragraphEl.innerHTML !== formatted) {
+    paragraphEl.innerHTML = formatted;
+  }
+}
+
 // --- TRANSLITERATION ENGINE ---
 const translitCache = new Map();
 let prefetchTimer = null;
@@ -1713,17 +2132,118 @@ function bind() {
     }
   });
 
+  // Topic image attachment button & input
+  els.addImageBtn?.addEventListener("click", () => void handleAddImageClick());
+  els.imageFileInput?.addEventListener("change", (e) => void handleImageFileSelected(e));
+
+  // Thumbnail bar actions: view image, rename alias, delete image
+  els.topicImageList?.addEventListener("click", (ev) => {
+    const deleteBtn = ev.target.closest('[data-action="delete-image"]');
+    if (deleteBtn) {
+      ev.stopPropagation();
+      void handleDeleteImage(deleteBtn.dataset.id, deleteBtn.dataset.alias);
+      return;
+    }
+
+    const renameBadge = ev.target.closest('[data-action="rename-image"]');
+    if (renameBadge) {
+      ev.stopPropagation();
+      void handleRenameImage(renameBadge.dataset.id, renameBadge.dataset.alias);
+      return;
+    }
+
+    const thumb = ev.target.closest(".imageThumb");
+    if (thumb) {
+      const topic = getTopicById(selectedTopicId());
+      const images = Array.isArray(topic?.images) ? topic.images : [];
+      const index = parseInt(thumb.dataset.index || "0", 10);
+      openImageViewer(images, index);
+    }
+  });
+
+  // Clicking an @mention badge inside the editor opens the viewer
+  els.topicEditor?.addEventListener("click", (ev) => {
+    const badge = ev.target.closest(".imageMentionBadge");
+    if (!badge) return;
+    ev.preventDefault();
+    ev.stopPropagation();
+    const alias = badge.getAttribute("data-alias");
+    const topic = getTopicById(selectedTopicId());
+    const images = Array.isArray(topic?.images) ? topic.images : [];
+    const index = images.findIndex((img) => img.alias.toLowerCase() === (alias || "").toLowerCase());
+    if (index !== -1) {
+      openImageViewer(images, index);
+    } else {
+      setStatus(`Image @${alias} not found in this entry`);
+    }
+  });
+
+  // Mention autocomplete popup clicks
+  els.mentionAutocomplete?.addEventListener("mousedown", (e) => {
+    e.preventDefault(); // Keep selection in editor
+  });
+  els.mentionAutocomplete?.addEventListener("click", (e) => {
+    const item = e.target.closest(".mentionPopup__item");
+    if (!item) return;
+    const alias = item.getAttribute("data-alias");
+    if (alias) {
+      insertMention(alias);
+    }
+  });
+
+  // Lightbox image viewer controls
+  els.imageViewerClose?.addEventListener("click", closeImageViewer);
+  els.imageViewerBackdrop?.addEventListener("click", closeImageViewer);
+  els.imageViewerPrev?.addEventListener("click", prevViewerImage);
+  els.imageViewerNext?.addEventListener("click", nextViewerImage);
+
   els.topicEditor.addEventListener("input", (e) => {
     if (!e.target.closest(".editorParagraph__text")) return;
     handleEditorInput();
+    checkMentionAutocomplete();
     if (currentInputLanguage() !== "en") {
       const info = getWordBeforeCaret();
       if (info?.word) triggerPrefetch(info.word);
     }
   });
+
+  els.topicEditor.addEventListener("focusout", (e) => {
+    const target = e.target.closest(".editorParagraph__text");
+    if (!target) return;
+    formatParagraphMentions(target);
+  });
+
   els.topicEditor.addEventListener("keydown", async (e) => {
     const target = e.target.closest(".editorParagraph__text");
     if (!target) return;
+
+    const isAutocompleteOpen = els.mentionAutocomplete && !els.mentionAutocomplete.classList.contains("mentionPopup--hidden");
+    if (isAutocompleteOpen) {
+      if (e.key === "ArrowDown") {
+        e.preventDefault();
+        selectNextMention();
+        return;
+      }
+      if (e.key === "ArrowUp") {
+        e.preventDefault();
+        selectPrevMention();
+        return;
+      }
+      if (e.key === "Enter" || e.key === "Tab") {
+        const alias = getActiveMentionAlias();
+        if (alias) {
+          e.preventDefault();
+          insertMention(alias);
+          return;
+        }
+      }
+      if (e.key === "Escape") {
+        e.preventDefault();
+        hideMentionAutocomplete();
+        return;
+      }
+    }
+
     if (e.key === "Tab" && lastTransliteration && !lastTransliteration.isInput) {
       if (cycleLastTransliteration()) {
         e.preventDefault();
@@ -1755,11 +2275,34 @@ function bind() {
     document.execCommand("insertText", false, pasted);
   });
 
+  document.addEventListener("click", (e) => {
+    if (!e.target.closest("#mentionAutocomplete") && !e.target.closest("#topicEditor")) {
+      hideMentionAutocomplete();
+    }
+  });
+
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape" && modalState) {
       e.preventDefault();
       closeModal({ confirmed: false });
       return;
+    }
+    if (els.imageViewerModal && !els.imageViewerModal.classList.contains("imageViewer--hidden")) {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        closeImageViewer();
+        return;
+      }
+      if (e.key === "ArrowLeft") {
+        e.preventDefault();
+        prevViewerImage();
+        return;
+      }
+      if (e.key === "ArrowRight") {
+        e.preventDefault();
+        nextViewerImage();
+        return;
+      }
     }
     const isMac = navigator.platform.toLowerCase().includes("mac");
     const mod = isMac ? e.metaKey : e.ctrlKey;

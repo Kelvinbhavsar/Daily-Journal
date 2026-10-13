@@ -143,6 +143,22 @@ def normalize_topic(topic: dict[str, Any]) -> dict[str, Any]:
             }
         )
     normalized["paragraphs"] = normalized_paragraphs or paragraph_records_from_content(content, fallback_updated_at)
+
+    raw_images = normalized.get("images")
+    normalized_images = []
+    if isinstance(raw_images, list):
+        for img in raw_images:
+            if isinstance(img, dict) and img.get("filename") and img.get("alias"):
+                normalized_images.append(
+                    {
+                        "id": str(img.get("id") or ""),
+                        "alias": str(img.get("alias") or "").strip().lower(),
+                        "filename": str(img.get("filename") or "").strip(),
+                        "size": int(img.get("size") or 0),
+                        "created_at": str(img.get("created_at") or fallback_updated_at),
+                    }
+                )
+    normalized["images"] = normalized_images[:5]
     return normalized
 
 
@@ -250,6 +266,7 @@ def default_state() -> dict[str, Any]:
                         "mood": DEFAULT_EMOTION_KEY,
                     },
                 ],
+                "images": [],
                 "created_at": topic_updated_at,
                 "updated_at": topic_updated_at,
             }

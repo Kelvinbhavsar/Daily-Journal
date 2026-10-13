@@ -166,7 +166,7 @@
       "title": "2 April 2026",
       "content": "One of the most haunted day of my trading career i can say.\n\nRecently i had a dramatic experience with my trading ",
       "created_at": "2026-03-31T00:19:40",
-      "updated_at": "2026-04-13T16:52:05",
+      "updated_at": "2026-10-13T23:04:42",
       "paragraphs": [
         {
           "text": "One of the most haunted day of my trading career i can say.",
@@ -178,7 +178,8 @@
           "updated_at": "2026-04-13T16:52:05",
           "mood": "normal"
         }
-      ]
+      ],
+      "images": []
     },
     {
       "id": "topic_b3173bafd218",
@@ -213,7 +214,8 @@
           "updated_at": "2026-04-04T02:16:31",
           "mood": "normal"
         }
-      ]
+      ],
+      "images": []
     },
     {
       "id": "topic_d8cf9c4365aa",
@@ -243,7 +245,8 @@
           "updated_at": "2026-03-31T01:03:39",
           "mood": "normal"
         }
-      ]
+      ],
+      "images": []
     },
     {
       "id": "topic_c5e0b27bf848",
@@ -318,7 +321,8 @@
           "updated_at": "2026-03-31T01:19:23",
           "mood": "normal"
         }
-      ]
+      ],
+      "images": []
     },
     {
       "id": "topic_2be7a6da76d5",
@@ -333,7 +337,8 @@
           "updated_at": "2026-04-06T09:12:35",
           "mood": "normal"
         }
-      ]
+      ],
+      "images": []
     },
     {
       "id": "topic_a97163eca541",
@@ -342,7 +347,8 @@
       "content": "",
       "created_at": "2026-03-31T01:27:53",
       "updated_at": "2026-03-31T01:27:54",
-      "paragraphs": []
+      "paragraphs": [],
+      "images": []
     },
     {
       "id": "topic_1885dd937625",
@@ -362,7 +368,8 @@
           "updated_at": "2026-06-13T14:38:27",
           "mood": "happy"
         }
-      ]
+      ],
+      "images": []
     },
     {
       "id": "topic_fc6d1341a17a",
@@ -507,7 +514,8 @@
           "updated_at": "2026-04-06T15:08:54",
           "mood": "normal"
         }
-      ]
+      ],
+      "images": []
     },
     {
       "id": "topic_b98312c793a8",
@@ -522,7 +530,8 @@
           "updated_at": "2026-04-13T01:08:19",
           "mood": "normal"
         }
-      ]
+      ],
+      "images": []
     },
     {
       "id": "topic_08eb5883475b",
@@ -567,7 +576,8 @@
           "updated_at": "2026-04-07T15:44:02",
           "mood": "normal"
         }
-      ]
+      ],
+      "images": []
     },
     {
       "id": "topic_73e59cc6ff51",
@@ -587,7 +597,8 @@
           "updated_at": "2026-04-10T01:59:09",
           "mood": "normal"
         }
-      ]
+      ],
+      "images": []
     },
     {
       "id": "topic_8ee9b4a8a2eb",
@@ -596,7 +607,8 @@
       "content": "",
       "created_at": "2026-04-10T01:50:38",
       "updated_at": "2026-04-10T01:50:40",
-      "paragraphs": []
+      "paragraphs": [],
+      "images": []
     },
     {
       "id": "topic_3498bc659326",
@@ -611,7 +623,8 @@
           "updated_at": "2026-04-11T00:38:46",
           "mood": "normal"
         }
-      ]
+      ],
+      "images": []
     },
     {
       "id": "topic_7633ed5af59f",
@@ -651,7 +664,8 @@
           "updated_at": "2026-04-11T12:04:14",
           "mood": "normal"
         }
-      ]
+      ],
+      "images": []
     },
     {
       "id": "topic_34f0cdd85526",
@@ -671,7 +685,8 @@
           "updated_at": "2026-04-13T00:02:01",
           "mood": "normal"
         }
-      ]
+      ],
+      "images": []
     },
     {
       "id": "topic_1be990b45966",
@@ -686,7 +701,8 @@
           "updated_at": "2026-04-13T16:51:35",
           "mood": "normal"
         }
-      ]
+      ],
+      "images": []
     },
     {
       "id": "topic_0ca802faa7ba",
@@ -721,7 +737,8 @@
           "updated_at": "2026-04-13T17:15:31",
           "mood": "normal"
         }
-      ]
+      ],
+      "images": []
     },
     {
       "id": "topic_8f452b944892",
@@ -741,7 +758,8 @@
           "updated_at": "2026-05-14T15:39:49",
           "mood": "normal"
         }
-      ]
+      ],
+      "images": []
     },
     {
       "id": "topic_9b1ab60118b4",
@@ -761,7 +779,8 @@
           "updated_at": "2026-04-13T17:25:46",
           "mood": "normal"
         }
-      ]
+      ],
+      "images": []
     },
     {
       "id": "topic_cff696c52765",
@@ -791,7 +810,8 @@
         }
       ],
       "created_at": "2026-05-13T22:22:40",
-      "updated_at": "2026-05-13T22:32:07"
+      "updated_at": "2026-05-13T22:32:07",
+      "images": []
     },
     {
       "id": "topic_caee72e7bb0e",
@@ -821,7 +841,8 @@
         }
       ],
       "created_at": "2026-05-13T22:41:26",
-      "updated_at": "2026-05-13T22:53:51"
+      "updated_at": "2026-05-13T22:53:51",
+      "images": []
     },
     {
       "id": "topic_a864b369f99c",
@@ -856,7 +877,8 @@
         }
       ],
       "created_at": "2026-05-14T09:42:13",
-      "updated_at": "2026-05-14T15:42:45"
+      "updated_at": "2026-05-14T15:42:45",
+      "images": []
     },
     {
       "id": "topic_cf8347e8ac61",
@@ -906,7 +928,8 @@
         }
       ],
       "created_at": "2026-05-15T01:00:23",
-      "updated_at": "2026-05-15T01:44:19"
+      "updated_at": "2026-05-15T01:44:19",
+      "images": []
     },
     {
       "id": "topic_2fe417314863",
@@ -941,7 +964,8 @@
         }
       ],
       "created_at": "2026-05-20T23:42:52",
-      "updated_at": "2026-05-21T00:09:43"
+      "updated_at": "2026-05-21T00:09:43",
+      "images": []
     },
     {
       "id": "topic_97e6007bdd8b",
@@ -966,7 +990,8 @@
         }
       ],
       "created_at": "2026-05-21T19:49:27",
-      "updated_at": "2026-05-21T19:55:48"
+      "updated_at": "2026-05-21T19:55:48",
+      "images": []
     },
     {
       "id": "topic_f770135adf51",
@@ -1011,7 +1036,8 @@
         }
       ],
       "created_at": "2026-05-22T10:46:29",
-      "updated_at": "2026-05-22T16:33:01"
+      "updated_at": "2026-05-22T16:33:01",
+      "images": []
     },
     {
       "id": "topic_b0a72c336f18",
@@ -1036,7 +1062,8 @@
         }
       ],
       "created_at": "2026-05-22T20:34:03",
-      "updated_at": "2026-05-22T22:12:38"
+      "updated_at": "2026-05-22T22:12:38",
+      "images": []
     },
     {
       "id": "topic_f993229825b4",
@@ -1051,7 +1078,8 @@
         }
       ],
       "created_at": "2026-05-28T09:21:13",
-      "updated_at": "2026-05-28T09:22:01"
+      "updated_at": "2026-05-28T09:22:01",
+      "images": []
     },
     {
       "id": "topic_533560d4fc4a",
@@ -1091,7 +1119,8 @@
         }
       ],
       "created_at": "2026-09-11T16:20:49",
-      "updated_at": "2026-09-19T02:21:55"
+      "updated_at": "2026-09-19T02:21:55",
+      "images": []
     },
     {
       "id": "topic_5034e81fbcca",
@@ -1116,7 +1145,8 @@
         }
       ],
       "created_at": "2026-09-20T17:44:08",
-      "updated_at": "2026-09-21T00:11:20"
+      "updated_at": "2026-09-21T00:11:20",
+      "images": []
     },
     {
       "id": "topic_c6b1ea11732c",
@@ -1151,7 +1181,8 @@
         }
       ],
       "created_at": "2026-09-25T12:39:08",
-      "updated_at": "2026-09-28T14:11:07"
+      "updated_at": "2026-09-28T14:11:07",
+      "images": []
     },
     {
       "id": "topic_a7e5b11301a9",
@@ -1160,7 +1191,8 @@
       "content": "",
       "paragraphs": [],
       "created_at": "2026-10-01T16:12:13",
-      "updated_at": "2026-10-01T16:12:13"
+      "updated_at": "2026-10-01T16:12:13",
+      "images": []
     },
     {
       "id": "topic_fd01a7b86b5b",
@@ -1175,7 +1207,8 @@
         }
       ],
       "created_at": "2026-10-01T16:18:46",
-      "updated_at": "2026-10-01T16:19:51"
+      "updated_at": "2026-10-01T16:19:51",
+      "images": []
     },
     {
       "id": "topic_7f1b595d07a6",
@@ -1200,7 +1233,8 @@
         }
       ],
       "created_at": "2026-10-05T15:26:28",
-      "updated_at": "2026-10-05T17:34:29"
+      "updated_at": "2026-10-05T17:34:29",
+      "images": []
     }
   ],
   "trash": {
@@ -1301,5 +1335,5 @@
     "selected_topic_id": null,
     "updated_at": "2026-06-13T14:39:10"
   },
-  "updated_at": "2026-10-05T17:34:29"
+  "updated_at": "2026-10-13T23:19:31"
 }

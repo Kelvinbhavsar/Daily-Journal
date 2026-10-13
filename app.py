@@ -1,10 +1,12 @@
 from __future__ import annotations
 
+import base64
 import copy
 import hashlib
 import hmac
 import json
 import os
+import re
 import secrets as token_secrets
 import ssl
 import urllib.parse
@@ -33,7 +35,10 @@ PORT = 9000
 
 
 STATIC_DIR = BASE_DIR / "static"
+IMAGES_DIR = BASE_DIR / "data" / "images"
 PASSWORD_ITERATIONS = 200_000
+MAX_IMAGE_BYTES = 5 * 1024 * 1024  # 5MB
+ALLOWED_IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png", ".webp", ".gif", ".svg"}
 
 SUPPORTED_LANGUAGES = {
     "en": "English",
@@ -200,6 +205,33 @@ def serve_static(path: str) -> list[bytes] | None:
     return bytes_response("200 OK", body, ctype)
 
 
+def serve_image(path: str) -> list[bytes] | None:
+    rel = path.removeprefix("/api/images/").lstrip("/")
+    if not rel or ".." in rel or "/" in rel or rel.startswith("."):
+        return None
+    target = (IMAGES_DIR / rel).resolve()
+    if IMAGES_DIR not in target.parents and target.parent != IMAGES_DIR:
+        return None
+    if not target.is_file():
+        return None
+    try:
+        body = target.read_bytes()
+    except OSError:
+        return None
+    ext = target.suffix.lower()
+    mimes = {
+        ".png": "image/png",
+        ".jpg": "image/jpeg",
+        ".jpeg": "image/jpeg",
+        ".webp": "image/webp",
+        ".gif": "image/gif",
+        ".svg": "image/svg+xml",
+    }
+    ctype = mimes.get(ext, "application/octet-stream")
+    headers = [("Cache-Control", "public, max-age=86400")]
+    return bytes_response("200 OK", body, ctype, headers)
+
+
 def select_defaults(state: dict[str, Any]) -> dict[str, Any]:
     state = ensure_trash(state)
     cats = state.get("categories") or []
@@ -273,6 +305,16 @@ def app(environ: dict[str, Any], start_response: Any) -> list[bytes]:
             status, headers, body = out
             start_response(status, headers)
             return body
+
+    if method == "GET" and path.startswith("/api/images/"):
+        out = serve_image(path)
+        if out is not None:
+            status, headers, body = out
+            start_response(status, headers)
+            return body
+        status, headers, body = json_response("404 Not Found", {"error": "Image not found"})
+        start_response(status, headers)
+        return body
 
     if method == "GET" and path == "/api/state":
         state = select_defaults(load_state(BASE_DIR))
@@ -553,6 +595,143 @@ def app(environ: dict[str, Any], start_response: Any) -> list[bytes]:
             status, headers, body = json_response("200 OK", public_state(state))
             start_response(status, headers)
             return body
+
+    if path.startswith("/api/topics/") and "/images" in path:
+        parts = path.removeprefix("/api/topics/").strip("/").split("/")
+        if len(parts) >= 2 and parts[1] == "images":
+            topic_id = parts[0]
+            image_id = parts[2] if len(parts) >= 3 else None
+            state = ensure_trash(select_defaults(load_state(BASE_DIR)))
+            topics = state.get("topics", [])
+            idx = next((i for i, t in enumerate(topics) if t.get("id") == topic_id), None)
+            if idx is None:
+                status, headers, body = json_response("404 Not Found", {"error": "Topic not found"})
+                start_response(status, headers)
+                return body
+
+            topic = topics[idx]
+            topic_images = topic.setdefault("images", [])
+
+            if method == "POST" and image_id is None:
+                if len(topic_images) >= 5:
+                    status, headers, body = json_response("400 Bad Request", {"error": "Maximum 5 images allowed per entry."})
+                    start_response(status, headers)
+                    return body
+
+                payload = parse_json(environ)
+                raw_data = str(payload.get("data") or "")
+                raw_alias = str(payload.get("alias") or "").strip()
+                filename = str(payload.get("filename") or "").strip()
+
+                if "," in raw_data:
+                    raw_data = raw_data.split(",", 1)[1]
+                try:
+                    img_bytes = base64.b64decode(raw_data)
+                except Exception:
+                    status, headers, body = json_response("400 Bad Request", {"error": "Invalid base64 image data."})
+                    start_response(status, headers)
+                    return body
+
+                if not img_bytes:
+                    status, headers, body = json_response("400 Bad Request", {"error": "Image file is empty."})
+                    start_response(status, headers)
+                    return body
+
+                if len(img_bytes) > MAX_IMAGE_BYTES:
+                    status, headers, body = json_response("413 Payload Too Large", {"error": "Image exceeds 5MB limit. Please choose a smaller file."})
+                    start_response(status, headers)
+                    return body
+
+                ext = Path(filename).suffix.lower() if filename else ".png"
+                if ext not in ALLOWED_IMAGE_EXTENSIONS:
+                    ext = ".png"
+
+                clean_alias = re.sub(r"[^a-zA-Z0-9_-]", "", raw_alias).lower()
+                if not clean_alias:
+                    stem = Path(filename).stem if filename else ""
+                    clean_alias = re.sub(r"[^a-zA-Z0-9_-]", "", stem).lower() or f"img{len(topic_images)+1}"
+
+                existing_aliases = {img.get("alias") for img in topic_images}
+                final_alias = clean_alias
+                counter = 2
+                while final_alias in existing_aliases:
+                    final_alias = f"{clean_alias}_{counter}"
+                    counter += 1
+
+                new_img_id = new_id("img")
+                stored_filename = f"{topic_id}_{new_img_id}{ext}"
+                IMAGES_DIR.mkdir(parents=True, exist_ok=True)
+                (IMAGES_DIR / stored_filename).write_bytes(img_bytes)
+
+                image_record = {
+                    "id": new_img_id,
+                    "alias": final_alias,
+                    "filename": stored_filename,
+                    "size": len(img_bytes),
+                    "created_at": iso_now(),
+                }
+                topic_images.append(image_record)
+                topic["images"] = topic_images[:5]
+                topic["updated_at"] = iso_now()
+                topics[idx] = topic
+                state["topics"] = topics
+                state = save_state(BASE_DIR, state)
+                status, headers, body = json_response("200 OK", {"state": public_state(state), "image": image_record})
+                start_response(status, headers)
+                return body
+
+            if method == "DELETE" and image_id:
+                img_idx = next((i for i, img in enumerate(topic_images) if img.get("id") == image_id), None)
+                if img_idx is None:
+                    status, headers, body = json_response("404 Not Found", {"error": "Image not found"})
+                    start_response(status, headers)
+                    return body
+
+                removed_img = topic_images.pop(img_idx)
+                stored_path = IMAGES_DIR / str(removed_img.get("filename") or "")
+                if stored_path.is_file():
+                    stored_path.unlink(missing_ok=True)
+
+                topic["images"] = topic_images
+                topic["updated_at"] = iso_now()
+                topics[idx] = topic
+                state["topics"] = topics
+                state = save_state(BASE_DIR, state)
+                status, headers, body = json_response("200 OK", public_state(state))
+                start_response(status, headers)
+                return body
+
+            if method == "PUT" and image_id:
+                payload = parse_json(environ)
+                new_alias = str(payload.get("alias") or "").strip()
+                clean_alias = re.sub(r"[^a-zA-Z0-9_-]", "", new_alias).lower()
+                if not clean_alias:
+                    status, headers, body = json_response("400 Bad Request", {"error": "Valid alias required."})
+                    start_response(status, headers)
+                    return body
+
+                img_idx = next((i for i, img in enumerate(topic_images) if img.get("id") == image_id), None)
+                if img_idx is None:
+                    status, headers, body = json_response("404 Not Found", {"error": "Image not found"})
+                    start_response(status, headers)
+                    return body
+
+                existing_aliases = {img.get("alias") for i, img in enumerate(topic_images) if i != img_idx}
+                final_alias = clean_alias
+                counter = 2
+                while final_alias in existing_aliases:
+                    final_alias = f"{clean_alias}_{counter}"
+                    counter += 1
+
+                topic_images[img_idx]["alias"] = final_alias
+                topic["images"] = topic_images
+                topic["updated_at"] = iso_now()
+                topics[idx] = topic
+                state["topics"] = topics
+                state = save_state(BASE_DIR, state)
+                status, headers, body = json_response("200 OK", public_state(state))
+                start_response(status, headers)
+                return body
 
     if path.startswith("/api/topics/"):
         topic_id = path.removeprefix("/api/topics/").strip("/")
