@@ -1,13 +1,14 @@
 {
   "version": 4,
-  "app_title": "Daily Journal",
-  "accent": "pink",
-  "font": "quicksand",
+  "app_title": "Daily-Journal",
+  "accent": "blue",
+  "font": "nunito",
   "theme": "dark",
+  "input_language": "en",
   "selected": {
-    "category_id": "cat_25313bf229f1",
-    "topic_id": "topic_ec184c9793c7",
-    "segment_key": "financial"
+    "category_id": "cat_98e24954e6a1",
+    "topic_id": "topic_7f1b595d07a6",
+    "segment_key": "professional"
   },
   "categories": [
     {
@@ -121,9 +122,41 @@
     },
     {
       "id": "cat_ed05449867eb",
-      "name": "NIFTY UPDATE",
+      "name": "NIFTY & BNF CHART UPDATE",
       "segment_key": "financial",
-      "created_at": "2026-09-11T16:20:49"
+      "created_at": "2026-09-11T16:20:49",
+      "updated_at": "2026-09-21T00:18:04"
+    },
+    {
+      "id": "cat_0da4e2a65260",
+      "name": "Market Next Week",
+      "segment_key": "financial",
+      "created_at": "2026-09-20T17:44:08",
+      "updated_at": "2026-09-20T17:44:29"
+    },
+    {
+      "id": "cat_4495ceaef99b",
+      "name": "Commodities Central",
+      "segment_key": "financial",
+      "created_at": "2026-09-25T12:39:08"
+    },
+    {
+      "id": "cat_091e1929e68e",
+      "name": "Trading",
+      "segment_key": "professional",
+      "created_at": "2026-10-01T16:12:13"
+    },
+    {
+      "id": "cat_ef3d56536b41",
+      "name": "Emotions (in-general)",
+      "segment_key": "emotional",
+      "created_at": "2026-10-01T16:18:46"
+    },
+    {
+      "id": "cat_98e24954e6a1",
+      "name": "New features",
+      "segment_key": "professional",
+      "created_at": "2026-10-05T15:26:28"
     }
   ],
   "topics": [
@@ -1059,6 +1092,115 @@
       ],
       "created_at": "2026-09-11T16:20:49",
       "updated_at": "2026-09-19T02:21:55"
+    },
+    {
+      "id": "topic_5034e81fbcca",
+      "category_id": "cat_0da4e2a65260",
+      "title": "Week 38/53",
+      "content": "on a daily chart of nifty 23400 is a major hurdle now to cross and last whole week it stayed below that only and if tomorrow nifty break down or even if doesn't crosses 23400 tomorrow (that's very hard tomorrow as there is more negative new on weekedn then possitve north korea fired missels, ukarian fired missels on russia) we can see a major break down in couple of days.\n\nafter a break down if nifty continues to trade below 23100 we can expect and can see that 23000 and 22800 level can be trsted and once those level break we are having major issue we can see a volatile and some start of major pain, cause after 23000-22800 we directly have 23550 and 23300 as a final support.\n\nFor next week those levels are major support and on the upside 23900-24000 is major resistance as weekly 20 SMA is passing from there and even if any news came and we start trading aroud those level we can see a pull down from those level to 23600-23500 levels.",
+      "paragraphs": [
+        {
+          "text": "on a daily chart of nifty 23400 is a major hurdle now to cross and last whole week it stayed below that only and if tomorrow nifty break down or even if doesn't crosses 23400 tomorrow (that's very hard tomorrow as there is more negative new on weekedn then possitve north korea fired missels, ukarian fired missels on russia) we can see a major break down in couple of days.",
+          "updated_at": "2026-09-21T00:11:20",
+          "mood": "normal"
+        },
+        {
+          "text": "after a break down if nifty continues to trade below 23100 we can expect and can see that 23000 and 22800 level can be trsted and once those level break we are having major issue we can see a volatile and some start of major pain, cause after 23000-22800 we directly have 23550 and 23300 as a final support.",
+          "updated_at": "2026-09-21T00:11:20",
+          "mood": "normal"
+        },
+        {
+          "text": "For next week those levels are major support and on the upside 23900-24000 is major resistance as weekly 20 SMA is passing from there and even if any news came and we start trading aroud those level we can see a pull down from those level to 23600-23500 levels.",
+          "updated_at": "2026-09-21T00:11:20",
+          "mood": "normal"
+        }
+      ],
+      "created_at": "2026-09-20T17:44:08",
+      "updated_at": "2026-09-21T00:11:20"
+    },
+    {
+      "id": "topic_c6b1ea11732c",
+      "category_id": "cat_4495ceaef99b",
+      "title": "40/53 Gold-Silver View",
+      "content": "As per chart gold/silver is breaking 3 months lows and due to multiple reason we can see a major break down in both the commodities now.\n\nSilver can show more violent moves than gold; it has a higher beta, so we have to check that. Dollar strengthening and higher yields in the global market can put pressure in both commodities\n\nAlso there is Q2 ending in 2 days so we can have some liquidation in the silver/gold and we can see also today only silver is down 4.5% and 3% gold is down.\n\nThere is a major possibility we can see a 15-20% correction more due to higher crude, dollars, and yields, so the big money is now getting out from gold and silver and moving towards other assets. Also, there is a risk-off scenario, and major investors want to be on the sideline rather than taking a position due to geopolitical issues. That is also a reason for not deferring support levels.\n\nOne major thing in the Indian market is that we have increased gold and silver import duties, so we are at a 9% premium to the global benchmarks of the same commodities. Some SGB are going to mature, and also we have the festival season coming. Even if the govt. or ministry body sends a message that they will think to reduce the import duties, we can have an overnight gap-down opening in both the indices. So better to make a short position in both indices. Silver is high beta can give a handsome return but you have to have big SL in that and don't try to bottom fish for support untill crude or yields go down.",
+      "paragraphs": [
+        {
+          "text": "As per chart gold/silver is breaking 3 months lows and due to multiple reason we can see a major break down in both the commodities now.",
+          "updated_at": "2026-09-28T08:16:04",
+          "mood": "normal"
+        },
+        {
+          "text": "Silver can show more violent moves than gold; it has a higher beta, so we have to check that. Dollar strengthening and higher yields in the global market can put pressure in both commodities",
+          "updated_at": "2026-09-28T08:30:56",
+          "mood": "normal"
+        },
+        {
+          "text": "Also there is Q2 ending in 2 days so we can have some liquidation in the silver/gold and we can see also today only silver is down 4.5% and 3% gold is down.",
+          "updated_at": "2026-09-28T14:06:14",
+          "mood": "normal"
+        },
+        {
+          "text": "There is a major possibility we can see a 15-20% correction more due to higher crude, dollars, and yields, so the big money is now getting out from gold and silver and moving towards other assets. Also, there is a risk-off scenario, and major investors want to be on the sideline rather than taking a position due to geopolitical issues. That is also a reason for not deferring support levels.",
+          "updated_at": "2026-09-28T14:06:14",
+          "mood": "normal"
+        },
+        {
+          "text": "One major thing in the Indian market is that we have increased gold and silver import duties, so we are at a 9% premium to the global benchmarks of the same commodities. Some SGB are going to mature, and also we have the festival season coming. Even if the govt. or ministry body sends a message that they will think to reduce the import duties, we can have an overnight gap-down opening in both the indices. So better to make a short position in both indices. Silver is high beta can give a handsome return but you have to have big SL in that and don't try to bottom fish for support untill crude or yields go down.",
+          "updated_at": "2026-09-28T14:11:07",
+          "mood": "normal"
+        }
+      ],
+      "created_at": "2026-09-25T12:39:08",
+      "updated_at": "2026-09-28T14:11:07"
+    },
+    {
+      "id": "topic_a7e5b11301a9",
+      "category_id": "cat_091e1929e68e",
+      "title": "New note",
+      "content": "",
+      "paragraphs": [],
+      "created_at": "2026-10-01T16:12:13",
+      "updated_at": "2026-10-01T16:12:13"
+    },
+    {
+      "id": "topic_fd01a7b86b5b",
+      "category_id": "cat_ef3d56536b41",
+      "title": "Get emotional but don't become a fool",
+      "content": "Dhandha ho ya, movie, ek drive ho ya fir mouteverst ki choti.",
+      "paragraphs": [
+        {
+          "text": "Dhandha ho ya, movie, ek drive ho ya fir mouteverst ki choti.",
+          "updated_at": "2026-10-01T16:19:51",
+          "mood": "normal"
+        }
+      ],
+      "created_at": "2026-10-01T16:18:46",
+      "updated_at": "2026-10-01T16:19:51"
+    },
+    {
+      "id": "topic_7f1b595d07a6",
+      "category_id": "cat_98e24954e6a1",
+      "title": "New note",
+      "content": "अब यहाँ पर में हिंदी में लिख रहा हूँ |\n\nહવે હું ગુજરાતી માં લખી રહ્યો છું.\n\nNow i will be writting in english only and this we'll be same it is forever.",
+      "paragraphs": [
+        {
+          "text": "अब यहाँ पर में हिंदी में लिख रहा हूँ |",
+          "updated_at": "2026-10-05T17:33:22",
+          "mood": "normal"
+        },
+        {
+          "text": "હવે હું ગુજરાતી માં લખી રહ્યો છું.",
+          "updated_at": "2026-10-05T17:33:53",
+          "mood": "normal"
+        },
+        {
+          "text": "Now i will be writting in english only and this we'll be same it is forever.",
+          "updated_at": "2026-10-05T17:34:29",
+          "mood": "normal"
+        }
+      ],
+      "created_at": "2026-10-05T15:26:28",
+      "updated_at": "2026-10-05T17:34:29"
     }
   ],
   "trash": {
@@ -1159,5 +1301,5 @@
     "selected_topic_id": null,
     "updated_at": "2026-06-13T14:39:10"
   },
-  "updated_at": "2026-09-20T01:47:48"
+  "updated_at": "2026-10-05T17:34:29"
 }
